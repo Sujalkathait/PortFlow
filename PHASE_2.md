@@ -1,59 +1,48 @@
-# Phase 2: The Next 40% (Moving Cargo & Advanced OS/DBMS)
+# Phase 2: Core Project Working (40% Milestone)
 
-This phase takes the project from 40% to 80% complete. In Phase 1, we set up the foundation (Ships, Berths, Cranes). In Phase 2, we introduce **Containers, Cargo, Trucks, and Warehouses**. 
+**Status: COMPLETED**
 
-This phase is where the **advanced** OS and DBMS concepts come into play, specifically **SJF Scheduling**, **Semaphores (Counting Locks)**, and **Complex SQL JOINs**.
+This phase represents the core working functionality of the PortFlow system. By completing this phase, we have built the working foundation for both the **Admin Panel** and the **User Panel**. The Login mechanism is completely functional. 
 
----
-
-## Team Roles & Feature Breakdown
-
-### Role 1: Frontend UI Developer (React.js)
-**Goal:** Build the logistics and cargo tracking screens.
-* **Feature 1:** Container & Cargo Tracking Dashboard (Show where every container is).
-* **Feature 2:** Warehouse capacity visualizer (Show how full a warehouse is).
-* **Feature 3:** Truck Dispatch Screen (Assign trucks to containers).
-* **Concepts:** Advanced React state management, rendering charts/bars for warehouse capacity.
-
-### Role 2: Backend API Developer (Node.js)
-**Goal:** Build the complex endpoints to handle cargo movement.
-* **Feature 1:** `/api/containers` and `/api/cargo` endpoints to track items.
-* **Feature 2:** `/api/warehouses` and `/api/trucks` to move containers off the port.
-* **Concepts:** Advanced **API Routing** and **Error Handling** (e.g., stopping a truck from taking a container that hasn't cleared customs yet).
-
-### Role 3: Database Administrator (Supabase / PostgreSQL)
-**Goal:** Set up the complex relationships and write advanced queries.
-* **Feature 1:** Create the `containers`, `cargo`, `warehouses`, and `trucks` tables.
-* **Feature 2:** Link Cargo to Containers, and Containers to Ships using Foreign Keys.
-* **DBMS Concepts Used Here:**
-  * **Advanced Foreign Keys:** Ensuring Cargo cannot exist without a Container (Referential Integrity).
-  * **JOIN Queries:** Writing SQL to say "Show me all Cargo inside Containers that came from Ship Alpha".
-  * **Aggregate Functions (SUM/COUNT):** Calculating the total weight of cargo on a specific ship, or counting how many containers are in Warehouse 1.
-
-### Role 4: OS Scheduling Engineer (Node.js OS Module)
-**Goal:** Make the scheduling algorithm smarter.
-* **Feature 1:** Upgrade the scheduler from simple FCFS to **SJF (Shortest Job First)**.
-* **OS Concepts Used Here:**
-  * **SJF Scheduling:** If there are 3 jobs waiting, the OS module must calculate which job takes the least time (e.g., unloading 5 containers vs unloading 100 containers) and put the shortest job at the front of the queue.
-  * **Turnaround Time Calculation:** Calculating the total time a job took from start to finish to prove SJF is faster than FCFS.
-
-### Role 5: OS Synchronization Engineer (Node.js OS Module)
-**Goal:** Build counting locks for resources we have more than one of.
-* **Feature 1:** Create a **Semaphore** class in Node.js.
-* **Feature 2:** Apply the Semaphore to Warehouses. If a Warehouse has 10 loading docks, the Semaphore starts at 10. When 10 trucks arrive, the Semaphore hits 0, and the 11th truck must wait.
-* **OS Concepts Used Here:**
-  * **Counting Semaphores:** Unlike a Mutex (which is just 1 or 0), a Semaphore counts down from a set number.
-  * **Process Blocking:** Making trucks wait in a specific queue if the warehouse semaphore is at 0.
-
-### Role 6: Integration & Testing Lead
-**Goal:** Ensure the complex cargo movement doesn't break the database.
-* **Feature 1:** End-to-End test of a container moving from a Ship -> Crane -> Warehouse -> Truck.
-* **DBMS/OS Concepts Used Here:**
-  * **ACID Properties:** Ensuring that when a container moves, it is deleted from the Ship's inventory and added to the Warehouse's inventory in one single, unbreakable transaction. If the system crashes halfway, the container shouldn't disappear.
+Most importantly, this 40% phase perfectly integrates the core Operating System (OS) and Database Management System (DBMS) concepts. 
 
 ---
 
-## Phase 2 Milestone Goal
-By the end of Phase 2, your system will be able to actively offload containers from a ship using **Shortest Job First** scheduling, store them in a warehouse using **Semaphores**, and track all the cargo weights using **SQL JOINs and Aggregates**.
+## OS Concepts Used in Phase 2
 
-*(Phase 3 will cover the final 50%: Customs Clearance, Billing, and Deadlock Detection!)*
+Here is exactly how Operating System concepts are implemented in this working phase:
+
+| OS Concept | PortFlow Feature | How it is used in Phase 2 |
+| :--- | :--- | :--- |
+| **Process** | Port Jobs | Every job (like unloading a ship) is treated as a process. |
+| **CPU Scheduling** | Job Scheduling | Deciding which job goes first using FCFS (First-Come, First-Served) rules for the active panels. |
+| **Ready Queue** | Waiting Line | A line for jobs that are ready but waiting for their turn. |
+| **Waiting Time** | Time Spent Waiting | How long a job sits in the waiting line before starting. |
+| **Turnaround Time** | Total Time Taken | The total time from when the job was asked for until it finished. |
+| **Process Synchronization** | Sharing Equipment | Making sure two jobs don't mess up by trying to use the same crane (using Mutex locks). |
+
+---
+
+## DBMS Concepts Used in Phase 2
+
+Here is exactly how Database Management System concepts are implemented alongside the OS concepts:
+
+| DBMS Concept | PortFlow Feature | How it is used in Phase 2 |
+| :--- | :--- | :--- |
+| **Tables** | Port Data | Places to store data like users, ships, and berths for the Admin Panel. |
+| **Primary Key** | Unique ID | A unique number for every single record so we don't mix them up (e.g., User ID). |
+| **Foreign Key** | Links | A way to safely link an operation to a specific user or ship. |
+| **Normalization** | Clean Design | Organizing the database so we don't repeat the same data over and over. |
+| **SQL (CRUD)** | Data Management | The `SELECT` and `INSERT` queries used by the working User and Admin panels. |
+| **Transactions** | Safe Saves | Making sure a complex save (like locking an OS resource AND updating the DB) either completely works or completely fails. |
+
+---
+
+## Team Roles (How the 6 members built this 40%)
+
+1. **Frontend UI Developer:** Built the fully working Login UI and rendered both the Admin Dashboard and User Panels.
+2. **Backend API Developer:** Built the Auth API & Resource Registration API (`/api/auth/login`, `/api/ships`) using Inter-Process Communication (IPC).
+3. **Database Administrator:** Handled the **Tables, Primary/Foreign Keys, and SQL** concepts to store the panel data.
+4. **OS Scheduling Engineer:** Handled the **Process, Ready Queue, and Waiting Time** concepts for incoming port jobs.
+5. **OS Synchronization Engineer:** Handled the **Process Synchronization** concept (Mutex) so cranes don't crash.
+6. **Integration & Testing Lead:** Ensured the **Database Transactions** matched the OS locks successfully without breaking.
