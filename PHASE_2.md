@@ -34,16 +34,9 @@ Here is exactly how Database Management System concepts are implemented alongsid
 | **Foreign Key** | Links | A way to safely link an operation to a specific user or ship. |
 | **Normalization** | Clean Design | Organizing the database so we don't repeat the same data over and over. |
 | **SQL (CRUD)** | Data Management | The `SELECT` and `INSERT` queries used by the working User and Admin panels. |
-Aggregate Functions	Analytics	Doing math like COUNT or SUM to see total bills or total containers.
+Aggregate Functions	AnalyticsDoing math like COUNT or SUM to see total bills or total containers.
 | **Transactions** | Safe Saves | Making sure a complex save (like locking an OS resource AND updating the DB) either completely works or completely fails. |
 
 ---
 
-## Team Roles (How the 6 members built this 40%)
 
-1. **Frontend UI Developer:** Built the fully working Login UI and rendered both the Admin Dashboard and User Panels.
-2. **Backend API Developer:** Built the Auth API & Resource Registration API (`/api/auth/login`, `/api/ships`) using Inter-Process Communication (IPC).
-3. **Database Administrator:** Handled the **Tables, Primary/Foreign Keys, and SQL** concepts to store the panel data.
-4. **OS Scheduling Engineer:** Handled the **Process, Ready Queue, and Waiting Time** concepts for incoming port jobs.
-5. **OS Synchronization Engineer:** Handled the **Process Synchronization** concept (Mutex) so cranes don't crash.
-6. **Integration & Testing Lead:** Ensured the **Database Transactions** matched the OS locks successfully without breaking.
