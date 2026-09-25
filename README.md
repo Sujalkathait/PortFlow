@@ -488,19 +488,19 @@ classDiagram
         +detectDeadlock()
     }
 
-    User "1" -- "*" Operation : 1:M initiates
-    Ship "1" -- "*" Operation : 1:M involves
-    Berth "1" -- "*" Operation : 1:M allocated to
-    Crane "1" -- "*" Operation : 1:M assigned to
-    Warehouse "1" -- "*" Operation : 1:M stores at
-    Truck "1" -- "*" Operation : 1:M assigned to
-    Operation "1" -- "*" Container : 1:M handles
-    Operation "1" -- "*" Bill : 1:M generates
-    Container "1" -- "*" Cargo : 1:M contains
-    Container "1" -- "*" Inspection : 1:M undergoes
-    Container "1" -- "*" Customs : 1:M requires
-    User "1" -- "*" Inspection : 1:M conducts
-    User "1" -- "*" Customs : 1:M processes
+    User "1" -- "*" Operation : initiates
+    Ship "1" -- "*" Operation : involves
+    Berth "1" -- "*" Operation : allocated to
+    Crane "1" -- "*" Operation : assigned to
+    Warehouse "1" -- "*" Operation : stores at
+    Truck "1" -- "*" Operation : assigned to
+    Operation "1" -- "*" Container : handles
+    Operation "1" -- "*" Bill : generates
+    Container "1" -- "*" Cargo : contains
+    Container "1" -- "*" Inspection : undergoes
+    Container "1" -- "*" Customs : requires
+    User "1" -- "*" Inspection : conducts
+    User "1" -- "*" Customs : processes
     Operation ..> OSScheduler : depends on
     Operation ..> OSSynchronizer : depends on
 ```
