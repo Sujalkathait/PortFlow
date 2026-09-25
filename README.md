@@ -643,3 +643,32 @@ flowchart TD
 | `/api/os/schedule` | Admin: Shows scheduling times | OS |
 | `/api/os/deadlocks` | Admin: Checks for stuck jobs | OS |
 | `/api/os/resources` | Admin: Shows what is locked | OS |
+
+---
+
+## 18. Phase 1: The 40% Milestone (Team Roles)
+This project is perfectly sized for a 6-person team. Here is how the first 40% of the project is split up. This milestone focuses on the core foundation (Logging in, creating a ship, locking a crane, and saving it).
+
+### Role 1: Frontend UI Developer (React.js)
+* **Feature:** Admin Dashboard & Basic Login UI.
+* **Concepts:** UI rendering and sending API requests. (No direct OS/DBMS logic).
+
+### Role 2: Backend API Developer (Node.js)
+* **Feature:** Auth API & Resource Registration API (`/api/auth/login`, `/api/ships`, `/api/berths`).
+* **Concepts:** **IPC (Inter-Process Communication)** to pass messages from the web API to the internal OS Module.
+
+### Role 3: Database Administrator (Supabase / PostgreSQL)
+* **Feature:** Core Database Setup (Create `users`, `ships`, `berths`, and `cranes` tables).
+* **DBMS Concepts:** **Tables**, **Primary Keys**, **Foreign Keys**, and **Normalization** (ensuring ship data isn't mixed with user data). Writing basic `INSERT` and `SELECT` SQL queries.
+
+### Role 4: OS Scheduling Engineer (Node.js OS Module)
+* **Feature:** Process Creation & Ready Queue implementation.
+* **OS Concepts:** **Process** (Modeling a port operation as a job), **Ready Queue** (The waiting line), and **CPU Scheduling (FCFS)** (First-Come, First-Served rule).
+
+### Role 5: OS Synchronization Engineer (Node.js OS Module)
+* **Feature:** Basic Mutex implementation for Cranes.
+* **OS Concepts:** **Mutex** (A binary lock for the crane), and **Critical Section** (The block of code where the crane is actively assigned).
+
+### Role 6: Integration & Testing Lead
+* **Feature:** System Pipeline & API-to-DB Connection.
+* **Concepts:** GitHub setup, End-to-End testing, and **Database Transactions** (Ensuring that if the OS locks a crane, the database correctly updates the status to "busy" without failing halfway through).
