@@ -56,4 +56,4 @@ This phase is where the **advanced** OS and DBMS concepts come into play, specif
 ## Phase 2 Milestone Goal
 By the end of Phase 2, your system will be able to actively offload containers from a ship using **Shortest Job First** scheduling, store them in a warehouse using **Semaphores**, and track all the cargo weights using **SQL JOINs and Aggregates**.
 
-*(Phase 3 will cover the final 20%: Customs Clearance, Billing, and Deadlock Detection!)*
+*(Phase 3 will cover the final 50%: Customs Clearance, Billing, and Deadlock Detection!)*
