@@ -41,11 +41,3 @@ Here is exactly how advanced Database Management System concepts are implemented
 
 ---
 
-## Team Roles (How the 6 members built this 50%)
-
-1. **Frontend UI Developer:** Built the logistics, cargo tracking, and billing dashboard screens.
-2. **Backend API Developer:** Built the advanced `/api/containers` and `/api/bills` endpoints using IPC.
-3. **Database Administrator:** Handled **Row-Level Security, Views, Indexes, and Referential Integrity** for advanced data sets.
-4. **OS Scheduling Engineer:** Built the **Deadlock Detection** and **Resource Allocation** algorithms.
-5. **OS Synchronization Engineer:** Handled **Semaphores, Mutexes, and Critical Sections** for advanced warehouse logistics.
-6. **Integration, Testing & Deployment Lead:** Ensured **ACID** properties held up during deployment and pushed the fully working project to the cloud.

@@ -1,4 +1,4 @@
-# Phase 1: Complete Project Documentation
+# Phase 1: Project Documentation (10% Milestone)
 
 **Project Name**: PortFlow
 **Tech Stack**: 
