@@ -34,6 +34,7 @@ Here is exactly how Database Management System concepts are implemented alongsid
 | **Foreign Key** | Links | A way to safely link an operation to a specific user or ship. |
 | **Normalization** | Clean Design | Organizing the database so we don't repeat the same data over and over. |
 | **SQL (CRUD)** | Data Management | The `SELECT` and `INSERT` queries used by the working User and Admin panels. |
+Aggregate Functions	Analytics	Doing math like COUNT or SUM to see total bills or total containers.
 | **Transactions** | Safe Saves | Making sure a complex save (like locking an OS resource AND updating the DB) either completely works or completely fails. |
 
 ---
