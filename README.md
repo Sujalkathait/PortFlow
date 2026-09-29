@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="frontend/public/image/favicon.png" alt="PortFlow Logo" width="150" />
+  <img src="./frontend/public/image/primarylogo.png" alt="PortFlow Logo" width="200" />
 
 # ⚓ PortFlow — Smart Port Management System
 
