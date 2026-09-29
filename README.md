@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./frontend/public/image/primarylogo.png" alt="PortFlow Logo" width="200" />
+  <img src="./frontend/public/image/favicon.png" alt="PortFlow Logo" width="200" />
 
 # ⚓ PortFlow — Smart Port Management System
 
@@ -122,19 +122,21 @@ flowchart TD
 
 ## ✨ Core Features
 
-### Admin Side (Phase 2)
-- **Dashboard**: View overall port activity and live metrics.
-- **Operations**: Manage daily port activities and dispatch OS jobs.
-- **Ships & Cargo**: Manage ships docking at the port and track inventory.
-- **Equipment**: Manage berths and cargo-loading cranes.
-- **Scheduling**: Manage timings, CPU algorithms (FCFS, SJF, Priority), and waiting queues.
-- **Reports**: View system information, database analytics, and logs.
+### 👑 Admin (The Port Manager)
+The Admin controls everything from a bird's-eye view. They do not do the physical work, but they manage the entire system:
+- **Dashboard**: See a quick overview of total ships, cargo, and active port operations.
+- **Manage Operations**: Create tasks (like unloading a ship) and assign them to workers.
+- **Manage Ships & Cargo**: Keep a record of all incoming ships and the goods they are carrying.
+- **Manage Equipment**: Control the parking areas (Berths) and loading machines (Cranes).
+- **Scheduling**: Choose the mathematical rule (FCFS, SJF, Priority) for how waiting tasks should be ordered.
+- **Reports**: Look at detailed system logs, database stats, and port performance.
 
-### Operator Side (Phase 2)
-- **Dashboard**: View personal operational stats and current assignments.
-- **My Operations**: Process dispatched jobs and execute physical tasks.
-- **Cargo**: Update the status of loaded/unloaded goods.
-- **Report Issue**: Contact admin regarding faulty equipment or delays.
+### 👷 User / Operator (The Ground Worker)
+The User (or Operator) is the person on the ground actually doing the job. They only see what is relevant to them:
+- **Dashboard**: See their personal work statistics and current tasks.
+- **My Operations**: Receive tasks assigned by the Admin. They click "Start" when they begin moving cargo, and "Complete" when they finish.
+- **Update Cargo**: Mark specific goods as successfully loaded or unloaded.
+- **Report Issue**: Quickly notify the Admin if a machine breaks down or there is a delay.
 
 ---
 
