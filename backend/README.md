@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="../frontend/public/image/favicon.png" alt="PortFlow Logo" width="150" />
+  <img src="../frontend/public/image/login.png" alt="PortFlow Logo" width="400" />
 
 # PortFlow Backend (Node.js + Express + TypeScript)
 </div>
