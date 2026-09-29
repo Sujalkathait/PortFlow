@@ -1,14 +1,168 @@
+.login-Cargo {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background-color: #f8fafc;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
 
+/* Left Side - Brand & Hero */
+.login-left {
+    flex: 1.2;
+    position: relative;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    color: white;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+.login-overlay {
+    position: absolute;
+    inset: 0;
+    background: url('/image/port_sunset_bg.jpg') center/cover no-repeat;
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+    z-index: 0;
+}
+
+.login-brand-top, .login-hero-text, .login-features {
+    position: relative;
+    z-index: 1;
+}
+
+.login-brand-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.login-logo-img {
+    height: 48px;
+    filter: brightness(0) invert(1);
+}
+
+.login-nav {
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: #cbd5e1;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.login-hero-text h1 {
+    font-size: 3.5rem;
+    line-height: 1.1;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+}
+
+.highlight-cyan {
+    color: #38bdf8;
+}
+
+.login-hero-text p {
+    font-size: 1.25rem;
+    color: #e2e8f0;
+    line-height: 1.6;
+    max-width: 500px;
+}
+
+.login-features {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.feature-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.feature-icon {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    padding: 12px;
+    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+}
+
+.feature-item p {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #cbd5e1;
+    line-height: 1.4;
+}
+
+/* Right Side - Form */
+.login-right {
+    flex: 1;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 2rem;
+}
+
+.secure-badge-top, .secure-badge-bottom {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.secure-badge-top {
+    align-self: flex-end;
+}
+
+.secure-badge-bottom {
+    align-self: center;
+    margin-top: auto;
+}
+
+.login-form-wrapper {
+    margin: auto;
+    width: 100%;
+    max-width: 420px;
+    padding: 2rem 0;
+}
+
+.login-header {
+    margin-bottom: 2rem;
+}
+
+.login-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+
+.login-header p {
+    color: #64748b;
+}
+
+/* Auth Tabs */
 .auth-tabs {
     display: flex;
-    gap: 0.5rem;
+    background: #f1f5f9;
+    padding: 0.25rem;
+    border-radius: 10px;
     margin-bottom: 2rem;
 }
 
 .auth-tab {
     flex: 1;
     padding: 0.75rem;
-    background: #f1f5f9;
+    background: transparent;
     border: none;
     border-radius: 8px;
     font-weight: 600;
@@ -18,6 +172,168 @@
 }
 
 .auth-tab.active {
-    background: var(--primary);
+    background: white;
+    color: #0f172a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Form Inputs */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    color: #94a3b8;
+}
+
+.input-with-icon input, .input-with-icon select {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 2.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #0f172a;
+    transition: all 0.2s;
+    background: #f8fafc;
+}
+
+.input-with-icon input:focus, .input-with-icon select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.login-select {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #0f172a;
+    background: #f8fafc;
+    cursor: pointer;
+}
+
+.login-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle:hover {
+    color: #64748b;
+}
+
+.login-submit-btn {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 1rem;
+    background: #2563eb;
     color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.login-submit-btn:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.login-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.login-error {
+    padding: 0.75rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #ef4444;
+    border-radius: 8px;
+    font-size: 0.875rem;
+}
+
+.forgot-password {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.forgot-password a {
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.forgot-password a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .login-Cargo {
+        flex-direction: column;
+    }
+    
+    .login-left {
+        padding: 2rem;
+        flex: none;
+    }
+    
+    .login-hero-text h1 {
+        font-size: 2.5rem;
+    }
+    
+    .login-features {
+        display: none;
+    }
+    
+    .login-right {
+        padding: 2rem;
+    }
 }
