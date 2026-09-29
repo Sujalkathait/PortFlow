@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Eye, EyeOff, Lock, User, ShieldCheck, Ship, Box, Anchor, LineChart, ArrowRight, Cpu } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, User, Cpu, UserCog } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, type Role } from '../auth/AuthProvider';
 import './Login.css';
@@ -8,244 +8,265 @@ type Mode = 'sign-in' | 'register';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function Login() {
-    const { login, register } = useAuth();
-    const [mode, setMode] = useState<Mode>('sign-in');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [fullName, setFullName] = useState('');
-    const [role, setRole] = useState<Role>('Operator');
-    const [algo, setAlgo] = useState('FCFS');
+  const { login, register } = useAuth();
+  const [mode, setMode] = useState<Mode>('sign-in');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [role, setRole] = useState<Role>('Operator');
+  const [algo, setAlgo] = useState('FCFS');
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+
+  const switchMode = (newMode: Mode) => {
+    setMode(newMode);
+    setError('');
+    setMessage('');
+  };
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setError('');
+    setMessage('');
+
+    const cleanEmail = email.trim().toLowerCase();
+    if (!EMAIL_PATTERN.test(cleanEmail) && cleanEmail.length < 3) {
+      setError('Enter a valid work email address.');
+      return;
+    }
     
-    const [showPassword, setShowPassword] = useState(false);
-    const [busy, setBusy] = useState(false);
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
+    if (password.length < 6) {
+      setError('Use at least 6 characters for your password.');
+      return;
+    }
 
-    const switchMode = (newMode: Mode) => {
-        setMode(newMode);
-        setError('');
-    };
+    if (mode === 'register' && fullName.trim().length < 2) {
+      setError('Please provide your full name.');
+      return;
+    }
 
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        setError('');
+    setBusy(true);
 
-        const cleanEmail = email.trim().toLowerCase();
-        if (!EMAIL_PATTERN.test(cleanEmail) && cleanEmail.length < 3) {
-            setError('Please enter a valid email or username.');
-            return;
-        }
+    try {
+      let profile;
+      if (mode === 'sign-in') {
+        profile = await login(cleanEmail, password);
+      } else {
+        profile = await register(cleanEmail, password, fullName.trim(), role);
+      }
 
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters long.');
-            return;
-        }
+      // Set CPU Algorithm
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api/os/algorithm`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('portflow_auth_token')}`
+          },
+          body: JSON.stringify({ algorithm: algo })
+        });
+      } catch (e) {
+        console.warn('Failed to set OS algorithm', e);
+      }
 
-        if (mode === 'register' && fullName.trim().length < 2) {
-            setError('Please provide your full name.');
-            return;
-        }
+      navigate(profile.role === 'Admin' ? '/admin' : '/operator', { replace: true });
+    } catch (reason: any) {
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : reason?.message || 'Unable to complete request. Please try again.'
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
 
-        setBusy(true);
+  const isRegister = mode === 'register';
 
-        try {
-            let profile;
-            if (mode === 'sign-in') {
-                profile = await login(cleanEmail, password);
-            } else {
-                profile = await register(cleanEmail, password, fullName.trim(), role);
-            }
-            
-            // Set CPU Algorithm
-            try {
-                await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api/os/algorithm`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('portflow_auth_token')}`
-                    },
-                    body: JSON.stringify({ algorithm: algo })
-                });
-            } catch (e) {
-                console.warn('Failed to set OS algorithm', e);
-            }
+  return (
+    <main className="auth-shell">
+      <a className="skip-link" href="#auth-form">
+        Skip to sign in
+      </a>
 
-            navigate(profile.role === 'Admin' ? '/admin' : '/operator', { replace: true });
-        } catch (err: any) {
-            setError(err.message || 'Authentication failed. Please verify your credentials.');
-        } finally {
-            setBusy(false);
-        }
-    };
-
-    return (
-        <div className="login-Cargo">
-            <div className="login-left">
-                <div className="login-overlay"></div>
-                <div className="login-brand-top">
-                    <div className="logo-area">
-                        <img src="/image/primarylogo.png" alt="PortFlow" className="login-logo-img" />
-                    </div>
-                    <div className="login-nav">
-                        <span>OPERATE</span> &bull; <span>MANAGE</span> &bull; <span>FLOW</span>
-                    </div>
-                </div>
-                
-                <div className="login-hero-text">
-                    <h1>Smarter Port Operations<br/>for a <span className="highlight-cyan">Faster Tomorrow</span></h1>
-                    <p>Manage ships, track cargo, coordinate operations<br/>and keep your port running smoothly — all in one place.</p>
-                </div>
-
-                <div className="login-features">
-                    <div className="feature-item">
-                        <Ship className="feature-icon" size={24} />
-                        <p>Ship<br/>Management</p>
-                    </div>
-                    <div className="feature-item">
-                        <Box className="feature-icon" size={24} />
-                        <p>Cargo<br/>Operations</p>
-                    </div>
-                    <div className="feature-item">
-                        <Anchor className="feature-icon" size={24} />
-                        <p>Berth & Crane<br/>Scheduling</p>
-                    </div>
-                    <div className="feature-item">
-                        <LineChart className="feature-icon" size={24} />
-                        <p>Real-time<br/>Analytics</p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="login-right">
-                <div className="secure-badge-top">
-                    <ShieldCheck size={16} /> Secure & Encrypted
-                </div>
-
-                <div className="login-form-wrapper">
-                    <div className="login-header">
-                        <h2>{mode === 'sign-in' ? 'Welcome back' : 'Create an Account'}</h2>
-                        <p>{mode === 'sign-in' ? 'Sign in to your PortFlow account.' : 'Register to manage port operations.'}</p>
-                    </div>
-                    
-                    <div className="auth-tabs">
-                        <button 
-                            type="button" 
-                            className={`auth-tab ${mode === 'sign-in' ? 'active' : ''}`}
-                            onClick={() => switchMode('sign-in')}
-                        >
-                            Sign In
-                        </button>
-                        <button 
-                            type="button" 
-                            className={`auth-tab ${mode === 'register' ? 'active' : ''}`}
-                            onClick={() => switchMode('register')}
-                        >
-                            Register
-                        </button>
-                    </div>
-
-                    <form onSubmit={handleSubmit} noValidate>
-                        {mode === 'register' && (
-                            <div className="input-group">
-                                <label>Full Name</label>
-                                <div className="input-with-icon">
-                                    <User className="input-icon" size={18} />
-                                    <input
-                                        type="text"
-                                        value={fullName}
-                                        onChange={(e) => setFullName(e.target.value)}
-                                        placeholder="e.g. John Doe"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="input-group">
-                            <label>Email or Username</label>
-                            <div className="input-with-icon">
-                                <User className="input-icon" size={18} />
-                                <input
-                                    type="text"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your email or username"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="input-group">
-                            <label>Password</label>
-                            <div className="input-with-icon">
-                                <Lock className="input-icon" size={18} />
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter your password"
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    className="password-toggle"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </button>
-                            </div>
-                        </div>
-
-                        {mode === 'register' && (
-                            <div className="input-group">
-                                <label>Operational Role</label>
-                                <select 
-                                    value={role} 
-                                    onChange={(e) => setRole(e.target.value as Role)}
-                                    className="login-select"
-                                >
-                                    <option value="Operator">Terminal Operator</option>
-                                    <option value="Admin">Port Administrator</option>
-                                </select>
-                            </div>
-                        )}
-
-                        <div className="input-group">
-                            <label>CPU Scheduling Algorithm</label>
-                            <div className="input-with-icon">
-                                <Cpu className="input-icon" size={18} />
-                                <select 
-                                    value={algo} 
-                                    onChange={(e) => setAlgo(e.target.value)}
-                                    className="login-select with-icon"
-                                >
-                                    <option value="FCFS">First-Come, First-Served (FCFS)</option>
-                                    <option value="SJF">Shortest Job First (SJF)</option>
-                                    <option value="PRIORITY">Priority Scheduling</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {error && <div className="login-error">{error}</div>}
-
-                        <button type="submit" className="login-submit-btn" disabled={busy}>
-                            <span>{busy ? 'Processing...' : mode === 'sign-in' ? 'Sign In' : 'Create Account'}</span>
-                            {!busy && <ArrowRight size={18} />}
-                        </button>
-                    </form>
-
-                    {mode === 'sign-in' && (
-                        <div className="forgot-password">
-                            <a href="#">Forgot password?</a>
-                        </div>
-                    )}
-                </div>
-
-                <div className="secure-badge-bottom">
-                    <ShieldCheck size={16} /> Your data is safe with us
-                </div>
-            </div>
+      <section className="auth-brand" aria-label="PortFlow overview">
+        <img
+          className="auth-logo"
+          src="/image/login.png"
+          alt="PortFlow integrated port operations and cargo management system"
+          width="700"
+          height="287"
+        />
+        <div>
+          <p className="eyebrow">PHASE 2 · SECURE OPERATIONS</p>
+          <h1>Operate the port with a clear, controlled flow.</h1>
+          <p>Role-based operational access for PortFlow administrators and operators.</p>
         </div>
-    );
-}
+      </section>
 
+      <section className="auth-panel">
+        <div className="auth-card" id="auth-form">
+          <div className="auth-heading">
+            <span className="auth-icon">
+              <LockKeyhole aria-hidden="true" />
+            </span>
+            <p className="eyebrow">SECURE ACCESS</p>
+            <h2>{isRegister ? 'Create an Account' : 'Welcome back'}</h2>
+            <p>
+              {isRegister
+                ? 'Register to manage port operations and cargo.'
+                : 'Sign in with your PortFlow account credentials.'}
+            </p>
+          </div>
+
+          <form onSubmit={submit} noValidate>
+            {isRegister && (
+              <label>
+                Full Name
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="e.g. John Doe"
+                  required
+                />
+                <User aria-hidden="true" />
+              </label>
+            )}
+
+            <label>
+              Email address
+              <input
+                type="text"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@organisation.com"
+                required
+              />
+              <Mail aria-hidden="true" />
+            </label>
+
+            <label>
+              Password
+              <div className="password-control">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete={isRegister ? 'new-password' : 'current-password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="icon-button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
+            </label>
+
+            {isRegister && (
+              <label>
+                Operational Role
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as Role)}
+                  style={{
+                    font: 'inherit',
+                    color: 'var(--ink)',
+                    border: '1px solid var(--line)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.85rem 0.9rem',
+                    background: 'var(--surface)',
+                    minHeight: '3rem',
+                    width: '100%',
+                    appearance: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="Operator">Terminal Operator</option>
+                  <option value="Admin">Port Administrator</option>
+                </select>
+                <UserCog aria-hidden="true" style={{ pointerEvents: 'none' }} />
+              </label>
+            )}
+
+            <label>
+              CPU Scheduling Algorithm
+              <select
+                value={algo}
+                onChange={(e) => setAlgo(e.target.value)}
+                style={{
+                  font: 'inherit',
+                  color: 'var(--ink)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.85rem 0.9rem',
+                  background: 'var(--surface)',
+                  minHeight: '3rem',
+                  width: '100%',
+                  appearance: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="FCFS">First-Come, First-Served (FCFS)</option>
+                <option value="SJF">Shortest Job First (SJF)</option>
+                <option value="PRIORITY">Priority Scheduling</option>
+              </select>
+              <Cpu aria-hidden="true" style={{ pointerEvents: 'none' }} />
+            </label>
+
+            {!isRegister && (
+              <div className="credentials-hint">
+                <strong>Local Credentials:</strong>
+                <span><code>admin@portflow.com</code> (Admin) or <code>operator@portflow.com</code> (Operator)</span>
+                <span>Password: <code>Password123!</code></span>
+              </div>
+            )}
+
+            {error && (
+              <p className="form-message error" role="alert">
+                {error}
+              </p>
+            )}
+
+            {message && (
+              <p className="form-message success" aria-live="polite">
+                {message}
+              </p>
+            )}
+
+            <button className="primary-button" disabled={busy}>
+              {busy
+                ? 'Please wait…'
+                : isRegister
+                ? 'Create Account'
+                : 'Sign in securely'}
+            </button>
+          </form>
+
+          <div className="auth-links">
+            {mode === 'sign-in' ? (
+              <button onClick={() => switchMode('register')}>Create a new account</button>
+            ) : (
+              <button onClick={() => switchMode('sign-in')}>Back to sign in</button>
+            )}
+          </div>
+
+          <p className="security-note">
+            <ShieldCheck aria-hidden="true" />
+            PortFlow internal system connection secure.
+          </p>
+        </div>
+      </section>
+    </main>
+  );
+}
