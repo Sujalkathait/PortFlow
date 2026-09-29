@@ -96,10 +96,9 @@ export function Login() {
       <section className="auth-brand" aria-label="PortFlow overview">
         <img
           className="auth-logo"
-          src="/image/login.png"
+          src="/image/favicon.png"
           alt="PortFlow integrated port operations and cargo management system"
-          width="700"
-          height="287"
+          width="200"
         />
         <div>
           <p className="eyebrow">PHASE 2 · SECURE OPERATIONS</p>
