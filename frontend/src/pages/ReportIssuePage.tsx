@@ -1,6 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { AlertTriangle, CheckCircle2, AlertCircle, Send } from 'lucide-react';
 import { API_BASE_URL } from '../lib/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export function ReportIssuePage() {
     const [title, setTitle] = useState('');
@@ -31,67 +34,75 @@ export function ReportIssuePage() {
             setTitle('');
             setDescription('');
         } catch (e: any) {
-            setError(e.message);
+            setError(e.message || 'Failed to submit issue');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="page-content" style={{ maxWidth: '600px', margin: '0 auto' }}>
-            <div className="page-title-row">
-                <div>
-                    <p className="page-eyebrow">SUPPORT</p>
-                    <h1>Report Issue</h1>
-                    <p className="subtitle">Submit operational issues for administrative review</p>
-                </div>
+        <div className="max-w-2xl mx-auto space-y-6">
+            {/* Header */}
+            <div>
+                <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Operator Support</p>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">Report Incident / Technical Issue</h1>
+                <p className="text-sm text-muted-foreground">Submit operational anomalies, crane equipment faults, or vessel conflicts for administrative review</p>
             </div>
 
+            {/* Notification Alerts */}
             {error && (
-                <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1rem', color: '#b91c1c', fontSize: '0.88rem' }}>
-                    <AlertCircle size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem' }} />{error}
+                <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>{error}</span>
                 </div>
             )}
             {success && (
-                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1rem', color: '#15803d', fontSize: '0.88rem' }}>
-                    <CheckCircle2 size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem' }} />{success}
+                <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>{success}</span>
                 </div>
             )}
 
-            <div className="panel">
-                <div className="panel-header">
-                    <h2><AlertTriangle size={16} /> Issue Details</h2>
-                </div>
-                <div className="panel-body">
-                    <form onSubmit={handleSubmit} className="form-grid">
-                        <div className="form-group full">
-                            <label>Issue Title *</label>
-                            <input 
-                                value={title} 
-                                onChange={e => setTitle(e.target.value)} 
-                                placeholder="e.g. Crane B is malfunctioning" 
-                                required 
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-base font-semibold flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-amber-500" /> Incident Report Form
+                    </CardTitle>
+                    <CardDescription>
+                        Details submitted here are dispatched into the system audit log and alerted to administrators.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-muted-foreground uppercase">Issue Title *</label>
+                            <Input
+                                value={title}
+                                onChange={e => setTitle(e.target.value)}
+                                placeholder="e.g. Crane B mechanical failure during discharge"
+                                required
                             />
                         </div>
-                        <div className="form-group full">
-                            <label>Description *</label>
-                            <textarea 
-                                value={description} 
-                                onChange={e => setDescription(e.target.value)} 
-                                placeholder="Please provide details about the issue..." 
-                                required 
-                                rows={5}
-                                style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '4px' }}
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-muted-foreground uppercase">Detailed Description *</label>
+                            <textarea
+                                value={description}
+                                onChange={e => setDescription(e.target.value)}
+                                placeholder="Provide specific vessel name, berth location, timestamps, and error codes observed..."
+                                required
+                                rows={6}
+                                className="w-full rounded-md border border-input bg-background p-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             />
                         </div>
-                        <div className="form-group full">
-                            <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', justifyContent: 'center' }}>
-                                <Send size={14} /> {loading ? 'Submitting...' : 'Submit Issue'}
-                            </button>
-                        </div>
+
+                        <Button type="submit" className="w-full" disabled={loading}>
+                            <Send className="mr-2 h-4 w-4" />
+                            {loading ? 'Submitting...' : 'Dispatch Issue Report'}
+                        </Button>
                     </form>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }

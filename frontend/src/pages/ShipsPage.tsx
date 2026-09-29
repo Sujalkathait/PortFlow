@@ -1,34 +1,55 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { Plus, Trash2, X, Ship, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { useEffect, useState, type FormEvent, useCallback, useMemo } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
+import { Plus, Trash2, X, Ship, AlertCircle, CheckCircle2, RefreshCw, ArrowUpDown } from 'lucide-react';
 import { api } from '../lib/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { DataTable } from '@/components/ui/data-table';
+
+interface ShipRecord {
+    id: number;
+    name: string;
+    imo_number?: string;
+    vessel_type: string;
+    capacity_teu: number;
+    berth_id?: string | null;
+    status: string;
+    created_at?: string;
+}
 
 export function ShipsPage() {
-    const [ships, setShips] = useState<any[]>([]);
+    const [ships, setShips] = useState<ShipRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [showCreate, setShowCreate] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
+    // Form inputs
     const [name, setName] = useState('');
     const [imo, setImo] = useState('');
     const [vesselType, setVesselType] = useState('Cargo');
     const [capacity, setCapacity] = useState('');
-    const [berthId, setBerthId] = useState('');
+    const [berthOption, setBerthOption] = useState('');
+    const [customBerth, setCustomBerth] = useState('');
 
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true);
         setError('');
         try {
-            setShips(await api.ships.list());
+            const data = await api.ships.list();
+            setShips(data);
         } catch (e: any) {
-            setError(e.message);
+            setError(e.message || 'Failed to load ships');
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    useEffect(() => { void load(); }, []);
+    useEffect(() => {
+        void load();
+    }, [load]);
 
     const handleCreate = async (e: FormEvent) => {
         e.preventDefault();
@@ -36,24 +57,33 @@ export function ShipsPage() {
         setSubmitting(true);
         setError('');
         setSuccess('');
-        if (!name.trim()) { setError('Ship name is required'); setSubmitting(false); return; }
+
+        if (!name.trim()) {
+            setError('Ship name is required');
+            setSubmitting(false);
+            return;
+        }
+
+        const chosenBerth = berthOption === 'Custom' ? customBerth.trim() : berthOption;
+
         try {
             await api.ships.create({
                 name: name.trim(),
                 imo_number: imo.trim() || undefined,
                 vessel_type: vesselType,
                 capacity_teu: Number(capacity) || 0,
-                berth_id: berthId || null,
+                berth_id: chosenBerth || null,
             });
             setSuccess('Ship registered successfully in database');
             setShowCreate(false);
             setName('');
             setImo('');
             setCapacity('');
-            setBerthId('');
+            setBerthOption('');
+            setCustomBerth('');
             void load();
         } catch (e: any) {
-            setError(e.message);
+            setError(e.message || 'Failed to register ship');
         } finally {
             setSubmitting(false);
         }
@@ -65,7 +95,7 @@ export function ShipsPage() {
             setSuccess(`Ship status updated to ${status}`);
             void load();
         } catch (e: any) {
-            setError(e.message);
+            setError(e.message || 'Failed to update ship status');
         }
     };
 
@@ -76,157 +106,294 @@ export function ShipsPage() {
             setSuccess('Ship moved to Trash Bin');
             void load();
         } catch (e: any) {
-            setError(e.message);
+            setError(e.message || 'Failed to delete ship');
         }
     };
 
-    return (
-        <div className="page-content">
-            <div className="page-title-row">
-                <div>
-                    <p className="page-eyebrow">VESSEL MANAGEMENT</p>
-                    <h1>Ships Registry</h1>
-                    <p className="subtitle">Register, track, and manage vessels in port</p>
+    const columns: ColumnDef<ShipRecord>[] = useMemo(() => [
+        {
+            accessorKey: 'id',
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="-ml-3 h-8 text-xs font-semibold"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                >
+                    ID
+                    <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
+                </Button>
+            ),
+            cell: ({ row }) => (
+                <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-muted text-foreground border">
+                    S-{row.original.id}
+                </span>
+            ),
+        },
+        {
+            accessorKey: 'name',
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="-ml-3 h-8 text-xs font-semibold"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                >
+                    Vessel Name
+                    <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
+                </Button>
+            ),
+            cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                    <Ship className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                        <div className="font-semibold text-foreground">{row.original.name}</div>
+                        {row.original.imo_number && (
+                            <div className="font-mono text-[11px] text-muted-foreground">{row.original.imo_number}</div>
+                        )}
+                    </div>
                 </div>
-                <div className="panel-actions">
-                    <button type="button" className="btn btn-secondary" onClick={() => void load()} disabled={loading}>
-                        <RefreshCw size={14} className={loading ? 'spin' : ''} /> Refresh
-                    </button>
-                    <button type="button" className="btn btn-primary" onClick={() => setShowCreate(true)}>
-                        <Plus size={14} /> Register Ship
-                    </button>
+            ),
+        },
+        {
+            accessorKey: 'vessel_type',
+            header: 'Type',
+            cell: ({ row }) => (
+                <span className="text-sm font-medium">{row.original.vessel_type}</span>
+            ),
+        },
+        {
+            accessorKey: 'capacity_teu',
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="-ml-3 h-8 text-xs font-semibold"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                >
+                    Capacity (TEU)
+                    <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
+                </Button>
+            ),
+            cell: ({ row }) => (
+                <span className="font-mono text-sm">
+                    {row.original.capacity_teu > 0 ? row.original.capacity_teu.toLocaleString() : '—'}
+                </span>
+            ),
+        },
+        {
+            accessorKey: 'status',
+            header: 'Status',
+            cell: ({ row }) => {
+                const s = row.original;
+                return (
+                    <select
+                        value={s.status}
+                        onChange={e => void handleUpdateStatus(s.id, e.target.value)}
+                        className={`text-xs font-medium rounded-full px-2.5 py-1 border transition-colors cursor-pointer ${
+                            s.status === 'Docked'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800'
+                                : s.status === 'Arriving'
+                                ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800'
+                                : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                        }`}
+                    >
+                        <option value="Docked">Docked</option>
+                        <option value="Arriving">Arriving</option>
+                        <option value="Departed">Departed</option>
+                    </select>
+                );
+            },
+        },
+        {
+            accessorKey: 'berth_id',
+            header: 'Berth',
+            cell: ({ row }) => (
+                <span className="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded bg-muted text-muted-foreground border">
+                    {row.original.berth_id || 'Unassigned'}
+                </span>
+            ),
+        },
+        {
+            id: 'actions',
+            header: () => <div className="text-right">Actions</div>,
+            cell: ({ row }) => (
+                <div className="flex items-center justify-end">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => void handleDelete(row.original.id)}
+                        title="Move to Trash"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
+            ),
+        },
+    ], []);
+
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Vessel Management</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">Ships Registry</h1>
+                    <p className="text-sm text-muted-foreground">Register, track berthing locations, and manage vessels in port</p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
+                        <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button>
+                    <Button size="sm" onClick={() => setShowCreate(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Register Ship
+                    </Button>
                 </div>
             </div>
 
+            {/* Notification Alerts */}
             {error && (
-                <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1rem', color: '#b91c1c', fontSize: '0.88rem' }}>
-                    <AlertCircle size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem' }} />{error}
+                <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>{error}</span>
                 </div>
             )}
             {success && (
-                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1rem', color: '#15803d', fontSize: '0.88rem' }}>
-                    <CheckCircle2 size={14} style={{ verticalAlign: 'middle', marginRight: '0.4rem' }} />{success}
+                <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>{success}</span>
                 </div>
             )}
 
-            <div className="panel">
-                <div className="panel-header">
-                    <h2><Ship size={16} /> Ships</h2>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{ships.length} records</span>
-                </div>
-                {loading ? (
-                    <div className="panel-body"><p style={{ color: 'var(--muted)' }}>Loading ships from database...</p></div>
-                ) : ships.length === 0 ? (
-                    <div className="panel-body">
-                        <div className="empty-state">
-                            <Ship />
-                            <h3>No records found.</h3>
-                            <p>No vessels registered in the port database. Click below to add a ship.</p>
-                            <button type="button" className="btn btn-primary" onClick={() => setShowCreate(true)} style={{ marginTop: '0.75rem' }}>
-                                <Plus size={14} /> Register First Ship
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <div style={{ overflowX: 'auto' }}>
-                        <table className="data-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th><th>IMO</th><th>Name</th><th>Type</th>
-                                    <th>Capacity TEU</th><th>Status</th><th>Berth</th><th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {ships.map(s => (
-                                    <tr key={s.id}>
-                                        <td><span className="ref-code">S-{s.id}</span></td>
-                                        <td style={{ fontSize: '0.82rem', fontFamily: 'monospace' }}>{s.imo_number}</td>
-                                        <td><strong>{s.name}</strong></td>
-                                        <td>{s.vessel_type}</td>
-                                        <td>{s.capacity_teu > 0 ? s.capacity_teu.toLocaleString() : '—'}</td>
-                                        <td>
-                                            <select
-                                                className="badge"
-                                                value={s.status}
-                                                onChange={e => void handleUpdateStatus(s.id, e.target.value)}
-                                                style={{
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    background: s.status === 'Docked' ? '#dcfce7' : s.status === 'Arriving' ? '#fef3c7' : '#fee2e2',
-                                                    color: s.status === 'Docked' ? '#15803d' : s.status === 'Arriving' ? '#92400e' : '#b91c1c'
-                                                }}
-                                            >
-                                                <option>Docked</option>
-                                                <option>Arriving</option>
-                                                <option>Departed</option>
-                                            </select>
-                                        </td>
-                                        <td>{s.berth_id || '—'}</td>
-                                        <td>
-                                            <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                                <button
-                                                    type="button"
-                                                    className="btn-icon danger"
-                                                    onClick={() => void handleDelete(s.id)}
-                                                    title="Move to Trash"
-                                                >
-                                                    <Trash2 size={13} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
+            {/* TanStack Table Card */}
+            <Card>
+                <CardHeader className="pb-3">
+                    <CardTitle className="text-base font-semibold flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                            <Ship className="h-4 w-4 text-primary" /> Registered Vessels
+                        </span>
+                        <span className="text-xs font-normal text-muted-foreground">
+                            {ships.length} vessels in registry
+                        </span>
+                    </CardTitle>
+                    <CardDescription>
+                        Filter vessels by name or IMO code, sort columns, and update docking status in real-time.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <DataTable
+                        columns={columns}
+                        data={ships}
+                        searchKey="name"
+                        searchPlaceholder="Filter vessels by name..."
+                        loading={loading}
+                        emptyMessage="No vessels registered in the port database. Click 'Register Ship' to add one."
+                    />
+                </CardContent>
+            </Card>
 
+            {/* REGISTER SHIP MODAL */}
             {showCreate && (
-                <div className="modal-overlay" onClick={() => setShowCreate(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-head">
-                            <h3><Plus size={16} /> Register New Ship</h3>
-                            <button type="button" className="btn-ghost" onClick={() => setShowCreate(false)}><X size={18} /></button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="relative w-full max-w-lg rounded-xl border bg-background p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between pb-4 border-b">
+                            <div className="flex items-center gap-2">
+                                <Ship className="h-5 w-5 text-primary" />
+                                <h3 className="font-semibold text-lg">Register New Vessel</h3>
+                            </div>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowCreate(false)}>
+                                <X className="h-4 w-4" />
+                            </Button>
                         </div>
-                        <form onSubmit={handleCreate}>
-                            <div className="modal-body">
-                                <div className="form-grid">
-                                    <div className="form-group">
-                                        <label>Ship Name *</label>
-                                        <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. MV Ocean Star" required />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>IMO Number</label>
-                                        <input value={imo} onChange={e => setImo(e.target.value)} placeholder="e.g. IMO-9876543" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Vessel Type</label>
-                                        <select value={vesselType} onChange={e => setVesselType(e.target.value)}>
-                                            <option>Cargo</option>
-                                            <option>Bulk Carrier</option>
-                                            <option>Tanker</option>
-                                            <option>General Cargo</option>
-                                            <option>Ro-Ro</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Capacity (TEU)</label>
-                                        <input type="number" min="0" value={capacity} onChange={e => setCapacity(e.target.value)} placeholder="e.g. 5000" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Assign Berth</label>
-                                        <select value={berthId} onChange={e => setBerthId(e.target.value)}>
-                                            <option value="">Not assigned</option>
-                                            <option>Berth 1</option>
-                                            <option>Berth 2</option>
-                                        </select>
-                                    </div>
+
+                        <form onSubmit={handleCreate} className="space-y-4 pt-4">
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-muted-foreground uppercase">Ship Name *</label>
+                                <Input
+                                    value={name}
+                                    onChange={e => setName(e.target.value)}
+                                    placeholder="e.g. MV Ocean Star"
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-muted-foreground uppercase">IMO Number</label>
+                                <Input
+                                    value={imo}
+                                    onChange={e => setImo(e.target.value)}
+                                    placeholder="e.g. IMO-9876543"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Vessel Type</label>
+                                    <select
+                                        value={vesselType}
+                                        onChange={e => setVesselType(e.target.value)}
+                                        className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                    >
+                                        <option>Cargo</option>
+                                        <option>Bulk Carrier</option>
+                                        <option>Tanker</option>
+                                        <option>General Cargo</option>
+                                        <option>Ro-Ro</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Capacity (TEU)</label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        value={capacity}
+                                        onChange={e => setCapacity(e.target.value)}
+                                        placeholder="e.g. 5000"
+                                    />
                                 </div>
                             </div>
-                            <div className="modal-foot">
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button>
-                                <button type="submit" className="btn btn-primary" disabled={submitting}>Register Ship</button>
+
+                            {/* Dynamic Berth Selection (apne according) */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-muted-foreground uppercase">Assign Berth (Dynamic)</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <select
+                                        value={berthOption}
+                                        onChange={e => setBerthOption(e.target.value)}
+                                        className="h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                    >
+                                        <option value="">Not assigned</option>
+                                        <option value="Berth 1">Berth 1</option>
+                                        <option value="Berth 2">Berth 2</option>
+                                        <option value="Berth 3">Berth 3</option>
+                                        <option value="Berth 4">Berth 4</option>
+                                        <option value="Custom">Custom Berth...</option>
+                                    </select>
+                                    {berthOption === 'Custom' ? (
+                                        <Input
+                                            value={customBerth}
+                                            onChange={e => setCustomBerth(e.target.value)}
+                                            placeholder="Enter Berth name/ID"
+                                            required
+                                        />
+                                    ) : (
+                                        <div className="text-xs text-muted-foreground flex items-center px-2 bg-muted/40 rounded border">
+                                            {berthOption ? `Assigned: ${berthOption}` : 'No berth selected'}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2 pt-4 border-t">
+                                <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>
+                                    Cancel
+                                </Button>
+                                <Button type="submit" disabled={submitting}>
+                                    {submitting ? 'Registering...' : 'Register Ship'}
+                                </Button>
                             </div>
                         </form>
                     </div>
@@ -235,4 +402,3 @@ export function ShipsPage() {
         </div>
     );
 }
-

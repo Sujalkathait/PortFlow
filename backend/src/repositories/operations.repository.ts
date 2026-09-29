@@ -1,24 +1,12 @@
 import { prisma } from '../config/prisma';
+import { IOperationsRepository } from '../interfaces/repositories.interface';
+import {
+    OperationRecord,
+    CreateOperationDTO,
+    UpdateOperationDTO
+} from '../models/operation.model';
 
-export interface OperationRecord {
-    id: number;
-    processId: string;
-    process_id?: string;
-    operation_type: string;
-    ship_name: string;
-    crane_id: string;
-    berth_id: string;
-    priority: number;
-    status: string;
-    start_time: string | null;
-    end_time: string | null;
-    waiting_time_ms: number | null;
-    turnaround_time_ms: number | null;
-    created_by: string;
-    created_at: string;
-    deleted_at: string | null;
-    deleted_by: string | null;
-}
+export { OperationRecord };
 
 function normalize(row: any): OperationRecord {
     if (!row) return row;
@@ -28,12 +16,12 @@ function normalize(row: any): OperationRecord {
         process_id: row.process_id || `op-${row.id}`,
         start_time: row.start_time ? row.start_time.toISOString() : null,
         end_time: row.end_time ? row.end_time.toISOString() : null,
-        created_at: row.created_at.toISOString(),
+        created_at: row.created_at ? row.created_at.toISOString() : new Date().toISOString(),
         deleted_at: row.deleted_at ? row.deleted_at.toISOString() : null,
     };
 }
 
-export class OperationsRepository {
+export class OperationsRepository implements IOperationsRepository {
     async findActive(): Promise<OperationRecord[]> {
         try {
             const res = await prisma.operation.findMany({
@@ -59,14 +47,19 @@ export class OperationsRepository {
         }
     }
 
-    async create(data: {
-        operationType: string;
-        shipName: string;
-        craneId?: string;
-        berthId?: string;
-        priority?: number;
-        created_by: string;
-    }): Promise<OperationRecord> {
+    async findByProcessId(processId: string): Promise<OperationRecord | null> {
+        try {
+            const res = await prisma.operation.findFirst({
+                where: { process_id: processId, deleted_at: null }
+            });
+            return res ? normalize(res) : null;
+        } catch (err: any) {
+            console.error('[OperationsRepository] DB findByProcessId error:', err.message);
+            return null;
+        }
+    }
+
+    async create(data: CreateOperationDTO): Promise<OperationRecord> {
         try {
             const res = await prisma.operation.create({
                 data: {
@@ -91,7 +84,7 @@ export class OperationsRepository {
         }
     }
 
-    async update(id: number, updates: Partial<OperationRecord>): Promise<OperationRecord | null> {
+    async update(id: number, updates: UpdateOperationDTO): Promise<OperationRecord | null> {
         try {
             const data: any = {};
             if (updates.status !== undefined) data.status = updates.status;
@@ -156,4 +149,3 @@ export class OperationsRepository {
 }
 
 export const operationsRepository = new OperationsRepository();
-

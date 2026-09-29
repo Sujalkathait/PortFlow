@@ -1,25 +1,14 @@
 import { prisma } from '../config/prisma';
+import { ITrashRepository } from '../interfaces/repositories.interface';
+import { TrashedRecord, TrashCollection } from '../models/trash.model';
 import { operationsRepository } from './operations.repository';
 import { shipsRepository } from './ships.repository';
 import { cargoRepository } from './cargo.repository';
 import { equipmentRepository } from './equipment.repository';
 
-export interface TrashedRecord {
-    id: number;
-    _collection: 'operations' | 'ships' | 'Cargos' | 'Equipments';
-    label?: string;
-    name?: string;
-    operation_type?: string;
-    cargo_number?: string;
-    ship_name?: string;
-    status?: string;
-    created_by?: string;
-    created_at: string;
-    deleted_at: string;
-    deleted_by?: string;
-}
+export { TrashedRecord };
 
-export class TrashRepository {
+export class TrashRepository implements ITrashRepository {
     async getTrash(): Promise<TrashedRecord[]> {
         try {
             const [ops, ships, Cargos, Equipments] = await Promise.all([
@@ -83,7 +72,7 @@ export class TrashRepository {
         }
     }
 
-    async restore(collection: string, id: number): Promise<any | null> {
+    async restore(collection: TrashCollection | string, id: number): Promise<any | null> {
         switch (collection) {
             case 'operations': return !!(await operationsRepository.restore(id));
             case 'ships': return !!(await shipsRepository.restore(id));
@@ -93,7 +82,7 @@ export class TrashRepository {
         }
     }
 
-    async permanentDelete(collection: string, id: number): Promise<boolean> {
+    async permanentDelete(collection: TrashCollection | string, id: number): Promise<boolean> {
         switch (collection) {
             case 'operations': return !!(await operationsRepository.permanentDelete(id));
             case 'ships': return !!(await shipsRepository.permanentDelete(id));
@@ -103,7 +92,7 @@ export class TrashRepository {
         }
     }
 
-    async emptyTrash(): Promise<{ total: number; details: Record<string, number> }> {
+    async emptyTrash(): Promise<{ count: number; total: number; details: Record<string, number> }> {
         try {
             const [ops, ships, Cargos, Equipments] = await Promise.all([
                 prisma.operation.deleteMany({ where: { deleted_at: { not: null } } }),
@@ -114,6 +103,7 @@ export class TrashRepository {
 
             const total = ops.count + ships.count + Cargos.count + Equipments.count;
             return {
+                count: total,
                 total,
                 details: {
                     operations: ops.count,
@@ -124,11 +114,9 @@ export class TrashRepository {
             };
         } catch (err: any) {
             console.error('[TrashRepository] DB emptyTrash error:', err.message);
-            return { total: 0, details: { operations: 0, ships: 0, Cargos: 0, Equipments: 0 } };
+            return { count: 0, total: 0, details: { operations: 0, ships: 0, Cargos: 0, Equipments: 0 } };
         }
     }
 }
 
 export const trashRepository = new TrashRepository();
-
-

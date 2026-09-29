@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { shipsRepository } from '../repositories/ships.repository';
+import { shipsService } from '../services/ships.service';
 import { AuthenticatedRequest } from '../middleware/auth';
 
 const getUser = (req: AuthenticatedRequest) => req.user?.email || (req.headers['x-user-email'] as string) || 'unknown';
@@ -7,11 +7,11 @@ const getUser = (req: AuthenticatedRequest) => req.user?.email || (req.headers['
 /** GET /api/ships */
 export const getShips = async (_req: Request, res: Response): Promise<void> => {
     try {
-        const ships = await shipsRepository.findActive();
+        const ships = await shipsService.getShips();
         res.status(200).json(ships);
     } catch (error: any) {
         console.error('[ShipsController] getShips error:', error);
-        res.status(500).json({ success: false, message: 'Failed to retrieve ships.' });
+        res.status(500).json({ success: false, message: error.message || 'Failed to retrieve ships.' });
     }
 };
 
@@ -23,7 +23,7 @@ export const getShipById = async (req: Request, res: Response): Promise<void> =>
             res.status(400).json({ success: false, message: 'Invalid ship ID' });
             return;
         }
-        const ship = await shipsRepository.findById(id);
+        const ship = await shipsService.getShipById(id);
         if (!ship) {
             res.status(404).json({ success: false, message: 'Ship not found' });
             return;
@@ -31,7 +31,7 @@ export const getShipById = async (req: Request, res: Response): Promise<void> =>
         res.status(200).json(ship);
     } catch (error: any) {
         console.error('[ShipsController] getShipById error:', error);
-        res.status(500).json({ success: false, message: 'Failed to retrieve ship.' });
+        res.status(500).json({ success: false, message: error.message || 'Failed to retrieve ship.' });
     }
 };
 
@@ -43,7 +43,7 @@ export const createShip = async (req: AuthenticatedRequest, res: Response): Prom
             res.status(400).json({ success: false, message: 'Ship name is required.' });
             return;
         }
-        const ship = await shipsRepository.create({
+        const ship = await shipsService.createShip({
             name: name.trim(),
             imo_number: imo_number ? String(imo_number).trim() : undefined,
             vessel_type,
@@ -54,7 +54,7 @@ export const createShip = async (req: AuthenticatedRequest, res: Response): Prom
         res.status(201).json(ship);
     } catch (error: any) {
         console.error('[ShipsController] createShip error:', error);
-        res.status(500).json({ success: false, message: 'Failed to register ship.' });
+        res.status(400).json({ success: false, message: error.message || 'Failed to register ship.' });
     }
 };
 
@@ -66,7 +66,7 @@ export const updateShip = async (req: AuthenticatedRequest, res: Response): Prom
             res.status(400).json({ success: false, message: 'Invalid ship ID' });
             return;
         }
-        const updated = await shipsRepository.update(id, req.body);
+        const updated = await shipsService.updateShip(id, req.body);
         if (!updated) {
             res.status(404).json({ success: false, message: 'Ship not found' });
             return;
@@ -74,7 +74,7 @@ export const updateShip = async (req: AuthenticatedRequest, res: Response): Prom
         res.status(200).json(updated);
     } catch (error: any) {
         console.error('[ShipsController] updateShip error:', error);
-        res.status(500).json({ success: false, message: 'Failed to update ship.' });
+        res.status(500).json({ success: false, message: error.message || 'Failed to update ship.' });
     }
 };
 
@@ -86,7 +86,7 @@ export const deleteShip = async (req: AuthenticatedRequest, res: Response): Prom
             res.status(400).json({ success: false, message: 'Invalid ship ID' });
             return;
         }
-        const deleted = await shipsRepository.softDelete(id, getUser(req));
+        const deleted = await shipsService.deleteShip(id, getUser(req));
         if (!deleted) {
             res.status(404).json({ success: false, message: 'Ship not found' });
             return;
@@ -94,7 +94,6 @@ export const deleteShip = async (req: AuthenticatedRequest, res: Response): Prom
         res.status(200).json({ success: true, message: 'Ship moved to trash', data: deleted });
     } catch (error: any) {
         console.error('[ShipsController] deleteShip error:', error);
-        res.status(500).json({ success: false, message: 'Failed to delete ship.' });
+        res.status(500).json({ success: false, message: error.message || 'Failed to delete ship.' });
     }
 };
-

@@ -1,16 +1,8 @@
 import { prisma } from '../config/prisma';
+import { IUserRepository } from '../interfaces/repositories.interface';
+import { UserRecord } from '../models/user.model';
 
-export interface UserRecord {
-    id: number;
-    email: string;
-    password_hash: string;
-    full_name: string;
-    role: string;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-    deleted_by: string | null;
-}
+export { UserRecord };
 
 function normalize(row: any): UserRecord {
     if (!row) return row;
@@ -22,7 +14,7 @@ function normalize(row: any): UserRecord {
     };
 }
 
-export class UserRepository {
+export class UserRepository implements IUserRepository {
     async findByEmail(email: string): Promise<UserRecord | null> {
         const cleanEmail = email.trim().toLowerCase();
         try {
@@ -50,7 +42,7 @@ export class UserRepository {
         email: string;
         password_hash: string;
         full_name: string;
-        role: 'Admin' | 'Operator';
+        role: string;
     }): Promise<UserRecord> {
         const cleanEmail = data.email.trim().toLowerCase();
         try {
@@ -71,7 +63,7 @@ export class UserRepository {
 
     async count(): Promise<number> {
         try {
-            return await prisma.user.count();
+            return await prisma.user.count({ where: { deleted_at: null } });
         } catch (err: any) {
             console.error('[UserRepository] DB count error:', err.message);
             return 0;

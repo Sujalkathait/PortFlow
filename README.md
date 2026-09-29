@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="./frontend/public/image/favicon.png" alt="PortFlow Logo" width="200" />
+  <img src="./frontend/public/image/favicon.png" alt="PortFlow Logo" width="180" />
 
-# ⚓ PortFlow — Smart Port Management System
+# ⚓ PortFlow — Smart Maritime Port Management System
 
 ```text
   _____           _   ______ _               
@@ -12,131 +12,149 @@
  |_|   \___/|_|   \__|_|    |_|\___/ \_/\_/  
 ```
 
-**[ PHASE 2 COMPLETED: 40% PROJECT MILESTONE ]**
+**An Intelligent Full-Stack Maritime Operations Suite with Custom OS & DBMS Simulation Engines**
 
 [![Frontend](https://img.shields.io/badge/Frontend-React_19_%7C_Vite_%7C_TypeScript-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Backend](https://img.shields.io/badge/Backend-Node.js_%7C_Express_%7C_TypeScript-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Database](https://img.shields.io/badge/Database-Supabase_%7C_PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
-[![License](https://img.shields.io/badge/License-ISC-blue.svg)](#license)
+[![ORM](https://img.shields.io/badge/ORM-Prisma-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![Architecture](https://img.shields.io/badge/Architecture-LLD_Clean_Architecture-8A2BE2)](#-architecture--data-flow)
+[![License](https://img.shields.io/badge/License-ISC-blue.svg)](#-license)
 
 </div>
-
-**PortFlow** is an intelligent, full-stack Maritime Port Management & Operations Terminal designed to digitize port logistics while demonstrating real-world applications of **Operating System (OS)** and **Database Management System (DBMS)** principles.
-
-This repository reflects the **40% Project Milestone (Phase 2)**. At this stage, the core working foundation for both the **Admin Panel** and the **Operator Panel** is fully functional, seamlessly integrating advanced OS and DBMS concepts.
 
 ---
 
 ## 📑 Table of Contents
 
-- [Overview](#-overview)
-- [OS Concepts Implementation](#-os-concepts-implementation)
-- [DBMS Concepts Implementation](#-dbms-concepts-implementation)
-- [Architecture & Data Flow](#-architecture--data-flow)
-- [Core Features](#-core-features)
-- [Repository Structure](#-repository-structure)
-- [Getting Started](#-getting-started)
-- [Test Credentials](#-test-credentials)
-- [Milestones & Roadmap](#-milestones--roadmap)
+- [🌊 Overview](#-overview)
+- [🏛️ System Architecture & LLD Design](#️-system-architecture--lld-design)
+- [🧠 Operating System (OS) Concepts](#-operating-system-os-concepts)
+- [💾 Database (DBMS) Concepts](#-database-dbms-concepts)
+- [✨ User Roles & Core Features](#-user-roles--core-features)
+- [📂 Repository Structure](#-repository-structure)
+- [🚀 Quick Start & Installation](#-quick-start--installation)
+- [🔑 Test Credentials](#-test-credentials)
+- [📈 Project Milestones & Roadmap](#-project-milestones--roadmap)
+- [📚 Detailed Sub-Guides](#-detailed-sub-guides)
+- [📄 License](#-license)
 
 ---
 
 ## 🌊 Overview
 
-Modern ports operate around the clock, managing massive vessels, cargo, and physical infrastructure (berths and cranes). PortFlow bridges this maritime domain with computer science fundamentals:
+Modern commercial ports operate 24/7, coordinating massive container ships, heavy cargo inventory, and limited physical infrastructure (berths and cranes). **PortFlow** bridges maritime logistics with fundamental computer science principles:
 
-1. **The Custom OS Kernel Simulator**: Models daily port operations as system **processes**, manages scarce crane access using **Mutex locks**, handles berth capacity using counting **Semaphores**, and schedules tasks via selectable algorithms (FCFS, SJF, Priority).
-2. **The Database Engine**: Built on PostgreSQL (Supabase), providing normalized schemas, foreign-key relational integrity, B-Tree indexes, and CRUD functionality.
-3. **The Web Operations Suite**: A modern React 19 SPA featuring an interactive Admin Panel and Operator Terminal.
-
----
-
-## 🧠 OS Concepts Implementation
-
-Here is exactly how Operating System concepts are implemented in the Phase 2 (40%) working phase:
-
-| OS Concept | PortFlow Feature | How it is used in Phase 2 |
-| :--- | :--- | :--- |
-| **Process** | **Port Jobs / Operations** | Every job (like unloading a ship) is treated as a system process. |
-| **CPU Scheduling** | **Job Scheduling** | Deciding which job goes first using selectable algorithms (**FCFS, SJF, Priority**) for active panels. |
-| **Ready Queue** | **Waiting Line** | A queue for operations that are ready but waiting for equipment (Berths/Cranes). |
-| **Waiting Time** | **Time Spent Waiting** | Tracking exactly how long a job sits in the waiting line before starting. |
-| **Turnaround Time** | **Total Time Taken** | The total time from when the job was submitted until it finished. |
-| **Process Synchronization** | **Sharing Equipment** | Making sure two jobs don't conflict by trying to use the same crane simultaneously (using **Mutex locks** and **Semaphores**). |
-| **Deadlock Detection** | **System Safety** | Continuously inspects equipment-allocation graphs to detect circular waits and flag deadlocked tasks. |
+1. **Custom OS Simulation Kernel**: Treats port jobs as operating system **processes**, manages scarce crane access through **Mutex locks**, models berth parking capacity using counting **Semaphores**, and dynamically schedules waiting jobs via selectable algorithms (**FCFS, SJF, Priority**).
+2. **Robust Database Layer**: Powered by PostgreSQL and Prisma ORM, utilizing 3NF relational normalization, foreign-key constraints, soft-delete audit trails, and transactional integrity.
+3. **Enterprise Low-Level Design (LLD)**: Built with clean separation of responsibilities on both backend (Controllers $\rightarrow$ Services $\rightarrow$ Repositories $\rightarrow$ Models/Interfaces) and frontend (Smart Containers $\rightarrow$ ViewModels/Custom Hooks $\rightarrow$ Presentational Components).
+4. **Interactive Operations Terminal**: A modern React 19 web suite featuring an **Admin Management Portal** and an **Operator Ground Terminal**.
 
 ---
 
-## 💾 DBMS Concepts Implementation
+## 🏛️ System Architecture & LLD Design
 
-Here is exactly how Database Management System concepts are implemented alongside the OS concepts:
-
-| DBMS Concept | PortFlow Feature | How it is used in Phase 2 |
-| :--- | :--- | :--- |
-| **Tables** | **Port Data** | Storing structured data like Users, Ships, Berths, and Cargo for the Admin Panel. |
-| **Primary Key** | **Unique ID** | A unique identifier for every single record to ensure absolute precision (e.g., User ID). |
-| **Foreign Key** | **Relational Links** | Safely linking an operation to a specific user, ship, or cargo item. |
-| **Normalization (3NF)** | **Clean Design** | Organizing the database efficiently so data is not repeated unnecessarily. |
-| **SQL (CRUD)** | **Data Management** | The `SELECT`, `INSERT`, `UPDATE`, and `DELETE` queries used by the working User and Admin panels. |
-| **Aggregate Functions**| **Reports & Analytics** | Performing math like `COUNT` or `SUM` to visualize total cargo, active operations, and user stats. |
-| **Transactions** | **Safe Saves** | Ensuring a complex save (like locking an OS resource AND updating the DB) either completely works or safely rolls back. |
-
----
-
-## 🏗 Architecture & Data Flow
+PortFlow utilizes a multi-tiered, loosely coupled architecture adhering to SOLID principles and classical software design patterns:
 
 ```mermaid
 flowchart TD
     subgraph Client["Frontend SPA (React 19 + TypeScript + Vite)"]
-        A[User Interface] --> B{Authentication}
-        B -- Live Auth --> C[Supabase Auth]
-        B -- Offline Mode --> D[Local Mock Provider]
-        A --> E[Admin Dashboard]
-        A --> F[Operator Dashboard]
-        E & F --> G[HTTP Client / REST API]
+        UI[View / Page Container]
+        Hook[Custom Hook / ViewModel]
+        Presentational[Presentational / Dumb Components]
+        FeatService[Feature Domain Service]
+        APIFacade[HTTP API Client Facade]
+
+        UI --> Hook
+        Hook --> Presentational
+        Hook --> FeatService
+        FeatService --> APIFacade
     end
 
-    subgraph Server["Backend (Node.js + Express + TypeScript)"]
-        G --> H[Express Router /api]
-        H --> I[Operations Controller]
-        I --> J[Operations Service]
-        
+    APIFacade -->|JSON / REST with JWT| Router
+
+    subgraph Server["Backend Server (Node.js + Express + TypeScript)"]
+        Router[Express Router /api]
+        AuthMid[Auth Middleware JWT & RBAC]
+        Controller[HTTP Controller Layer]
+        Service[Domain Service Layer]
+
+        Router --> AuthMid --> Controller
+        Controller --> Service
+
         subgraph OS_Kernel["Custom OS Concurrency Engine"]
-            J --> K[Process Dispatcher]
-            K --> L[Ready Queue / CPU Scheduler]
-            L --> M[Mutex Locks - Cranes]
-            L --> N[Semaphores - Berths]
-            M & N --> O[Deadlock Detector]
+            Service --> ProcessMgr[Process Factory & PCB]
+            ProcessMgr --> Scheduler[CPU Scheduler FCFS / SJF / Priority]
+            Scheduler --> MutexLocks[Mutex Locks - Cranes]
+            Scheduler --> Semaphores[Semaphores - Berths]
+            MutexLocks & Semaphores --> Deadlock[Deadlock Detector RAG]
+        end
+
+        subgraph Data_Layer["Data Access Layer"]
+            Service --> Repo[Repository Layer]
+            Repo --> PrismaORM[Prisma Client ORM]
         end
     end
 
-    subgraph Storage["Database Layer (Supabase PostgreSQL)"]
-        J -.-> P[(PostgreSQL Database)]
-        P --> Q[Users / Ships / Berths]
-        P --> R[Operations & Cargo]
-        P --> S[Row Level Security & Indexes]
+    subgraph Storage["Database (Supabase / PostgreSQL)"]
+        PrismaORM --> PostgresDB[(PostgreSQL Database)]
+        PostgresDB --> Tables[Users / Ships / Berths / Cargo / Operations]
     end
 ```
 
+### Design Patterns Used
+- **Repository Pattern**: Decouples business rules from database queries ([`backend/src/repositories/`](./backend/src/repositories)).
+- **Service Layer Pattern**: Encapsulates business logic, metric calculations, and OS kernel synchronization ([`backend/src/services/`](./backend/src/services)).
+- **Strategy Pattern**: Swappable scheduling algorithms (`FCFSStrategy`, `SJFStrategy`, `PriorityStrategy`) via `SchedulingStrategy` interface ([`backend/src/os/Scheduler.ts`](./backend/src/os/Scheduler.ts)).
+- **Singleton Pattern**: Guarantees single instances of the OS Simulator ([`PortSystem.getInstance()`](./backend/src/os/PortSystem.ts)) and DB connection pool ([`prisma.ts`](./backend/src/config/prisma.ts)).
+- **Dependency Injection (DI)**: Inversion of control via TypeScript interfaces ([`backend/src/interfaces/`](./backend/src/interfaces)).
+- **Container / Presentational Pattern**: Smart containers orchestrate state, while dumb components handle pure UI rendering ([`frontend/src/features/operations/`](./frontend/src/features/operations)).
+- **Custom Hook / ViewModel Pattern**: React hooks (`useOperations.ts`) manage local state, caching, and async API dispatch.
+
 ---
 
-## ✨ Core Features
+## 🧠 Operating System (OS) Concepts
 
-### 👑 Admin (The Port Manager)
-The Admin controls everything from a bird's-eye view. They do not do the physical work, but they manage the entire system:
-- **Dashboard**: See a quick overview of total ships, cargo, and active port operations.
-- **Manage Operations**: Create tasks (like unloading a ship) and assign them to workers.
-- **Manage Ships & Cargo**: Keep a record of all incoming ships and the goods they are carrying.
-- **Manage Equipment**: Control the parking areas (Berths) and loading machines (Cranes).
-- **Scheduling**: Choose the mathematical rule (FCFS, SJF, Priority) for how waiting tasks should be ordered.
-- **Reports**: Look at detailed system logs, database stats, and port performance.
+| OS Concept | Maritime Analogy | Implementation in PortFlow | Code Location |
+| :--- | :--- | :--- | :--- |
+| **Process & PCB** | Ship loading / unloading job | Each task is an isolated `Process` with PID, burst time, priority, and state (`READY`, `RUNNING`, `TERMINATED`). | [`backend/src/os/Process.ts`](./backend/src/os/Process.ts) |
+| **CPU Scheduling** | Crane work sequencing | Jobs in the ready queue are scheduled using **FCFS**, **SJF**, or **Priority** algorithms. | [`backend/src/os/Scheduler.ts`](./backend/src/os/Scheduler.ts) |
+| **Ready Queue** | Waiting line for equipment | Queue where operations wait until cranes and berths are allocated. | [`backend/src/os/Scheduler.ts`](./backend/src/os/Scheduler.ts) |
+| **Mutex Lock** | Exclusive Crane access | Only **one** job can operate a specific crane simultaneously to avoid collisions. | [`backend/src/os/Mutex.ts`](./backend/src/os/Mutex.ts) |
+| **Counting Semaphore** | Berth capacity slots | Limits simultaneous docking to the available parking berths. | [`backend/src/os/Semaphore.ts`](./backend/src/os/Semaphore.ts) |
+| **Deadlock Detection** | Circular wait detection | Continuously checks Resource Allocation Graphs (RAG) to detect circular waits. | [`backend/src/os/DeadlockDetector.ts`](./backend/src/os/DeadlockDetector.ts) |
+| **Telemetry & Metrics**| CPU utilization metrics | Tracks exact Waiting Time ($W_t$) and Turnaround Time ($T_t$) per process. | [`backend/src/services/operations.service.ts`](./backend/src/services/operations.service.ts) |
 
-### 👷 User / Operator (The Ground Worker)
-The User (or Operator) is the person on the ground actually doing the job. They only see what is relevant to them:
-- **Dashboard**: See their personal work statistics and current tasks.
-- **My Operations**: Receive tasks assigned by the Admin. They click "Start" when they begin moving cargo, and "Complete" when they finish.
-- **Update Cargo**: Mark specific goods as successfully loaded or unloaded.
-- **Report Issue**: Quickly notify the Admin if a machine breaks down or there is a delay.
+---
+
+## 💾 Database (DBMS) Concepts
+
+| DBMS Principle | Application in PortFlow | How It Works |
+| :--- | :--- | :--- |
+| **Relational Integrity** | Foreign Keys (`1:N` relations) | Links Operations to Ships, Berths, and Cargo items safely. |
+| **3NF Normalization** | Redundancy elimination | Normalized tables for `users`, `ships`, `cargo`, `operations`, and `equipment`. |
+| **Soft Deletes (Recycle Bin)** | Audit safety & data recovery | Records set `deleted_at` timestamp rather than hard deletion, managed via the unified Trash Bin. |
+| **B-Tree Indexing** | Fast search & retrieval | Indexed lookup on IMO numbers, container numbers, and process IDs. |
+| **Aggregate Analytics** | Real-time reporting | SQL aggregate queries (`COUNT`, `AVG`, `SUM`) compute port KPIs, turnaround averages, and berth loads. |
+| **Transactions** | Atomic state consistency | Ensures OS lock release and database record updates succeed or roll back together. |
+
+---
+
+## ✨ User Roles & Core Features
+
+### 👑 Port Administrator (System Controller)
+- **Executive Command Center**: High-level dashboard showing active ships, cargo throughput, crane utilization, and live logs.
+- **Operations Dispatcher**: Create tasks with dynamic custom crane and berth allocation; dispatch processes through the OS scheduler.
+- **Vessel & Cargo Management**: Register incoming ships, assign berths, track container weights and TEU capacity.
+- **Equipment Configuration**: Dynamically provision cranes and berths with automatic OS Mutex and Semaphore registration.
+- **Scheduling Engine**: Switch scheduling algorithms (FCFS $\leftrightarrow$ SJF $\leftrightarrow$ Priority) on the fly and inspect waiting queues.
+- **Unified Trash Bin**: Inspect, restore, or permanently purge soft-deleted records across all collections.
+
+### 👷 Terminal Operator (Ground Operations)
+- **Personalized Job Queue**: View only tasks assigned to the logged-in operator.
+- **Step-by-Step Execution**: Start jobs (`Running`), acquire equipment locks, and complete tasks (`Completed`).
+- **Cargo Status Updates**: Mark container status transitions (`On Ship` $\rightarrow$ `In Yard` $\rightarrow$ `Dispatched`).
+- **Issue Reporting**: Instantly report broken cranes, berth bottlenecks, or delays to administrators.
 
 ---
 
@@ -144,67 +162,104 @@ The User (or Operator) is the person on the ground actually doing the job. They 
 
 ```text
 portflow/
-├── README.md                      # Comprehensive project documentation
-├── folder/                        
+├── README.md                      # Primary project documentation (you are here)
+├── LLD_ARCHITECTURE.md            # Comprehensive Low-Level Design specification
+├── folder/                        # Project milestone specifications & guides
 │   ├── PHASE_1.md                 # Phase 1: 10% Foundation Milestone
 │   ├── PHASE_2.md                 # Phase 2: 40% Core Working Implementation
-│   └── PHASE_3.md                 # Phase 3: 50% Advanced Deployment Roadmap
+│   ├── PHASE_3.md                 # Phase 3: 50% Advanced Deployment Roadmap
+│   └── PortFlow_PostgreSQL_Prisma_Guide.pdf # Database design reference guide
 ├── backend/                       # Node.js + Express + TypeScript Backend
-│   ├── src/os/                    # Custom OS Simulation Kernel (Mutex, Scheduling)
-│   └── supabase/schema.sql        # Complete PostgreSQL DDL & DB Schema
+│   ├── README.md                  # Comprehensive backend guide & architecture walkthrough
+│   ├── package.json               # Backend dependencies and scripts
+│   ├── prisma/                    # Prisma ORM schema & SQLite dev file
+│   │   └── schema.prisma          # Database schema definitions
+│   ├── supabase/                  # PostgreSQL migrations
+│   │   └── schema.sql             # SQL DDL script
+│   └── src/                       # TypeScript source code
+│       ├── index.ts               # Server bootstrap file
+│       ├── config/                # Database & Prisma connection singletons
+│       ├── controllers/           # HTTP Request & Response handlers
+│       ├── interfaces/            # Repository and Service contracts (DIP)
+│       ├── middleware/            # JWT authentication and role validation
+│       ├── models/                # Domain entities and Data Transfer Objects (DTOs)
+│       ├── os/                    # Custom OS Simulation Kernel (Mutex, Semaphore, Scheduler)
+│       ├── repositories/          # Data Access Layer (Prisma queries)
+│       ├── routes/                # Express API route endpoints
+│       └── services/              # Business logic & OS synchronization services
 └── frontend/                      # React 19 + TypeScript + Vite SPA
-    ├── src/pages/                 # Admin & Operator Dashboards (UI)
-    └── src/auth/                  # Role-Based Access Control (RBAC)
+    ├── README.md                  # Comprehensive frontend guide & UI component walkthrough
+    ├── package.json               # Frontend dependencies and scripts
+    ├── vite.config.ts             # Vite bundler configuration
+    ├── public/image/              # Branding assets, logos, and favicon
+    └── src/                       # React source code
+        ├── App.tsx                # Client-side router and dashboard layout
+        ├── main.tsx               # React application entrypoint
+        ├── auth/                  # Session provider and protected route guards
+        ├── components/ui/         # Atomic design system primitives (Radix UI / Tailwind)
+        ├── features/operations/   # Feature-based vertical slice (Table, Modals, Hooks, Service)
+        ├── lib/                   # API client facade and utilities
+        └── pages/                 # Full-page views (Dashboard, Ships, Cargo, Trash, etc.)
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start & Installation
 
 ### Prerequisites
-
 - **Node.js**: v18.0.0 or higher
 - **npm**: v9.0.0 or higher
 - **Git**
 
 ### 1. Backend Setup
-
+In a terminal window:
 ```bash
 cd backend
 npm install
+npx prisma generate
 npm run dev
 ```
+*The backend API server will start on `http://localhost:10000`.*
 
 ### 2. Frontend Setup
-
-In a new terminal window:
-
+In a second terminal window:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+*The React SPA will start on `http://localhost:5173`.*
 
 ---
 
 ## 🔑 Test Credentials
 
-PortFlow comes with pre-configured developer accounts for instant testing:
+PortFlow comes pre-seeded with developer accounts for instant evaluation:
 
 | Role | Email Address | Password | Permissions |
 | :--- | :--- | :--- | :--- |
-| **Port Administrator** | `admin@portflow.com` | `Password123!` | Full control, OS monitor, CRUD operations, equipment configuration |
-| **Crane Operator** | `operator@portflow.com` | `Password123!` | Operational dispatch, queue monitoring, cargo status updates |
+| **Port Administrator** | `admin@portflow.com` | `Password123!` | Full admin access, equipment setup, OS scheduling, reports, trash recovery |
+| **Crane Operator** | `operator@portflow.com` | `Password123!` | Ground terminal, task execution, cargo updates, breakdown reporting |
 
-*(Note: The system ships with a clean database. Test data must be created by the user.)*
+*(One-click demo login buttons are also provided directly on the Login page).*
 
 ---
 
-## 📈 Milestones & Roadmap
+## 📈 Project Milestones & Roadmap
 
-- [x] **Phase 1: Project Foundation (10%)** — System documentation, architectural mapping, and entity relationship modeling.
-- [x] **Phase 2: Core Working Implementation (40%)** — Working Admin and Operator panels, OS scheduling, Mutex synchronization, and CRUD API.
-- [ ] **Phase 3: Advanced Logistics & Production Deployment (50%)** — Customs clearance, cargo yard optimization, billing engine, and cloud hosting.
+- [x] **Phase 1: Project Foundation (10%)** — Architectural mapping, entity-relationship modeling, and OS simulation design.
+- [x] **Phase 2: Core Working Implementation (40%)** — Working Admin & Operator panels, OS scheduling algorithms, Mutex locks, Semaphores, Prisma ORM, and CRUD REST APIs.
+- [x] **LLD Architectural Refactoring** — Full decoupling with Domain Models, DTOs, Repository Interfaces, Service Layer, and Feature-based folder structure.
+- [ ] **Phase 3: Advanced Logistics & Cloud Deployment (50%)** — Real-time WebSocket telemetry, customs clearance workflow, multi-yard optimization, and production cloud hosting.
+
+---
+
+## 📚 Detailed Sub-Guides
+
+For in-depth explanations and developer cheat-sheets, explore our dedicated guides:
+- 📖 **[Backend Guide](./backend/README.md)**: Deep dive into the backend directory, routes, controllers, services, repositories, and OS simulation kernel.
+- 🎨 **[Frontend Guide](./frontend/README.md)**: Breakdown of React components, custom hooks, feature-based modularity, and Tailwind styling.
+- 🏛️ **[LLD Architecture Guide](./LLD_ARCHITECTURE.md)**: Low-Level Design specification covering SOLID principles, design patterns, and feature-based vs flat-based directory trade-offs.
 
 ---
 

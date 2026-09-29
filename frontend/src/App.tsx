@@ -16,11 +16,14 @@ import { ReportsPage } from './pages/ReportsPage';
 import { ReportIssuePage } from './pages/ReportIssuePage';
 import { LogOut, Menu, X, ShieldCheck } from 'lucide-react';
 
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "./components/app-sidebar";
+import { CommandMenu } from "./components/command-menu";
+
 function DashboardLayout({ role, children }: { role: Role; children: React.ReactNode }) {
     const { profile, signOut } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const handleSignOut = async () => {
         await signOut();
@@ -35,72 +38,42 @@ function DashboardLayout({ role, children }: { role: Role; children: React.React
     const pageName = pathPart.charAt(0).toUpperCase() + pathPart.slice(1).replace('-', ' ');
 
     return (
-        <div className="app-layout">
-            {/* Mobile backdrop */}
-            {sidebarOpen && (
-                <div
-                    className="sidebar-backdrop"
-                    onClick={() => setSidebarOpen(false)}
-                    aria-hidden="true"
-                    style={{
-                        position: 'fixed',
-                        inset: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                        zIndex: 40,
-                    }}
-                />
-            )}
-
-            <Sidebar
-                role={role}
-                isOpen={sidebarOpen}
-                onClose={() => setSidebarOpen(false)}
-            />
-
-            <div className="main-content">
-                <header className="top-header">
-                    <div className="top-header-left" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <button
-                            type="button"
-                            className="mobile-menu-btn icon-button"
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
-                            aria-label="Toggle Navigation Menu"
-                            style={{ display: 'none' }}
-                        >
-                            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-                        </button>
-                        <span className="breadcrumb">
-                            {role} / {pageName}
+        <SidebarProvider>
+            <AppSidebar role={role} />
+            
+            <div className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden h-screen">
+                <header className="flex h-14 items-center justify-between border-b px-4 lg:px-6 gap-4">
+                    <div className="flex items-center gap-4">
+                        <SidebarTrigger />
+                        <span className="text-sm font-medium text-muted-foreground hidden md:block">
+                            {role} / <span className="text-foreground">{pageName}</span>
                         </span>
                     </div>
 
-                    <div className="top-header-right">
-                        <span className="header-badge" title="Connected to PostgreSQL Database">
-                            <ShieldCheck size={13} style={{ color: '#10b981' }} />
-                            <span>Live Database</span>
-                        </span>
-                        <div className="user-info">
-                            <div className="user-avatar">{userInitial}</div>
-                            <div>
-                                <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{userName}</div>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>{role} · Online</div>
+                    <div className="flex items-center gap-3 flex-1 justify-end max-w-xl">
+                        <CommandMenu role={role} />
+                        
+                        <div className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+                            <ShieldCheck size={14} />
+                            Live
+                        </div>
+                        <div className="flex items-center gap-2.5 pl-1 border-l">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm">
+                                {userInitial}
+                            </div>
+                            <div className="hidden lg:block text-left">
+                                <div className="text-xs font-semibold leading-none">{userName}</div>
+                                <div className="text-[11px] text-muted-foreground mt-0.5">{role}</div>
                             </div>
                         </div>
-                        <button
-                            type="button"
-                            className="signout-btn"
-                            onClick={() => void handleSignOut()}
-                        >
-                            <LogOut size={14} /> Sign Out
-                        </button>
                     </div>
                 </header>
 
-                <main id="main-content-area" role="main">
+                <main className="flex-1 overflow-auto p-4 md:p-6" id="main-content-area" role="main">
                     {children}
                 </main>
             </div>
-        </div>
+        </SidebarProvider>
     );
 }
 

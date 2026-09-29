@@ -14,7 +14,6 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState<Role>('Operator');
-  const [algo, setAlgo] = useState('FCFS');
 
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -57,20 +56,6 @@ export function Login() {
         profile = await login(cleanEmail, password);
       } else {
         profile = await register(cleanEmail, password, fullName.trim(), role);
-      }
-
-      // Set CPU Algorithm
-      try {
-        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api/os/algorithm`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('portflow_auth_token')}`
-          },
-          body: JSON.stringify({ algorithm: algo })
-        });
-      } catch (e) {
-        console.warn('Failed to set OS algorithm', e);
       }
 
       navigate(profile.role === 'Admin' ? '/admin' : '/operator', { replace: true });
@@ -197,31 +182,6 @@ export function Login() {
                 <UserCog aria-hidden="true" style={{ pointerEvents: 'none' }} />
               </label>
             )}
-
-            <label>
-              CPU Scheduling Algorithm
-              <select
-                value={algo}
-                onChange={(e) => setAlgo(e.target.value)}
-                style={{
-                  font: 'inherit',
-                  color: 'var(--ink)',
-                  border: '1px solid var(--line)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '0.85rem 0.9rem',
-                  background: 'var(--surface)',
-                  minHeight: '3rem',
-                  width: '100%',
-                  appearance: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="FCFS">First-Come, First-Served (FCFS)</option>
-                <option value="SJF">Shortest Job First (SJF)</option>
-                <option value="PRIORITY">Priority Scheduling</option>
-              </select>
-              <Cpu aria-hidden="true" style={{ pointerEvents: 'none' }} />
-            </label>
 
             {!isRegister && (
               <div className="credentials-hint">

@@ -1,29 +1,19 @@
 import { prisma } from '../config/prisma';
+import { IShipsRepository } from '../interfaces/repositories.interface';
+import { ShipRecord, CreateShipDTO, UpdateShipDTO } from '../models/ship.model';
 
-export interface ShipRecord {
-    id: number;
-    imo_number: string;
-    name: string;
-    vessel_type: string;
-    capacity_teu: number;
-    status: string;
-    berth_id: string | null;
-    created_by: string;
-    created_at: string;
-    deleted_at: string | null;
-    deleted_by: string | null;
-}
+export { ShipRecord };
 
 function normalize(row: any): ShipRecord {
     if (!row) return row;
     return {
         ...row,
-        created_at: row.created_at.toISOString(),
+        created_at: row.created_at ? row.created_at.toISOString() : new Date().toISOString(),
         deleted_at: row.deleted_at ? row.deleted_at.toISOString() : null,
     };
 }
 
-export class ShipsRepository {
+export class ShipsRepository implements IShipsRepository {
     async findActive(): Promise<ShipRecord[]> {
         try {
             const res = await prisma.ship.findMany({
@@ -49,14 +39,19 @@ export class ShipsRepository {
         }
     }
 
-    async create(data: {
-        name: string;
-        imo_number?: string;
-        vessel_type?: string;
-        capacity_teu?: number;
-        berth_id?: string | null;
-        created_by: string;
-    }): Promise<ShipRecord> {
+    async findByImo(imo: string): Promise<ShipRecord | null> {
+        try {
+            const res = await prisma.ship.findFirst({
+                where: { imo_number: imo, deleted_at: null }
+            });
+            return res ? normalize(res) : null;
+        } catch (err: any) {
+            console.error('[ShipsRepository] DB findByImo error:', err.message);
+            return null;
+        }
+    }
+
+    async create(data: CreateShipDTO): Promise<ShipRecord> {
         try {
             const res = await prisma.ship.create({
                 data: {
@@ -76,7 +71,7 @@ export class ShipsRepository {
         }
     }
 
-    async update(id: number, updates: Partial<ShipRecord>): Promise<ShipRecord | null> {
+    async update(id: number, updates: UpdateShipDTO): Promise<ShipRecord | null> {
         try {
             const data: any = {};
             if (updates.name !== undefined) data.name = updates.name;
@@ -138,4 +133,3 @@ export class ShipsRepository {
 }
 
 export const shipsRepository = new ShipsRepository();
-

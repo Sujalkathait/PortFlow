@@ -1,13 +1,80 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 206 91% 44%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 206 91% 44%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
 :root {
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --ink: #08244a;
-  --muted: #56687e;
-  --primary: #087ed7;
+  --muted-legacy: #56687e;
+  --primary-legacy: #087ed7;
   --primary-dark: #075a9e;
   --primary-soft: #e6f4ff;
-  --accent: #36b9ff;
+  --accent-legacy: #36b9ff;
   --canvas: #f0f4f8;
   --surface: #ffffff;
   --line: #dce5ef;
@@ -182,7 +249,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 
 .top-header-left .breadcrumb {
   font-size: 0.85rem;
-  color: var(--muted);
+  color: var(--muted-legacy);
 }
 
 .top-header-right {
@@ -275,7 +342,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .page-title-row .subtitle {
   margin: 0.25rem 0 0;
   font-size: 0.9rem;
-  color: var(--muted);
+  color: var(--muted-legacy);
 }
 
 .page-eyebrow {
@@ -283,13 +350,13 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--primary);
+  color: var(--primary-legacy);
   margin: 0 0 0.15rem;
 }
 
 .page-title-date {
   font-size: 0.82rem;
-  color: var(--muted);
+  color: var(--muted-legacy);
   text-align: right;
 }
 
@@ -336,7 +403,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .stat-info p {
   margin: 0;
   font-size: 0.8rem;
-  color: var(--muted);
+  color: var(--muted-legacy);
   font-weight: 500;
 }
 
@@ -382,7 +449,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 }
 
 .panel-header h2 svg {
-  color: var(--primary);
+  color: var(--primary-legacy);
 }
 
 .panel-actions {
@@ -419,7 +486,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--muted-legacy);
   background: #f8fafc;
   border-bottom: 1px solid var(--line);
   font-weight: 700;
@@ -484,9 +551,9 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 }
 
 .btn-primary {
-  background: var(--primary);
+  background: var(--primary-legacy);
   color: #fff;
-  border-color: var(--primary);
+  border-color: var(--primary-legacy);
 }
 
 .btn-primary:hover { background: var(--primary-dark); }
@@ -501,7 +568,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 
 .btn-ghost {
   background: transparent;
-  color: var(--muted);
+  color: var(--muted-legacy);
   border: none;
   padding: 0.4rem;
   border-radius: var(--radius-sm);
@@ -531,7 +598,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
   border: 1px solid var(--line);
   background: #fff;
   cursor: pointer;
-  color: var(--muted);
+  color: var(--muted-legacy);
   transition: all 0.15s;
   padding: 0;
 }
@@ -697,7 +764,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .resource-name svg {
   width: 16px;
   height: 16px;
-  color: var(--primary);
+  color: var(--primary-legacy);
 }
 
 /* ─── Job Status Flow ─── */
@@ -734,11 +801,11 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--muted);
+  color: var(--muted-legacy);
 }
 
 .job-arrow {
-  color: var(--muted);
+  color: var(--muted-legacy);
   font-size: 0.7rem;
   margin-bottom: 1rem;
 }
@@ -757,10 +824,10 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
   gap: 0.4rem;
 }
 
-.timing-item svg { color: var(--primary); width: 16px; height: 16px; }
-.timing-label { font-size: 0.72rem; color: var(--muted); }
+.timing-item svg { color: var(--primary-legacy); width: 16px; height: 16px; }
+.timing-label { font-size: 0.72rem; color: var(--muted-legacy); }
 .timing-value { font-size: 1.1rem; font-weight: 800; color: var(--ink); }
-.timing-unit { font-size: 0.72rem; color: var(--muted); font-weight: 500; }
+.timing-unit { font-size: 0.72rem; color: var(--muted-legacy); font-weight: 500; }
 
 /* ─── Activity Log ─── */
 .activity-item {
@@ -794,7 +861,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 
 .activity-time {
   font-size: 0.78rem;
-  color: var(--muted);
+  color: var(--muted-legacy);
   font-weight: 500;
 }
 
@@ -880,7 +947,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--primary-legacy);
   box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
@@ -897,13 +964,13 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: var(--muted);
+  color: var(--muted-legacy);
 }
 
 .empty-state svg {
   width: 2.5rem;
   height: 2.5rem;
-  color: var(--primary);
+  color: var(--primary-legacy);
   margin-bottom: 0.5rem;
 }
 
@@ -917,7 +984,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  color: var(--muted);
+  color: var(--muted-legacy);
   padding: 2rem;
   text-align: center;
 }
@@ -1007,4 +1074,3 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
     padding-bottom: 0.5rem;
   }
 }
-

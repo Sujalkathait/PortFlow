@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { cargoRepository } from '../repositories/cargo.repository';
+import { cargoService } from '../services/cargo.service';
 import { AuthenticatedRequest } from '../middleware/auth';
 
 const getUser = (req: AuthenticatedRequest) => req.user?.email || (req.headers['x-user-email'] as string) || 'unknown';
@@ -7,11 +7,11 @@ const getUser = (req: AuthenticatedRequest) => req.user?.email || (req.headers['
 /** GET /api/cargo */
 export const getCargos = async (_req: Request, res: Response): Promise<void> => {
     try {
-        const Cargos = await cargoRepository.findActive();
+        const Cargos = await cargoService.getCargos();
         res.status(200).json(Cargos);
     } catch (error: any) {
         console.error('[CargoController] getCargos error:', error);
-        res.status(500).json({ success: false, message: 'Failed to retrieve Cargos.' });
+        res.status(500).json({ success: false, message: error.message || 'Failed to retrieve Cargos.' });
     }
 };
 
@@ -23,7 +23,7 @@ export const createCargo = async (req: AuthenticatedRequest, res: Response): Pro
             res.status(400).json({ success: false, message: 'Cargo number is required.' });
             return;
         }
-        const c = await cargoRepository.create({
+        const c = await cargoService.createCargo({
             cargo_number: cargo_number.trim(),
             size_type,
             weight_tons: Number(weight_tons) || 0,
@@ -35,7 +35,7 @@ export const createCargo = async (req: AuthenticatedRequest, res: Response): Pro
         res.status(201).json(c);
     } catch (error: any) {
         console.error('[CargoController] createCargo error:', error);
-        res.status(500).json({ success: false, message: 'Failed to create Cargo.' });
+        res.status(400).json({ success: false, message: error.message || 'Failed to create Cargo.' });
     }
 };
 
@@ -47,7 +47,7 @@ export const updateCargo = async (req: AuthenticatedRequest, res: Response): Pro
             res.status(400).json({ success: false, message: 'Invalid Cargo ID' });
             return;
         }
-        const updated = await cargoRepository.update(id, req.body);
+        const updated = await cargoService.updateCargo(id, req.body);
         if (!updated) {
             res.status(404).json({ success: false, message: 'Cargo not found' });
             return;
@@ -55,7 +55,7 @@ export const updateCargo = async (req: AuthenticatedRequest, res: Response): Pro
         res.status(200).json(updated);
     } catch (error: any) {
         console.error('[CargoController] updateCargo error:', error);
-        res.status(500).json({ success: false, message: 'Failed to update Cargo.' });
+        res.status(500).json({ success: false, message: error.message || 'Failed to update Cargo.' });
     }
 };
 
@@ -67,7 +67,7 @@ export const deleteCargo = async (req: AuthenticatedRequest, res: Response): Pro
             res.status(400).json({ success: false, message: 'Invalid Cargo ID' });
             return;
         }
-        const deleted = await cargoRepository.softDelete(id, getUser(req));
+        const deleted = await cargoService.deleteCargo(id, getUser(req));
         if (!deleted) {
             res.status(404).json({ success: false, message: 'Cargo not found' });
             return;
@@ -75,9 +75,6 @@ export const deleteCargo = async (req: AuthenticatedRequest, res: Response): Pro
         res.status(200).json({ success: true, message: 'Cargo moved to trash', data: deleted });
     } catch (error: any) {
         console.error('[CargoController] deleteCargo error:', error);
-        res.status(500).json({ success: false, message: 'Failed to delete Cargo.' });
+        res.status(500).json({ success: false, message: error.message || 'Failed to delete Cargo.' });
     }
 };
-
-
-

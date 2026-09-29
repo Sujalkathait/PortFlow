@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
-import { trashRepository } from '../repositories/trash.repository';
+import { trashService } from '../services/trash.service';
 
 /** Unified Trash Bin — returns all soft-deleted records across all collections */
 export const getTrash = async (_req: Request, res: Response): Promise<void> => {
     try {
-        const records = await trashRepository.getTrash();
+        const records = await trashService.getTrash();
         res.status(200).json(records);
     } catch (error: any) {
         console.error('[TrashController] getTrash error:', error);
-        res.status(500).json({ success: false, message: 'Failed to retrieve trash items.' });
+        res.status(500).json({ success: false, message: error.message || 'Failed to retrieve trash items.' });
     }
 };
 
@@ -22,18 +22,7 @@ export const restoreFromTrash = async (req: Request, res: Response): Promise<voi
             return;
         }
 
-        const validCollections = ['operations', 'ships', 'Cargos', 'Equipments'];
-        if (!validCollections.includes(collection)) {
-            res.status(400).json({ success: false, message: `Unknown collection: ${collection}` });
-            return;
-        }
-
-        const restored = await trashRepository.restore(collection, numId);
-        if (!restored) {
-            res.status(404).json({ success: false, message: 'Record not found in trash.' });
-            return;
-        }
-
+        const restored = await trashService.restoreItem(collection, numId);
         res.status(200).json({
             success: true,
             message: 'Record restored successfully.',
@@ -41,7 +30,7 @@ export const restoreFromTrash = async (req: Request, res: Response): Promise<voi
         });
     } catch (error: any) {
         console.error('[TrashController] restoreFromTrash error:', error);
-        res.status(500).json({ success: false, message: 'Failed to restore record.' });
+        res.status(400).json({ success: false, message: error.message || 'Failed to restore record.' });
     }
 };
 
@@ -55,40 +44,28 @@ export const permanentDelete = async (req: Request, res: Response): Promise<void
             return;
         }
 
-        const validCollections = ['operations', 'ships', 'Cargos', 'Equipments'];
-        if (!validCollections.includes(collection)) {
-            res.status(400).json({ success: false, message: `Unknown collection: ${collection}` });
-            return;
-        }
-
-        const deleted = await trashRepository.permanentDelete(collection, numId);
-        if (!deleted) {
-            res.status(404).json({ success: false, message: 'Record not found in trash.' });
-            return;
-        }
-
+        const success = await trashService.permanentlyDeleteItem(collection, numId);
         res.status(200).json({
-            success: true,
-            message: 'Record permanently deleted.',
+            success,
+            message: 'Record permanently purged from database.',
         });
     } catch (error: any) {
         console.error('[TrashController] permanentDelete error:', error);
-        res.status(500).json({ success: false, message: 'Failed to permanently delete record.' });
+        res.status(400).json({ success: false, message: error.message || 'Failed to purge record.' });
     }
 };
 
-/** Empty all trash — permanently delete ALL soft-deleted records */
+/** Empty entire trash bin */
 export const emptyTrash = async (_req: Request, res: Response): Promise<void> => {
     try {
-        const result = await trashRepository.emptyTrash();
+        const result = await trashService.emptyAllTrash();
         res.status(200).json({
             success: true,
-            message: `${result.total} records permanently deleted from trash.`,
-            details: result.details,
+            message: `Trash emptied. ${result.count} records purged permanently.`,
+            data: result,
         });
     } catch (error: any) {
         console.error('[TrashController] emptyTrash error:', error);
-        res.status(500).json({ success: false, message: 'Failed to empty trash.' });
+        res.status(500).json({ success: false, message: error.message || 'Failed to empty trash.' });
     }
 };
-
