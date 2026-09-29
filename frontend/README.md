@@ -1,32 +1,32 @@
-# React + TypeScript + Vite
+<div align="center">
+  <img src="public/image/favicon.png" alt="PortFlow Logo" width="100" />
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+# PortFlow Frontend (React 19 + TypeScript + Vite)
+</div>
 
-Currently, two official plugins are available:
+This is the web operations suite for PortFlow. 
+It operates at the **40% project milestone (Phase 2 completed)**, meaning the core operations for both sides are fully functional.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Both Sides (Roles) Implemented:
 
-## React Compiler
+### 1. Admin Side
+- **Dashboard**: View overall port activity and live metrics.
+- **Operations**: Manage daily port activities and dispatch OS jobs.
+- **Ships**: Manage ships docking at the port.
+- **Cargo**: Manage goods and track inventory.
+- **Berths & Cranes**: Manage ship parking areas and cargo-loading machines.
+- **Scheduling**: Manage timings, CPU algorithms (FCFS, SJF, Priority), and waiting queues.
+- **Reports**: View system information, database analytics, and logs.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. Operator Side
+- **Dashboard**: View personal operational stats and current assignments.
+- **My Operations**: Process dispatched jobs and execute physical tasks.
+- **Cargo**: Update the status of loaded/unloaded goods.
+- **Report Issue**: Contact admin regarding faulty equipment or delays.
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Tech Stack
+- React 19
+- Vite
+- TypeScript
+- CSS (Vanilla)
+- Lucide React (Icons)

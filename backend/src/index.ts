@@ -1,18 +1,108 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { apiRouter } from './routes/api';
+import { initDatabase, checkDatabaseConnection } from './config/database';
+import { seedDefaultAccounts } from './controllers/auth.controller';
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 
-app.use(cors());
-app.use(express.json());
+// CORS configuration for Vercel frontend & production environments
+const corsOrigin = process.env.CORS_ORIGIN || '*';
+app.use(cors({
+    origin: corsOrigin === '*' ? true : corsOrigin.split(',').map(s => s.trim()),
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-user-email'],
+}));
 
+// Request parsing
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Standard security headers
+app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+});
+
+// Production Health Check & Readiness Endpoint
+app.get('/health', async (_req: Request, res: Response) => {
+    const dbHealthy = await checkDatabaseConnection();
+    res.status(200).json({
+        status: 'ok',
+        service: 'PortFlow Backend',
+        environment: process.env.NODE_ENV || 'production',
+        databaseConnected: dbHealthy,
+        timestamp: new Date().toISOString(),
+    });
+});
+
+// Root Welcome Endpoint
+app.get('/', (_req: Request, res: Response) => {
+    res.json({
+        name: 'PortFlow API',
+        version: '1.0.0',
+        status: 'online',
+        endpoints: {
+            health: '/health',
+            api: '/api',
+            docs: 'https://github.com/Sujalkathait/PortFlow',
+        },
+    });
+});
+
+// Mount Main REST API
 app.use('/api', apiRouter);
 
-app.listen(port, () => {
-    console.log(`PortFlow Phase 2 Backend running on port ${port}`);
+// 404 Route Handler
+app.use((req: Request, res: Response) => {
+    res.status(404).json({
+        success: false,
+        message: `Endpoint ${req.method} ${req.originalUrl} not found.`,
+    });
 });
+
+// Centralized Production Error Handler
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    console.error('[ServerError]', err.stack || err.message || err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: process.env.NODE_ENV === 'development'
+            ? err.message || 'Internal Server Error'
+            : 'An unexpected internal server error occurred.',
+    });
+});
+
+// Start Server & Bootstrap Database
+const server = app.listen(port, async () => {
+    console.log(`\n======================================================`);
+    console.log(`  ⚓ PortFlow Production Backend`);
+    console.log(`  Listening on port: ${port}`);
+    console.log(`  Health Check: http://localhost:${port}/health`);
+    console.log(`  API Base: http://localhost:${port}/api`);
+    console.log(`======================================================\n`);
+
+    // Initialize database tables & seed accounts
+    await initDatabase();
+    await seedDefaultAccounts();
+});
+
+// Graceful Shutdown for Cloud Orchestration (Render / Docker)
+const handleShutdown = (signal: string) => {
+    console.log(`\nReceived ${signal}. Gracefully shutting down PortFlow server...`);
+    server.close(() => {
+        console.log('PortFlow HTTP server closed.');
+        process.exit(0);
+    });
+};
+
+process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+process.on('SIGINT', () => handleShutdown('SIGINT'));
+
+export default app;

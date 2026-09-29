@@ -1,150 +1,105 @@
 -- =============================================================================
--- PortFlow Database Schema (Phase 2 & Phase 3)
--- Integrated Operating System & Database Management Concepts
+-- PortFlow Production Database Schema
+-- Production Deployment for Render Backend & PostgreSQL / Supabase
+-- ACID Transactions, Referential Integrity, B-Tree Indexes, Soft-Delete
 -- =============================================================================
 
--- 1. EXTENSIONS & SCHEMAS
-create extension if not exists pgcrypto;
-create schema if not exists private;
+-- 1. EXTENSIONS
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- 2. ENUM TYPES
-do $$ begin
-  create type public.port_role as enum ('Admin', 'Operator');
-exception
-  when duplicate_object then null;
-end $$;
-
--- 3. PROFILES TABLE (DBMS: Primary Key, Foreign Key to auth.users, Normalization)
-create table if not exists public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  full_name text not null check (char_length(full_name) between 2 and 120),
-  role public.port_role not null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+-- 2. USERS TABLE (Authentication & Role-Based Access Control)
+CREATE TABLE IF NOT EXISTS public.users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(120) NOT NULL CHECK (char_length(full_name) BETWEEN 2 AND 120),
+    role VARCHAR(50) NOT NULL DEFAULT 'Operator' CHECK (role IN ('Admin', 'Operator')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 4. SHIPS TABLE (DBMS: Entity Modeling, Unique Constraints)
-create table if not exists public.ships (
-  id bigint generated always as identity primary key,
-  imo_number text unique not null,
-  name text not null,
-  vessel_type text,
-  capacity_teu integer check (capacity_teu >= 0),
-  created_at timestamptz not null default now()
+-- 3. SHIPS TABLE (Vessel Registry & Entity Modeling)
+CREATE TABLE IF NOT EXISTS public.ships (
+    id SERIAL PRIMARY KEY,
+    imo_number VARCHAR(100) UNIQUE NOT NULL,
+    name VARCHAR(120) NOT NULL CHECK (char_length(name) >= 1),
+    vessel_type VARCHAR(100) DEFAULT 'Container',
+    capacity_teu INTEGER DEFAULT 0 CHECK (capacity_teu >= 0),
+    status VARCHAR(50) NOT NULL DEFAULT 'Arriving' CHECK (status IN ('Docked', 'Arriving', 'Departed')),
+    berth_id VARCHAR(50),
+    created_by VARCHAR(255) DEFAULT 'system',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ DEFAULT NULL,
+    deleted_by VARCHAR(255) DEFAULT NULL
 );
 
--- 5. BERTHS TABLE (OS: Semaphore Resource Modeling)
-create table if not exists public.berths (
-  id bigint generated always as identity primary key,
-  name text unique not null,
-  location text,
-  is_available boolean not null default true,
-  max_vessel_length integer check (max_vessel_length > 0),
-  created_at timestamptz not null default now()
+-- 4. OPERATIONS TABLE (Process Scheduling, CPU Telemetry & Lifecycle)
+CREATE TABLE IF NOT EXISTS public.operations (
+    id SERIAL PRIMARY KEY,
+    process_id VARCHAR(50),
+    operation_type VARCHAR(100) NOT NULL CHECK (char_length(operation_type) >= 2),
+    ship_name VARCHAR(120) NOT NULL CHECK (char_length(ship_name) >= 1),
+    crane_id VARCHAR(50) DEFAULT 'None',
+    berth_id VARCHAR(50) DEFAULT 'Berth 1',
+    priority INTEGER NOT NULL DEFAULT 1 CHECK (priority >= 1),
+    status VARCHAR(50) NOT NULL DEFAULT 'Queued' CHECK (status IN ('Queued', 'Running', 'Completed', 'Cancelled')),
+    start_time TIMESTAMPTZ,
+    end_time TIMESTAMPTZ,
+    waiting_time_ms INTEGER CHECK (waiting_time_ms IS NULL OR waiting_time_ms >= 0),
+    turnaround_time_ms INTEGER CHECK (turnaround_time_ms IS NULL OR turnaround_time_ms >= 0),
+    created_by VARCHAR(255) DEFAULT 'system',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ DEFAULT NULL,
+    deleted_by VARCHAR(255) DEFAULT NULL,
+    CHECK (end_time IS NULL OR start_time IS NULL OR end_time >= start_time)
 );
 
--- 6. OPERATIONS TABLE (OS: Processes & Scheduling / DBMS: Foreign Keys, CRUD)
-create table if not exists public.operations (
-  id bigint generated always as identity primary key,
-  user_id uuid not null references public.profiles(id),
-  ship_id bigint references public.ships(id),
-  berth_id bigint references public.berths(id),
-  operation_type text not null check (char_length(operation_type) between 2 and 100),
-  status text not null default 'Queued' check (status in ('Queued', 'Running', 'Completed', 'Cancelled')),
-  start_time timestamptz,
-  end_time timestamptz,
-  created_at timestamptz not null default now(),
-  check (end_time is null or start_time is null or end_time >= start_time)
+-- 5. CONTAINERS TABLE (Cargo Manifest & Location Tracking)
+CREATE TABLE IF NOT EXISTS public.containers (
+    id SERIAL PRIMARY KEY,
+    container_number VARCHAR(100) UNIQUE NOT NULL CHECK (char_length(container_number) >= 3),
+    size_type VARCHAR(50) NOT NULL DEFAULT '20ft',
+    weight_tons NUMERIC(10, 2) NOT NULL DEFAULT 0.0 CHECK (weight_tons >= 0),
+    cargo_type VARCHAR(100) NOT NULL DEFAULT 'General',
+    current_location VARCHAR(100) NOT NULL DEFAULT 'Yard',
+    ship_name VARCHAR(120) DEFAULT '',
+    status VARCHAR(50) NOT NULL DEFAULT 'On Ship' CHECK (status IN ('On Ship', 'In Yard', 'Cleared', 'In Transit')),
+    created_by VARCHAR(255) DEFAULT 'system',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ DEFAULT NULL,
+    deleted_by VARCHAR(255) DEFAULT NULL
 );
 
--- 7. CONTAINERS TABLE (DBMS: Referential Integrity & Tracking)
-create table if not exists public.containers (
-  id bigint generated always as identity primary key,
-  operation_id bigint references public.operations(id) on delete set null,
-  container_number text unique not null,
-  size_type text,
-  current_location text,
-  created_at timestamptz not null default now()
+-- 6. RESOURCES TABLE (Physical Hardware: Berths, Cranes, Trucks, Warehouses)
+CREATE TABLE IF NOT EXISTS public.resources (
+    id SERIAL PRIMARY KEY,
+    resource_id VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(120) NOT NULL CHECK (char_length(name) >= 1),
+    type VARCHAR(50) NOT NULL CHECK (type IN ('Berth', 'Crane', 'Truck', 'Warehouse')),
+    status VARCHAR(50) NOT NULL DEFAULT 'Available' CHECK (status IN ('Available', 'Occupied', 'Running', 'Busy', 'Maintenance')),
+    assigned_to VARCHAR(100) DEFAULT NULL,
+    created_by VARCHAR(255) DEFAULT 'system',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ DEFAULT NULL,
+    deleted_by VARCHAR(255) DEFAULT NULL
 );
 
--- 8. INDEXES (DBMS: Performance Optimization & Fast Lookup)
-create index if not exists operations_user_id_idx on public.operations(user_id);
-create index if not exists operations_created_at_idx on public.operations(created_at desc);
-create index if not exists containers_operation_id_idx on public.containers(operation_id);
+-- 7. PERFORMANCE INDEXES (Optimized for Soft-Delete and Frequent Queries)
+CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
+CREATE INDEX IF NOT EXISTS idx_operations_status ON public.operations(status);
+CREATE INDEX IF NOT EXISTS idx_operations_deleted_at ON public.operations(deleted_at);
+CREATE INDEX IF NOT EXISTS idx_operations_created_at ON public.operations(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ships_deleted_at ON public.ships(deleted_at);
+CREATE INDEX IF NOT EXISTS idx_ships_status ON public.ships(status);
+CREATE INDEX IF NOT EXISTS idx_containers_deleted_at ON public.containers(deleted_at);
+CREATE INDEX IF NOT EXISTS idx_containers_number ON public.containers(container_number);
+CREATE INDEX IF NOT EXISTS idx_resources_deleted_at ON public.resources(deleted_at);
+CREATE INDEX IF NOT EXISTS idx_resources_type ON public.resources(type);
 
--- 9. ADMIN SECURITY FUNCTION (DBMS: Security Definer Helper)
-create or replace function private.is_admin()
-returns boolean
-language sql
-security definer
-set search_path = ''
-stable
-as $$
-  select exists (
-    select 1
-    from public.profiles
-    where id = (select auth.uid())
-      and role = 'Admin'
-  );
-$$;
-
-revoke all on function private.is_admin() from public;
-grant usage on schema private to authenticated;
-grant execute on function private.is_admin() to authenticated;
-
--- 10. ROW LEVEL SECURITY (RLS) POLICIES
-alter table public.profiles enable row level security;
-alter table public.ships enable row level security;
-alter table public.berths enable row level security;
-alter table public.operations enable row level security;
-alter table public.containers enable row level security;
-
--- Profiles Policies
-create policy "profiles_read_own" on public.profiles
-  for select to authenticated
-  using ((select auth.uid()) = id);
-
-create policy "profiles_read_admin" on public.profiles
-  for select to authenticated
-  using ((select private.is_admin()));
-
--- Ships Policies
-create policy "ships_read_authenticated" on public.ships
-  for select to authenticated
-  using (true);
-
--- Berths Policies
-create policy "berths_read_authenticated" on public.berths
-  for select to authenticated
-  using (true);
-
--- Operations Policies (Full CRUD)
-create policy "operations_select" on public.operations
-  for select to authenticated
-  using ((select private.is_admin()) or user_id = (select auth.uid()));
-
-create policy "operations_insert" on public.operations
-  for insert to authenticated
-  with check (user_id = (select auth.uid()));
-
-create policy "operations_update" on public.operations
-  for update to authenticated
-  using ((select private.is_admin()) or user_id = (select auth.uid()))
-  with check ((select private.is_admin()) or user_id = (select auth.uid()));
-
-create policy "operations_delete" on public.operations
-  for delete to authenticated
-  using ((select private.is_admin()) or user_id = (select auth.uid()));
-
--- Containers Policies
-create policy "containers_select" on public.containers
-  for select to authenticated
-  using (
-    (select private.is_admin())
-    or exists (
-      select 1
-      from public.operations o
-      where o.id = operation_id
-        and o.user_id = (select auth.uid())
-    )
-  );
+-- 8. INITIAL SEED ACCOUNTS (Only if table is empty)
+-- Password for both accounts is: Password123!
+INSERT INTO public.users (email, password_hash, full_name, role)
+VALUES 
+    ('admin@portflow.com', '$2a$10$wE9L0Zq2f2T0yv1eLdC5p.3uFqvjM6yZ0A5.9bW9/6.2k7Lq3W7z6', 'Port Administrator', 'Admin'),
+    ('operator@portflow.com', '$2a$10$wE9L0Zq2f2T0yv1eLdC5p.3uFqvjM6yZ0A5.9bW9/6.2k7Lq3W7z6', 'Crane Operator', 'Operator')
+ON CONFLICT (email) DO NOTHING;

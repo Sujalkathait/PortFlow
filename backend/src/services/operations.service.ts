@@ -1,145 +1,140 @@
+import { operationsRepository, type OperationRecord } from '../repositories/operations.repository';
 import { PortSystem } from '../os/PortSystem';
 import { Process } from '../os/Process';
 
-export interface OperationRecord {
-    id: number;
-    processId: string;
-    operation_type: string;
-    ship_id: string;
-    ship_name: string;
-    crane_id: string;
-    berth_id: string;
-    priority: number;
-    status: 'Queued' | 'Running' | 'Completed' | 'Cancelled';
-    start_time: string | null;
-    end_time: string | null;
-    waiting_time_ms?: number;
-    turnaround_time_ms?: number;
-    created_at: string;
-}
-
 export class OperationsService {
     private portSystem: PortSystem;
-    private operations: OperationRecord[] = [];
-    private idCounter = 101;
 
     constructor() {
         this.portSystem = PortSystem.getInstance();
+        // Register default port infrastructure in OS engine
         this.portSystem.registerCrane('Crane A');
         this.portSystem.registerCrane('Crane B');
         this.portSystem.registerBerths('Berth 1', 1);
         this.portSystem.registerBerths('Berth 2', 1);
     }
 
-    public getOperations(): OperationRecord[] {
-        return [...this.operations].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    /** READ — all active operations (excludes soft-deleted) */
+    public async getOperations(): Promise<OperationRecord[]> {
+        return operationsRepository.findActive();
     }
 
-    public getOperationById(id: number): OperationRecord | undefined {
-        return this.operations.find(op => op.id === id);
+    /** READ — single active operation by ID */
+    public async getOperationById(id: number): Promise<OperationRecord | null> {
+        return operationsRepository.findById(id);
     }
 
+    /** CREATE — submit a new operation to scheduler & database */
     public async submitOperation(data: {
         operationType: string;
-        shipId?: string;
-        shipName?: string;
+        shipName: string;
         craneId?: string;
         berthId?: string;
         priority?: number;
         burstDuration?: number;
+        created_by: string;
     }): Promise<OperationRecord> {
-        const id = this.idCounter++;
-        const processId = `op-${id}`;
         const burstTime = Number(data.burstDuration) || 4000;
-        const requiredResources: string[] = [];
+        const requiredEquipments: string[] = [];
 
         if (data.craneId && data.craneId !== 'None') {
-            requiredResources.push(data.craneId);
+            requiredEquipments.push(data.craneId);
         }
 
-        const operation: OperationRecord = {
-            id,
-            processId,
-            operation_type: data.operationType || 'Container Discharge',
-            ship_id: data.shipId || `SHIP-${id}`,
-            ship_name: data.shipName || 'MV Ocean Carrier',
-            crane_id: data.craneId || 'None',
-            berth_id: data.berthId || 'Berth 1',
-            priority: Number(data.priority) || 1,
-            status: 'Queued',
-            start_time: null,
-            end_time: null,
-            created_at: new Date().toISOString()
-        };
+        const operation = await operationsRepository.create({
+            operationType: data.operationType,
+            shipName: data.shipName,
+            craneId: data.craneId,
+            berthId: data.berthId,
+            priority: data.priority,
+            created_by: data.created_by,
+        });
 
-        this.operations.push(operation);
-
-        // OS Concept: Create Process & Add to FCFS Scheduler Ready Queue
-        const process = new Process(
-            processId,
-            burstTime,
-            requiredResources,
-            operation.priority
-        );
-
+        // OS Concept: Create a Process and add to FCFS Ready Queue
+        const process = new Process(operation.processId, burstTime, requiredEquipments, operation.priority);
         this.portSystem.addProcess(process);
-
-        // Execute via OS Scheduler with Mutex Lock acquisition
-        setTimeout(() => {
-            void this.executeOperationProcess(operation, process);
-        }, 300);
 
         return operation;
     }
 
-    private async executeOperationProcess(operation: OperationRecord, _process: Process) {
-        operation.status = 'Running';
-        operation.start_time = new Date().toISOString();
+    /** Run the next process from the FCFS queue through the OS scheduler */
+    public async dispatchNext(): Promise<{ operationId: number; process: Process } | null> {
+        const result = await this.portSystem.executeNextProcess();
+        if (!result) return null;
 
-        // OS Concept: CPU Scheduling, Mutex lock on Crane, and Burst Time Execution
-        const finishedProcess = await this.portSystem.executeNextProcess();
-        if (finishedProcess) {
-            operation.status = 'Completed';
-            operation.end_time = new Date().toISOString();
-            operation.waiting_time_ms = finishedProcess.waitingTime;
-            operation.turnaround_time_ms = finishedProcess.turnaroundTime;
+        // Find the matching operation by process id or numerical id
+        const opId = Number(result.id.replace('op-', ''));
+        const op = await operationsRepository.findById(opId);
+        if (op) {
+            await operationsRepository.update(opId, {
+                status: 'Completed',
+                start_time: result.startTime ? new Date(result.startTime).toISOString() : new Date().toISOString(),
+                end_time: new Date().toISOString(),
+                waiting_time_ms: result.waitingTime,
+                turnaround_time_ms: result.turnaroundTime,
+            });
         }
+
+        return { operationId: opId, process: result };
     }
 
-    public async dispatchNext(): Promise<Process | null> {
-        return this.portSystem.executeNextProcess();
+    /** UPDATE — change operation fields */
+    public async updateOperation(id: number, updates: Partial<OperationRecord>): Promise<OperationRecord | null> {
+        if (updates.status === 'Running') {
+            updates.start_time = updates.start_time || new Date().toISOString();
+        }
+        if (updates.status === 'Completed' || updates.status === 'Cancelled') {
+            updates.end_time = updates.end_time || new Date().toISOString();
+            const op = await operationsRepository.findById(id);
+            if (op) {
+                updates.turnaround_time_ms = Date.now() - new Date(op.created_at).getTime();
+                if (op.start_time) {
+                    updates.waiting_time_ms = new Date(op.start_time).getTime() - new Date(op.created_at).getTime();
+                }
+            }
+        }
+        return operationsRepository.update(id, updates);
     }
 
-    public updateOperation(id: number, updates: Partial<OperationRecord>): OperationRecord | null {
-        const op = this.operations.find(o => o.id === id);
-        if (!op) return null;
-
-        Object.assign(op, updates);
-        return op;
+    /** SOFT DELETE — move to trash */
+    public async deleteOperation(id: number, deletedBy: string): Promise<OperationRecord | null> {
+        const op = await operationsRepository.findById(id);
+        if (op) {
+            this.portSystem.removeProcess(op.processId);
+        }
+        return operationsRepository.softDelete(id, deletedBy);
     }
 
-    public deleteOperation(id: number): boolean {
-        const index = this.operations.findIndex(o => o.id === id);
-        if (index === -1) return false;
+    /** Get real analytics from actual database records */
+    public async getMetrics() {
+        const ops = await operationsRepository.findActive();
+        const queued = ops.filter(o => o.status === 'Queued').length;
+        const running = ops.filter(o => o.status === 'Running').length;
+        const completed = ops.filter(o => o.status === 'Completed').length;
+        const cancelled = ops.filter(o => o.status === 'Cancelled').length;
+        const total = ops.length;
 
-        const [removed] = this.operations.splice(index, 1);
-        this.portSystem.removeProcess(removed.processId);
-        return true;
-    }
+        const completedOps = ops.filter(o => o.turnaround_time_ms !== null);
+        const avgTurnaround = completedOps.length > 0
+            ? Math.round(completedOps.reduce((sum, o) => sum + (o.turnaround_time_ms || 0), 0) / completedOps.length)
+            : 0;
+        const avgWaiting = completedOps.length > 0
+            ? Math.round(completedOps.reduce((sum, o) => sum + (o.waiting_time_ms || 0), 0) / completedOps.length)
+            : 0;
 
-    public getMetrics() {
-        const uniqueShips = new Set(this.operations.map(o => o.ship_name)).size;
-        const activeOps = this.operations.filter(o => o.status === 'Queued' || o.status === 'Running').length;
-        const totalContainers = this.operations.length * 140;
-        const activeBerths = new Set(
-            this.operations.filter(o => o.status === 'Running').map(o => o.berth_id)
-        ).size;
+        const uniqueShips = new Set(ops.map(o => o.ship_name)).size;
 
         return {
-            ships: uniqueShips,
-            operations: activeOps,
-            containers: totalContainers,
-            resources: activeBerths
+            total,
+            queued,
+            running,
+            completed,
+            cancelled,
+            uniqueShips,
+            avgTurnaroundMs: avgTurnaround,
+            avgWaitingMs: avgWaiting,
         };
     }
 }
+
+

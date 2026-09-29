@@ -1,12 +1,15 @@
 import { Process } from './Process';
-import { Scheduler, FCFSStrategy } from './Scheduler';
+import { Scheduler, FCFSStrategy, SJFStrategy, PriorityStrategy } from './Scheduler';
 import { Mutex } from './Mutex';
 import { Semaphore } from './Semaphore';
 import { DeadlockDetector } from './DeadlockDetector';
 
+export type SchedulingAlgo = 'FCFS' | 'SJF' | 'PRIORITY';
+
 export class PortSystem {
     private static instance: PortSystem;
     private scheduler: Scheduler;
+    private currentAlgo: SchedulingAlgo = 'FCFS';
     private processes: Map<string, Process> = new Map();
     private mutexes: Map<string, Mutex> = new Map(); // E.g., cranes
     private semaphores: Map<string, Semaphore> = new Map(); // E.g., berths
@@ -23,6 +26,13 @@ export class PortSystem {
             PortSystem.instance = new PortSystem();
         }
         return PortSystem.instance;
+    }
+
+    public setSchedulingAlgorithm(algo: SchedulingAlgo) {
+        this.currentAlgo = algo;
+        if (algo === 'FCFS') this.scheduler.setStrategy(new FCFSStrategy());
+        else if (algo === 'SJF') this.scheduler.setStrategy(new SJFStrategy());
+        else if (algo === 'PRIORITY') this.scheduler.setStrategy(new PriorityStrategy());
     }
 
     public registerCrane(craneId: string) {
@@ -49,11 +59,11 @@ export class PortSystem {
         process.start();
 
         // Try to acquire locks
-        const locksToAcquire = process.requiredResources;
+        const locksToAcquire = process.requiredEquipments;
         for (const res of locksToAcquire) {
             if (this.mutexes.has(res)) {
                 await this.mutexes.get(res)!.lock(process);
-                process.heldResources.push(res);
+                process.heldEquipments.push(res);
             }
         }
 
@@ -61,12 +71,12 @@ export class PortSystem {
         await new Promise(resolve => setTimeout(resolve, process.burstTime));
 
         // Release locks
-        for (const res of process.heldResources) {
+        for (const res of process.heldEquipments) {
             if (this.mutexes.has(res)) {
                 this.mutexes.get(res)!.unlock(process);
             }
         }
-        process.heldResources = [];
+        process.heldEquipments = [];
 
         process.finish();
         this.executedProcesses.push(process);
@@ -81,14 +91,14 @@ export class PortSystem {
     }
 
     public checkDeadlock(): boolean {
-        const resourceLocks: Record<string, string> = {};
+        const EquipmentLocks: Record<string, string> = {};
         for (const [res, mutex] of this.mutexes.entries()) {
             const owner = mutex.getOwner();
             if (owner) {
-                resourceLocks[res] = owner.id;
+                EquipmentLocks[res] = owner.id;
             }
         }
-        return DeadlockDetector.detectDeadlock(Array.from(this.processes.values()), resourceLocks);
+        return DeadlockDetector.detectDeadlock(Array.from(this.processes.values()), EquipmentLocks);
     }
 
     public getSystemState() {
@@ -108,6 +118,7 @@ export class PortSystem {
         }
 
         return {
+            schedulingAlgorithm: this.currentAlgo,
             readyQueue: this.scheduler.getReadyQueue().map(p => ({
                 id: p.id,
                 status: p.status,
@@ -122,3 +133,4 @@ export class PortSystem {
         };
     }
 }
+

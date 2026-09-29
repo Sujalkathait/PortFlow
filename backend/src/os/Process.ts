@@ -14,18 +14,18 @@ export class Process {
 
     // Operation specific
     operationId?: number;
-    requiredResources: string[];
-    heldResources: string[];
+    requiredEquipments: string[];
+    heldEquipments: string[];
 
-    constructor(id: string, burstTime: number, requiredResources: string[] = [], priority: number = 0) {
+    constructor(id: string, burstTime: number, requiredEquipments: string[] = [], priority: number = 0) {
         this.id = id;
         this.arrivalTime = Date.now();
         this.burstTime = burstTime;
         this.remainingTime = burstTime;
         this.priority = priority;
         this.status = 'NEW';
-        this.requiredResources = requiredResources;
-        this.heldResources = [];
+        this.requiredEquipments = requiredEquipments;
+        this.heldEquipments = [];
     }
 
     start() {
@@ -42,3 +42,4 @@ export class Process {
         this.turnaroundTime = this.endTime - this.arrivalTime;
     }
 }
+

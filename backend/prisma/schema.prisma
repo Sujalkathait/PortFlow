@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  password_hash String
+  full_name     String
+  role          String
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  deleted_at    DateTime?
+  deleted_by    String?
+
+  @@map("users")
+}
+
+model Cargo {
+  id               Int       @id @default(autoincrement())
+  cargo_number     String    @unique
+  size_type        String    @default("20ft")
+  weight_tons      Float     @default(0)
+  cargo_type       String    @default("General")
+  current_location String    @default("Yard")
+  ship_name        String    @default("")
+  status           String    @default("On Ship")
+  created_by       String    @default("unknown")
+  created_at       DateTime  @default(now())
+  deleted_at       DateTime?
+  deleted_by       String?
+
+  @@map("cargo")
+}
+
+model Operation {
+  id                 Int       @id @default(autoincrement())
+  process_id         String?   @unique
+  operation_type     String
+  ship_name          String
+  crane_id           String    @default("None")
+  berth_id           String    @default("Berth 1")
+  priority           Int       @default(1)
+  status             String
+  start_time         DateTime?
+  end_time           DateTime?
+  waiting_time_ms    Int?
+  turnaround_time_ms Int?
+  created_by         String    @default("unknown")
+  created_at         DateTime  @default(now())
+  deleted_at         DateTime?
+  deleted_by         String?
+
+  @@map("operations")
+}
+
+model Equipment {
+  id           Int       @id @default(autoincrement())
+  equipment_id String    @unique
+  name         String
+  type         String    @default("Berth")
+  status       String    @default("Available")
+  assigned_to  String?
+  created_by   String    @default("unknown")
+  created_at   DateTime  @default(now())
+  deleted_at   DateTime?
+  deleted_by   String?
+
+  @@map("equipment")
+}
+
+model Ship {
+  id           Int       @id @default(autoincrement())
+  imo_number   String    @unique
+  name         String
+  vessel_type  String    @default("General Cargo")
+  capacity_teu Int       @default(0)
+  status       String    @default("Arriving")
+  berth_id     String?
+  created_by   String    @default("unknown")
+  created_at   DateTime  @default(now())
+  deleted_at   DateTime?
+  deleted_by   String?
+
+  @@map("ships")
+}

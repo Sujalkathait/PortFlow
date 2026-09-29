@@ -1,141 +1,145 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { User } from '@supabase/supabase-js';
-import { requireSupabase, supabase } from '../lib/supabase';
+import { api } from '../lib/api';
 
 export type Role = 'Admin' | 'Operator';
 
 export type Profile = {
-  id: string;
-  full_name: string;
-  role: Role;
+    id: number | string;
+    email: string;
+    full_name: string;
+    role: Role;
 };
 
-export type AppUser = User | { id: string; email?: string; [key: string]: unknown };
-
 type AuthState = {
-  user: AppUser | null;
-  profile: Profile | null;
-  loading: boolean;
-  signInLocal: (role: Role, email: string, fullName: string) => void;
-  signOut: () => Promise<void>;
+    user: Profile | null;
+    profile: Profile | null;
+    loading: boolean;
+    login: (email: string, password: string) => Promise<Profile>;
+    register: (email: string, password: string, fullName: string, role?: Role) => Promise<Profile>;
+    signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
 
-const LOCAL_STORAGE_KEY = 'portflow_auth_session';
-
-async function getProfile(user: User): Promise<Profile | null> {
-  const { data, error } = await requireSupabase()
-    .from('profiles')
-    .select('id, full_name, role')
-    .eq('id', user.id)
-    .single();
-  if (error) throw error;
-  return data as Profile;
-}
+const TOKEN_KEY = 'portflow_auth_token';
+const USER_KEY = 'portflow_auth_user';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AppUser | null>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!saved) return null;
-    try {
-      const parsed = JSON.parse(saved);
-      return parsed.user ?? null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [profile, setProfile] = useState<Profile | null>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!saved) return null;
-    try {
-      const parsed = JSON.parse(saved);
-      return parsed.profile ?? null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [loading, setLoading] = useState(() => !localStorage.getItem(LOCAL_STORAGE_KEY) && Boolean(supabase));
-
-  const signInLocal = (role: Role, email: string, fullName: string) => {
-    const localUser: AppUser = {
-      id: `local-${role.toLowerCase()}-01`,
-      email,
-      aud: 'authenticated',
-      created_at: new Date().toISOString(),
-    };
-    const localProfile: Profile = {
-      id: localUser.id,
-      full_name: fullName,
-      role,
-    };
-    setUser(localUser);
-    setProfile(localProfile);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ user: localUser, profile: localProfile }));
-    setLoading(false);
-  };
-
-  const signOut = async () => {
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    setUser(null);
-    setProfile(null);
-    if (supabase) {
-      try {
-        await supabase.auth.signOut();
-      } catch {
-        // ignore sign out network error
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
-
-    const load = async (nextUser: User | null) => {
-      if (nextUser) {
-        setUser(nextUser);
+    const [user, setUser] = useState<Profile | null>(() => {
+        const saved = localStorage.getItem(USER_KEY);
+        if (!saved) return null;
         try {
-          const prof = await getProfile(nextUser);
-          setProfile(prof);
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ user: nextUser, profile: prof }));
+            return JSON.parse(saved) as Profile;
         } catch {
-          setProfile(null);
+            return null;
         }
-      }
-      setLoading(false);
+    });
+
+    const [loading, setLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        const verifySession = async () => {
+            const token = localStorage.getItem(TOKEN_KEY);
+            if (!token) {
+                setLoading(false);
+                return;
+            }
+            try {
+                const res = await api.auth.me();
+                if (res?.user) {
+                    const verifiedUser: Profile = {
+                        id: res.user.id,
+                        email: res.user.email,
+                        full_name: res.user.fullName || res.user.full_name || res.user.email,
+                        role: res.user.role,
+                    };
+                    setUser(verifiedUser);
+                    localStorage.setItem(USER_KEY, JSON.stringify(verifiedUser));
+                }
+            } catch {
+                // Token expired or invalid
+                localStorage.removeItem(TOKEN_KEY);
+                localStorage.removeItem(USER_KEY);
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        void verifySession();
+
+        const handleUnauthorized = () => {
+            setUser(null);
+            localStorage.removeItem(TOKEN_KEY);
+            localStorage.removeItem(USER_KEY);
+        };
+
+        window.addEventListener('portflow-unauthorized', handleUnauthorized);
+        return () => window.removeEventListener('portflow-unauthorized', handleUnauthorized);
+    }, []);
+
+    const login = async (email: string, password: string): Promise<Profile> => {
+        setLoading(true);
+        try {
+            const res = await api.auth.login({ email, password });
+            const loggedUser: Profile = {
+                id: res.user.id,
+                email: res.user.email,
+                full_name: res.user.full_name || res.user.email,
+                role: res.user.role,
+            };
+            localStorage.setItem(TOKEN_KEY, res.token);
+            localStorage.setItem(USER_KEY, JSON.stringify(loggedUser));
+            setUser(loggedUser);
+            return loggedUser;
+        } finally {
+            setLoading(false);
+        }
     };
 
-    void supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        void load(data.user);
-      } else {
-        setLoading(false);
-      }
-    });
+    const register = async (email: string, password: string, fullName: string, role?: Role): Promise<Profile> => {
+        setLoading(true);
+        try {
+            const res = await api.auth.register({ email, password, fullName, role });
+            const registeredUser: Profile = {
+                id: res.user.id,
+                email: res.user.email,
+                full_name: res.user.full_name,
+                role: res.user.role,
+            };
+            localStorage.setItem(TOKEN_KEY, res.token);
+            localStorage.setItem(USER_KEY, JSON.stringify(registeredUser));
+            setUser(registeredUser);
+            return registeredUser;
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        void load(session.user);
-      }
-    });
+    const signOut = async () => {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+        setUser(null);
+    };
 
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
-  return (
-    <AuthContext.Provider value={{ user, profile, loading, signInLocal, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
+    return (
+        <AuthContext.Provider
+            value={{
+                user,
+                profile: user,
+                loading,
+                login,
+                register,
+                signOut,
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
 }
 
 export const useAuth = () => {
-  const value = useContext(AuthContext);
-  if (!value) throw new Error('useAuth must be used inside AuthProvider');
-  return value;
+    const value = useContext(AuthContext);
+    if (!value) throw new Error('useAuth must be used inside AuthProvider');
+    return value;
 };

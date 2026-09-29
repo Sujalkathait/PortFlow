@@ -18,6 +18,13 @@ export class SJFStrategy implements SchedulingStrategy {
     }
 }
 
+export class PriorityStrategy implements SchedulingStrategy {
+    schedule(processes: Process[]): Process | null {
+        // Sort by priority (higher priority number = higher priority)
+        return processes.sort((a, b) => b.priority - a.priority)[0] || null;
+    }
+}
+
 export class Scheduler {
     private strategy: SchedulingStrategy;
     private readyQueue: Process[] = [];

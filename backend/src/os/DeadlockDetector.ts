@@ -1,18 +1,18 @@
 import { Process } from './Process';
 
-// Simple deadlock detection using resource allocation graph concepts
+// Simple deadlock detection using Equipment allocation graph concepts
 export class DeadlockDetector {
     // Check for circular wait among processes
-    static detectDeadlock(processes: Process[], resourceLocks: Record<string, string>): boolean {
-        // Build wait-for graph: A -> B means A is waiting for a resource held by B
+    static detectDeadlock(processes: Process[], EquipmentLocks: Record<string, string>): boolean {
+        // Build wait-for graph: A -> B means A is waiting for a Equipment held by B
         const waitForGraph = new Map<string, string>();
         
         for (const p of processes) {
-            if (p.status === 'WAITING' && p.requiredResources.length > 0) {
-                // Find what resource it's waiting for that is currently locked
-                for (const res of p.requiredResources) {
-                    if (resourceLocks[res] && resourceLocks[res] !== p.id) {
-                        waitForGraph.set(p.id, resourceLocks[res]);
+            if (p.status === 'WAITING' && p.requiredEquipments.length > 0) {
+                // Find what Equipment it's waiting for that is currently locked
+                for (const res of p.requiredEquipments) {
+                    if (EquipmentLocks[res] && EquipmentLocks[res] !== p.id) {
+                        waitForGraph.set(p.id, EquipmentLocks[res]);
                         break;
                     }
                 }
@@ -54,3 +54,4 @@ export class DeadlockDetector {
         return false;
     }
 }
+

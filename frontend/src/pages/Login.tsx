@@ -1,243 +1,251 @@
 import { useState, type FormEvent } from 'react';
-import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, ShieldCheck, Ship, Box, Anchor, LineChart, ArrowRight, Cpu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../auth/AuthProvider';
-import { supabase } from '../lib/supabase';
+import { useAuth, type Role } from '../auth/AuthProvider';
 import './Login.css';
 
-type Mode = 'sign-in' | 'request-reset' | 'update-password';
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+type Mode = 'sign-in' | 'register';
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function Login() {
-  const { signInLocal } = useAuth();
-  const [mode, setMode] = useState<Mode>(location.hash.includes('type=recovery') ? 'update-password' : 'sign-in');
-  const [email, setEmail] = useState('admin@portflow.com');
-  const [password, setPassword] = useState('Password123!');
-  const [showPassword, setShowPassword] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+    const { login, register } = useAuth();
+    const [mode, setMode] = useState<Mode>('sign-in');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [fullName, setFullName] = useState('');
+    const [role, setRole] = useState<Role>('Operator');
+    const [algo, setAlgo] = useState('FCFS');
+    
+    const [showPassword, setShowPassword] = useState(false);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    setError('');
-    setMessage('');
+    const switchMode = (newMode: Mode) => {
+        setMode(newMode);
+        setError('');
+    };
 
-    if (mode !== 'update-password' && !emailPattern.test(email)) {
-      setError('Enter a valid work email address.');
-      return;
-    }
-    if (mode !== 'request-reset' && password.length < 6) {
-      setError('Use at least 6 characters for your password.');
-      return;
-    }
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        setError('');
 
-    setBusy(true);
-
-    try {
-      if (mode === 'sign-in') {
         const cleanEmail = email.trim().toLowerCase();
-
-        // 1. Direct local authentication for development & offline mode
-        if (cleanEmail === 'admin@portflow.com' && password === 'Password123!') {
-          signInLocal('Admin', 'admin@portflow.com', 'Port Administrator');
-          navigate('/admin', { replace: true });
-          return;
+        if (!EMAIL_PATTERN.test(cleanEmail) && cleanEmail.length < 3) {
+            setError('Please enter a valid email or username.');
+            return;
         }
 
-        if (cleanEmail === 'operator@portflow.com' && password === 'Password123!') {
-          signInLocal('Operator', 'operator@portflow.com', 'Crane Operator');
-          navigate('/operator', { replace: true });
-          return;
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters long.');
+            return;
         }
 
-        // 2. Live Supabase authentication if configured
-        if (supabase) {
-          const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
-          if (authError) throw authError;
-
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', data.user.id)
-            .single();
-
-          if (profileError || !profile) {
-            throw new Error('This account is not assigned a PortFlow role.');
-          }
-
-          navigate(profile.role === 'Admin' ? '/admin' : '/operator', { replace: true });
-          return;
+        if (mode === 'register' && fullName.trim().length < 2) {
+            setError('Please provide your full name.');
+            return;
         }
 
-        throw new Error('Invalid email or password. Use admin@portflow.com or operator@portflow.com with password Password123!');
-      } else if (mode === 'request-reset') {
-        if (!supabase) {
-          setMessage('Local mode: password reset simulated. Use Password123! to sign in.');
-          setMode('sign-in');
-          return;
+        setBusy(true);
+
+        try {
+            let profile;
+            if (mode === 'sign-in') {
+                profile = await login(cleanEmail, password);
+            } else {
+                profile = await register(cleanEmail, password, fullName.trim(), role);
+            }
+            
+            // Set CPU Algorithm
+            try {
+                await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api/os/algorithm`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('portflow_auth_token')}`
+                    },
+                    body: JSON.stringify({ algorithm: algo })
+                });
+            } catch (e) {
+                console.warn('Failed to set OS algorithm', e);
+            }
+
+            navigate(profile.role === 'Admin' ? '/admin' : '/operator', { replace: true });
+        } catch (err: any) {
+            setError(err.message || 'Authentication failed. Please verify your credentials.');
+        } finally {
+            setBusy(false);
         }
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/login#type=recovery`,
-        });
-        if (resetError) throw resetError;
-        setMessage('If this account exists, a secure reset link has been sent.');
-      } else {
-        if (!supabase) {
-          setMessage('Local mode: password updated. You can now sign in.');
-          setMode('sign-in');
-          setPassword('Password123!');
-          return;
-        }
-        const { error: updateError } = await supabase.auth.updateUser({ password });
-        if (updateError) throw updateError;
-        setMessage('Password updated. You can now sign in.');
-        setMode('sign-in');
-        setPassword('');
-      }
-    } catch (reason) {
-      setError(
-        reason instanceof Error
-          ? reason.message
-          : 'Unable to complete request. Please try again.'
-      );
-    } finally {
-      setBusy(false);
-    }
-  };
+    };
 
-  const reset = (next: Mode) => {
-    setMode(next);
-    setError('');
-    setMessage('');
-    setPassword('');
-  };
-
-  const isReset = mode === 'request-reset';
-  const isUpdate = mode === 'update-password';
-
-  return (
-    <main className="auth-shell">
-      <a className="skip-link" href="#auth-form">
-        Skip to sign in
-      </a>
-
-      <section className="auth-brand" aria-label="PortFlow overview">
-        <img
-          className="auth-logo"
-          src="/image/primarylogo.png"
-          alt="PortFlow integrated port operations and cargo management system"
-          width="700"
-          height="287"
-        />
-        <div>
-          <p className="eyebrow">PHASE 2 · SECURE OPERATIONS</p>
-          <h1>Operate the port with a clear, controlled flow.</h1>
-          <p>Role-based operational access for PortFlow administrators and operators.</p>
-        </div>
-      </section>
-
-      <section className="auth-panel">
-        <div className="auth-card" id="auth-form">
-          <div className="auth-heading">
-            <span className="auth-icon">
-              <LockKeyhole aria-hidden="true" />
-            </span>
-            <p className="eyebrow">SECURE ACCESS</p>
-            <h2>{isReset ? 'Reset your password' : isUpdate ? 'Choose a new password' : 'Welcome back'}</h2>
-            <p>
-              {isReset
-                ? 'We will email a one-time reset link if the address is registered.'
-                : isUpdate
-                ? 'Use a strong password to protect your workspace.'
-                : 'Sign in with your PortFlow account credentials.'}
-            </p>
-          </div>
-
-          <form onSubmit={submit} noValidate>
-            {!isUpdate && (
-              <label>
-                Email address
-                <input
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@organisation.com"
-                  required
-                />
-                <Mail aria-hidden="true" />
-              </label>
-            )}
-
-            {!isReset && (
-              <label>
-                {isUpdate ? 'New password' : 'Password'}
-                <div className="password-control">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete={isUpdate ? 'new-password' : 'current-password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="icon-button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff /> : <Eye />}
-                  </button>
+    return (
+        <div className="login-Cargo">
+            <div className="login-left">
+                <div className="login-overlay"></div>
+                <div className="login-brand-top">
+                    <div className="logo-area">
+                        <img src="/image/primarylogo.png" alt="PortFlow" className="login-logo-img" />
+                    </div>
+                    <div className="login-nav">
+                        <span>OPERATE</span> &bull; <span>MANAGE</span> &bull; <span>FLOW</span>
+                    </div>
                 </div>
-              </label>
-            )}
+                
+                <div className="login-hero-text">
+                    <h1>Smarter Port Operations<br/>for a <span className="highlight-cyan">Faster Tomorrow</span></h1>
+                    <p>Manage ships, track cargo, coordinate operations<br/>and keep your port running smoothly — all in one place.</p>
+                </div>
 
-            <div className="credentials-hint">
-              <strong>Local Credentials:</strong>
-              <span><code>admin@portflow.com</code> (Admin) or <code>operator@portflow.com</code> (Operator)</span>
-              <span>Password: <code>Password123!</code></span>
+                <div className="login-features">
+                    <div className="feature-item">
+                        <Ship className="feature-icon" size={24} />
+                        <p>Ship<br/>Management</p>
+                    </div>
+                    <div className="feature-item">
+                        <Box className="feature-icon" size={24} />
+                        <p>Cargo<br/>Operations</p>
+                    </div>
+                    <div className="feature-item">
+                        <Anchor className="feature-icon" size={24} />
+                        <p>Berth & Crane<br/>Scheduling</p>
+                    </div>
+                    <div className="feature-item">
+                        <LineChart className="feature-icon" size={24} />
+                        <p>Real-time<br/>Analytics</p>
+                    </div>
+                </div>
             </div>
 
-            {error && (
-              <p className="form-message error" role="alert">
-                {error}
-              </p>
-            )}
+            <div className="login-right">
+                <div className="secure-badge-top">
+                    <ShieldCheck size={16} /> Secure & Encrypted
+                </div>
 
-            {message && (
-              <p className="form-message success" aria-live="polite">
-                {message}
-              </p>
-            )}
+                <div className="login-form-wrapper">
+                    <div className="login-header">
+                        <h2>{mode === 'sign-in' ? 'Welcome back' : 'Create an Account'}</h2>
+                        <p>{mode === 'sign-in' ? 'Sign in to your PortFlow account.' : 'Register to manage port operations.'}</p>
+                    </div>
+                    
+                    <div className="auth-tabs">
+                        <button 
+                            type="button" 
+                            className={`auth-tab ${mode === 'sign-in' ? 'active' : ''}`}
+                            onClick={() => switchMode('sign-in')}
+                        >
+                            Sign In
+                        </button>
+                        <button 
+                            type="button" 
+                            className={`auth-tab ${mode === 'register' ? 'active' : ''}`}
+                            onClick={() => switchMode('register')}
+                        >
+                            Register
+                        </button>
+                    </div>
 
-            <button className="primary-button" disabled={busy}>
-              {busy
-                ? 'Please wait…'
-                : isReset
-                ? 'Send reset link'
-                : isUpdate
-                ? 'Update password'
-                : 'Sign in securely'}
-            </button>
-          </form>
+                    <form onSubmit={handleSubmit} noValidate>
+                        {mode === 'register' && (
+                            <div className="input-group">
+                                <label>Full Name</label>
+                                <div className="input-with-icon">
+                                    <User className="input-icon" size={18} />
+                                    <input
+                                        type="text"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
+                                        placeholder="e.g. John Doe"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        )}
 
-          <div className="auth-links">
-            {mode === 'sign-in' ? (
-              <button onClick={() => reset('request-reset')}>Forgot password?</button>
-            ) : (
-              <button onClick={() => reset('sign-in')}>Back to sign in</button>
-            )}
-          </div>
+                        <div className="input-group">
+                            <label>Email or Username</label>
+                            <div className="input-with-icon">
+                                <User className="input-icon" size={18} />
+                                <input
+                                    type="text"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="Enter your email or username"
+                                    required
+                                />
+                            </div>
+                        </div>
 
-          <p className="security-note">
-            <ShieldCheck aria-hidden="true" />
-            {supabase ? 'Authentication is managed securely by Supabase.' : 'Local Workspace Authentication active.'}
-          </p>
+                        <div className="input-group">
+                            <label>Password</label>
+                            <div className="input-with-icon">
+                                <Lock className="input-icon" size={18} />
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter your password"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    className="password-toggle"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        {mode === 'register' && (
+                            <div className="input-group">
+                                <label>Operational Role</label>
+                                <select 
+                                    value={role} 
+                                    onChange={(e) => setRole(e.target.value as Role)}
+                                    className="login-select"
+                                >
+                                    <option value="Operator">Terminal Operator</option>
+                                    <option value="Admin">Port Administrator</option>
+                                </select>
+                            </div>
+                        )}
+
+                        <div className="input-group">
+                            <label>CPU Scheduling Algorithm</label>
+                            <div className="input-with-icon">
+                                <Cpu className="input-icon" size={18} />
+                                <select 
+                                    value={algo} 
+                                    onChange={(e) => setAlgo(e.target.value)}
+                                    className="login-select with-icon"
+                                >
+                                    <option value="FCFS">First-Come, First-Served (FCFS)</option>
+                                    <option value="SJF">Shortest Job First (SJF)</option>
+                                    <option value="PRIORITY">Priority Scheduling</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {error && <div className="login-error">{error}</div>}
+
+                        <button type="submit" className="login-submit-btn" disabled={busy}>
+                            <span>{busy ? 'Processing...' : mode === 'sign-in' ? 'Sign In' : 'Create Account'}</span>
+                            {!busy && <ArrowRight size={18} />}
+                        </button>
+                    </form>
+
+                    {mode === 'sign-in' && (
+                        <div className="forgot-password">
+                            <a href="#">Forgot password?</a>
+                        </div>
+                    )}
+                </div>
+
+                <div className="secure-badge-bottom">
+                    <ShieldCheck size={16} /> Your data is safe with us
+                </div>
+            </div>
         </div>
-      </section>
-    </main>
-  );
+    );
 }
+

@@ -1,2 +1,3 @@
-import { Phase2Dashboard } from './Phase2Dashboard';
-export const OperatorDashboard = () => <Phase2Dashboard role="Operator" />;
+import { DashboardPage } from './DashboardPage';
+
+export const OperatorDashboard = () => <DashboardPage role="Operator" />;

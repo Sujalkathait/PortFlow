@@ -1,8 +1,40 @@
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-dotenv.config();
+import { prisma } from './prisma';
 
-const supabaseUrl = process.env.SUPABASE_URL || 'https://mock.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY || 'mock-key';
+let isConnected = false;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+/**
+ * Check if the database connection is currently alive.
+ */
+export async function checkDatabaseConnection(): Promise<boolean> {
+    try {
+        // A simple query to check connection
+        await prisma.$queryRaw`SELECT 1 as alive`;
+        isConnected = true;
+        return true;
+    } catch (err: any) {
+        console.error('[Database] Connection check failed:', err.message);
+        isConnected = false;
+        return false;
+    }
+}
+
+/**
+ * Initialize Database (Schema is managed by Prisma, so this just checks connection)
+ */
+export async function initDatabase(): Promise<void> {
+    try {
+        console.log('[Database] Verifying database connection via Prisma...');
+        await checkDatabaseConnection();
+        if (isConnected) {
+            console.log('[Database] Database connection is ready.');
+        } else {
+            console.warn('[Database] Could not connect to the database.');
+        }
+    } catch (err: any) {
+        console.error('[Database] Initialization warning:', err.message);
+    }
+}
+
+export function isDatabaseConnected(): boolean {
+    return isConnected;
+}
