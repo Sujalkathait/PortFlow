@@ -15,40 +15,25 @@ function normalize(row: any): ShipRecord {
 
 export class ShipsRepository implements IShipsRepository {
     async findActive(): Promise<ShipRecord[]> {
-        try {
-            const res = await prisma.ship.findMany({
-                where: { deleted_at: null },
-                orderBy: { created_at: 'desc' }
-            });
-            return res.map(normalize);
-        } catch (err: any) {
-            console.error('[ShipsRepository] DB findActive error:', err.message);
-            return [];
-        }
+        const res = await prisma.ship.findMany({
+            where: { deleted_at: null },
+            orderBy: { created_at: 'desc' }
+        });
+        return res.map(normalize);
     }
 
     async findById(id: number): Promise<ShipRecord | null> {
-        try {
-            const res = await prisma.ship.findFirst({
-                where: { id, deleted_at: null }
-            });
-            return res ? normalize(res) : null;
-        } catch (err: any) {
-            console.error('[ShipsRepository] DB findById error:', err.message);
-            return null;
-        }
+        const res = await prisma.ship.findFirst({
+            where: { id, deleted_at: null }
+        });
+        return res ? normalize(res) : null;
     }
 
     async findByImo(imo: string): Promise<ShipRecord | null> {
-        try {
-            const res = await prisma.ship.findFirst({
-                where: { imo_number: imo, deleted_at: null }
-            });
-            return res ? normalize(res) : null;
-        } catch (err: any) {
-            console.error('[ShipsRepository] DB findByImo error:', err.message);
-            return null;
-        }
+        const res = await prisma.ship.findFirst({
+            where: { imo_number: imo, deleted_at: null }
+        });
+        return res ? normalize(res) : null;
     }
 
     async create(data: CreateShipDTO): Promise<ShipRecord> {

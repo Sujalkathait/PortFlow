@@ -2,7 +2,13 @@ import { Request, Response } from 'express';
 import { equipmentService } from '../services/equipment.service';
 import { AuthenticatedRequest } from '../middleware/auth';
 
-const getUser = (req: AuthenticatedRequest) => req.user?.email || (req.headers['x-user-email'] as string) || 'unknown';
+const getUser = (req: AuthenticatedRequest) => req.user?.email || 'unknown';
+
+const getRecordId = (value: string | string[]): number | null => {
+    if (Array.isArray(value)) return null;
+    const id = Number(value);
+    return Number.isInteger(id) && id > 0 ? id : null;
+};
 
 /** GET /api/equipment */
 export const getEquipments = async (_req: Request, res: Response): Promise<void> => {
@@ -42,8 +48,8 @@ export const createEquipment = async (req: AuthenticatedRequest, res: Response):
 /** PUT /api/equipment/:id */
 export const updateEquipment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) {
+        const id = getRecordId(req.params.id);
+        if (id === null) {
             res.status(400).json({ success: false, message: 'Invalid Equipment ID' });
             return;
         }
@@ -63,8 +69,8 @@ export const updateEquipment = async (req: AuthenticatedRequest, res: Response):
 /** DELETE /api/equipment/:id — soft delete */
 export const deleteEquipment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) {
+        const id = getRecordId(req.params.id);
+        if (id === null) {
             res.status(400).json({ success: false, message: 'Invalid Equipment ID' });
             return;
         }

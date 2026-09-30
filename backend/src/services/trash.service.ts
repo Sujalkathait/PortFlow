@@ -41,7 +41,7 @@ export class TrashService implements ITrashService {
         return this.repo.permanentDelete(collection, id);
     }
 
-    public async emptyAllTrash(): Promise<{ count: number }> {
+    public async emptyAllTrash(): Promise<{ count: number; total: number; details: Record<string, number> }> {
         return this.repo.emptyTrash();
     }
 }

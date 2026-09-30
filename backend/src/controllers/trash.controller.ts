@@ -1,6 +1,12 @@
 import { Request, Response } from 'express';
 import { trashService } from '../services/trash.service';
 
+const getRecordId = (value: string | string[]): number | null => {
+    if (Array.isArray(value)) return null;
+    const id = Number(value);
+    return Number.isInteger(id) && id > 0 ? id : null;
+};
+
 /** Unified Trash Bin — returns all soft-deleted records across all collections */
 export const getTrash = async (_req: Request, res: Response): Promise<void> => {
     try {
@@ -16,8 +22,8 @@ export const getTrash = async (_req: Request, res: Response): Promise<void> => {
 export const restoreFromTrash = async (req: Request, res: Response): Promise<void> => {
     try {
         const collection = String(req.params.collection);
-        const numId = Number(req.params.id);
-        if (isNaN(numId)) {
+        const numId = getRecordId(req.params.id);
+        if (numId === null) {
             res.status(400).json({ success: false, message: 'Invalid record ID' });
             return;
         }
@@ -38,8 +44,8 @@ export const restoreFromTrash = async (req: Request, res: Response): Promise<voi
 export const permanentDelete = async (req: Request, res: Response): Promise<void> => {
     try {
         const collection = String(req.params.collection);
-        const numId = Number(req.params.id);
-        if (isNaN(numId)) {
+        const numId = getRecordId(req.params.id);
+        if (numId === null) {
             res.status(400).json({ success: false, message: 'Invalid record ID' });
             return;
         }

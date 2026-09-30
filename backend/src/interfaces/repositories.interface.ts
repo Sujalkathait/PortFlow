@@ -64,7 +64,7 @@ export interface ITrashRepository {
     getTrash(): Promise<TrashedRecord[]>;
     restore(collection: TrashCollection | string, id: number): Promise<any>;
     permanentDelete(collection: TrashCollection | string, id: number): Promise<boolean>;
-    emptyTrash(): Promise<{ count: number }>;
+    emptyTrash(): Promise<{ count: number; total: number; details: Record<string, number> }>;
 }
 
 export interface IUserRepository {

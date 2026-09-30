@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 import {
     Trash2, RotateCcw, AlertCircle, CheckCircle2, RefreshCw, X, ArrowUpDown
 } from 'lucide-react';

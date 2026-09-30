@@ -2,7 +2,13 @@ import { Request, Response } from 'express';
 import { cargoService } from '../services/cargo.service';
 import { AuthenticatedRequest } from '../middleware/auth';
 
-const getUser = (req: AuthenticatedRequest) => req.user?.email || (req.headers['x-user-email'] as string) || 'unknown';
+const getUser = (req: AuthenticatedRequest) => req.user?.email || 'unknown';
+
+const getRecordId = (value: string | string[]): number | null => {
+    if (Array.isArray(value)) return null;
+    const id = Number(value);
+    return Number.isInteger(id) && id > 0 ? id : null;
+};
 
 /** GET /api/cargo */
 export const getCargos = async (_req: Request, res: Response): Promise<void> => {
@@ -42,8 +48,8 @@ export const createCargo = async (req: AuthenticatedRequest, res: Response): Pro
 /** PUT /api/cargo/:id */
 export const updateCargo = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) {
+        const id = getRecordId(req.params.id);
+        if (id === null) {
             res.status(400).json({ success: false, message: 'Invalid Cargo ID' });
             return;
         }
@@ -62,8 +68,8 @@ export const updateCargo = async (req: AuthenticatedRequest, res: Response): Pro
 /** DELETE /api/cargo/:id — soft delete */
 export const deleteCargo = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) {
+        const id = getRecordId(req.params.id);
+        if (id === null) {
             res.status(400).json({ success: false, message: 'Invalid Cargo ID' });
             return;
         }

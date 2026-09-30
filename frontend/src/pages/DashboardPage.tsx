@@ -74,7 +74,6 @@ export function DashboardPage({ role }: { role: string }) {
     const activeOperations = operations.filter(o => o.status !== 'Completed').length;
     const readyJobs = operations.filter(o => o.status === 'Ready' || o.status === 'Queued').length;
     const runningJobs = operations.filter(o => o.status === 'Running').length;
-    const waitingJobs = operations.filter(o => o.status === 'Waiting').length;
     const completedJobs = operations.filter(o => o.status === 'Completed').length;
     const availableBerths = equipments.filter(r => r.type === 'Berth' && r.status === 'Available').length;
     const availableCranes = equipments.filter(r => r.type === 'Crane' && r.status === 'Available').length;
@@ -139,7 +138,7 @@ export function DashboardPage({ role }: { role: string }) {
                 </div>
             )}
 
-            {/* Algorithm Switcher Banner (Choose in Dashboard) */}
+            {/* Algorithm Switcher Banner */}
             <Card className="border bg-gradient-to-r from-card to-primary/5">
                 <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4">
                     <div className="flex items-center gap-3">
@@ -147,28 +146,39 @@ export function DashboardPage({ role }: { role: string }) {
                             <Cpu className="h-5 w-5" />
                         </div>
                         <div>
-                            <div className="font-semibold text-sm">CPU Scheduling Algorithm Control</div>
+                            <div className="font-semibold text-sm">
+                                {role === 'Admin' ? 'CPU Scheduling Algorithm Control' : 'Active Scheduling Engine'}
+                            </div>
                             <div className="text-xs text-muted-foreground">
-                                Active algorithm: <span className="font-semibold text-foreground">{schedulerType}</span> · Dynamically selected in dashboard
+                                Active algorithm: <span className="font-semibold text-foreground">{schedulerType}</span>
+                                {role === 'Admin' ? ' · Dynamically switchable by Admin' : ' · Configured by Port Administrator'}
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-1.5 rounded-md border p-1 bg-background/80">
-                        {(['FCFS', 'SJF', 'PRIORITY'] as const).map((algo) => (
-                            <button
-                                key={algo}
-                                type="button"
-                                onClick={() => void handleAlgoChange(algo)}
-                                className={`px-3 py-1 text-xs font-semibold rounded transition-all ${
-                                    schedulerType === algo
-                                        ? 'bg-primary text-primary-foreground shadow-sm'
-                                        : 'text-muted-foreground hover:text-foreground'
-                                }`}
-                            >
-                                {algo}
-                            </button>
-                        ))}
-                    </div>
+                    {role === 'Admin' ? (
+                        <div className="flex items-center gap-1.5 rounded-md border p-1 bg-background/80">
+                            {(['FCFS', 'SJF', 'PRIORITY'] as const).map((algo) => (
+                                <button
+                                    key={algo}
+                                    type="button"
+                                    onClick={() => void handleAlgoChange(algo)}
+                                    className={`px-3 py-1 text-xs font-semibold rounded transition-all ${
+                                        schedulerType === algo
+                                            ? 'bg-primary text-primary-foreground shadow-sm'
+                                            : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                                >
+                                    {algo}
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center px-3 py-1 rounded-md bg-primary/10 text-primary font-mono text-xs font-bold border border-primary/20">
+                                {schedulerType} ACTIVE
+                            </span>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 

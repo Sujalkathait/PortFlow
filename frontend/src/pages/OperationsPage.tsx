@@ -10,14 +10,13 @@ import {
     OperationEditModal,
 } from '@/features/operations';
 import type { OperationRecord } from '@/features/operations';
+import { useAuth } from '@/auth/AuthProvider';
 
-/**
- * OperationsPage — Smart Container Component
- * Follows LLD architectural separation:
- * - State and asynchronous workflows are handled by the `useOperations` ViewModel hook.
- * - Rendering is delegated to reusable Presentational components.
- */
+// Operations Page Container
 export function OperationsPage() {
+    const { profile } = useAuth();
+    const isAdmin = profile?.role === 'Admin';
+
     const {
         operations,
         loading,
@@ -38,6 +37,7 @@ export function OperationsPage() {
     const [editOp, setEditOp] = useState<OperationRecord | null>(null);
 
     const handleDelete = async (id: number) => {
+        if (!isAdmin) return;
         if (!window.confirm(`Move operation OP-${id} to Trash?`)) return;
         await deleteOperation(id);
     };
@@ -90,6 +90,7 @@ export function OperationsPage() {
                 completedCount={completedCount}
                 onDispatch={() => void dispatchNextProcess()}
                 disabled={loading}
+                isAdmin={isAdmin}
             />
 
             {/* Operations Table Card */}
@@ -114,6 +115,7 @@ export function OperationsPage() {
                         onUpdateStatus={(id, status) => void updateStatus(id, status)}
                         onEdit={op => setEditOp(op)}
                         onDelete={id => void handleDelete(id)}
+                        isAdmin={isAdmin}
                     />
                 </CardContent>
             </Card>

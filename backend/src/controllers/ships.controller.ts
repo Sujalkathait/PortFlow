@@ -2,7 +2,13 @@ import { Request, Response } from 'express';
 import { shipsService } from '../services/ships.service';
 import { AuthenticatedRequest } from '../middleware/auth';
 
-const getUser = (req: AuthenticatedRequest) => req.user?.email || (req.headers['x-user-email'] as string) || 'unknown';
+const getUser = (req: AuthenticatedRequest) => req.user?.email || 'unknown';
+
+const getRecordId = (value: string | string[]): number | null => {
+    if (Array.isArray(value)) return null;
+    const id = Number(value);
+    return Number.isInteger(id) && id > 0 ? id : null;
+};
 
 /** GET /api/ships */
 export const getShips = async (_req: Request, res: Response): Promise<void> => {
@@ -18,8 +24,8 @@ export const getShips = async (_req: Request, res: Response): Promise<void> => {
 /** GET /api/ships/:id */
 export const getShipById = async (req: Request, res: Response): Promise<void> => {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) {
+        const id = getRecordId(req.params.id);
+        if (id === null) {
             res.status(400).json({ success: false, message: 'Invalid ship ID' });
             return;
         }
@@ -61,8 +67,8 @@ export const createShip = async (req: AuthenticatedRequest, res: Response): Prom
 /** PUT /api/ships/:id */
 export const updateShip = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) {
+        const id = getRecordId(req.params.id);
+        if (id === null) {
             res.status(400).json({ success: false, message: 'Invalid ship ID' });
             return;
         }
@@ -81,8 +87,8 @@ export const updateShip = async (req: AuthenticatedRequest, res: Response): Prom
 /** DELETE /api/ships/:id — soft delete */
 export const deleteShip = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) {
+        const id = getRecordId(req.params.id);
+        if (id === null) {
             res.status(400).json({ success: false, message: 'Invalid ship ID' });
             return;
         }

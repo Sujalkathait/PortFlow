@@ -17,25 +17,15 @@ function normalize(row: any): UserRecord {
 export class UserRepository implements IUserRepository {
     async findByEmail(email: string): Promise<UserRecord | null> {
         const cleanEmail = email.trim().toLowerCase();
-        try {
-            const user = await prisma.user.findFirst({
-                where: { email: { equals: cleanEmail, mode: 'insensitive' } }
-            });
-            return user ? normalize(user) : null;
-        } catch (err: any) {
-            console.error('[UserRepository] DB findByEmail error:', err.message);
-            return null;
-        }
+        const user = await prisma.user.findFirst({
+            where: { email: { equals: cleanEmail, mode: 'insensitive' }, deleted_at: null }
+        });
+        return user ? normalize(user) : null;
     }
 
     async findById(id: number): Promise<UserRecord | null> {
-        try {
-            const user = await prisma.user.findUnique({ where: { id } });
-            return user ? normalize(user) : null;
-        } catch (err: any) {
-            console.error('[UserRepository] DB findById error:', err.message);
-            return null;
-        }
+        const user = await prisma.user.findUnique({ where: { id } });
+        return user ? normalize(user) : null;
     }
 
     async create(data: {
@@ -62,12 +52,7 @@ export class UserRepository implements IUserRepository {
     }
 
     async count(): Promise<number> {
-        try {
-            return await prisma.user.count({ where: { deleted_at: null } });
-        } catch (err: any) {
-            console.error('[UserRepository] DB count error:', err.message);
-            return 0;
-        }
+        return prisma.user.count({ where: { deleted_at: null } });
     }
 }
 

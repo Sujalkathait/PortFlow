@@ -24,37 +24,38 @@ apiRouter.get('/operations', requireAuth, getOperations);
 apiRouter.get('/operations/:id', requireAuth, getOperationById);
 apiRouter.post('/operations', requireAuth, startOperation);
 apiRouter.put('/operations/:id', requireAuth, updateOperation);
-apiRouter.delete('/operations/:id', requireAuth, deleteOperation);
+apiRouter.delete('/operations/:id', requireAuth, requireRole(['Admin']), deleteOperation);
 
 // ─── OS Scheduling & Telemetry ───
 apiRouter.post('/operations/dispatch', requireAuth, requireRole(['Admin']), dispatchNext);
-apiRouter.get('/os/state', requireAuth, requireRole(['Admin']), getOSState);
+apiRouter.get('/os/state', requireAuth, getOSState); // Both Admin & Operator can monitor scheduler, queues, and locks
 apiRouter.put('/os/algorithm', requireAuth, requireRole(['Admin']), setOSAlgorithm);
 
 // ─── Ships CRUD ───
-apiRouter.get('/ships', getShips);
-apiRouter.get('/ships/:id', getShipById);
-apiRouter.post('/ships', createShip);
-apiRouter.put('/ships/:id', updateShip);
-apiRouter.delete('/ships/:id', deleteShip);
+apiRouter.get('/ships', requireAuth, getShips);
+apiRouter.get('/ships/:id', requireAuth, getShipById);
+apiRouter.post('/ships', requireAuth, requireRole(['Admin']), createShip);
+apiRouter.put('/ships/:id', requireAuth, updateShip);
+apiRouter.delete('/ships/:id', requireAuth, requireRole(['Admin']), deleteShip);
 
 // ─── Cargos CRUD ───
-apiRouter.get('/Cargos', getCargos);
-apiRouter.post('/Cargos', createCargo);
-apiRouter.put('/Cargos/:id', updateCargo);
-apiRouter.delete('/Cargos/:id', deleteCargo);
+apiRouter.get('/Cargos', requireAuth, getCargos);
+apiRouter.post('/Cargos', requireAuth, requireRole(['Admin']), createCargo);
+apiRouter.put('/Cargos/:id', requireAuth, updateCargo);
+apiRouter.delete('/Cargos/:id', requireAuth, requireRole(['Admin']), deleteCargo);
 
 // ─── Equipments CRUD ───
-apiRouter.get('/Equipments', getEquipments);
-apiRouter.post('/Equipments', createEquipment);
-apiRouter.put('/Equipments/:id', updateEquipment);
-apiRouter.delete('/Equipments/:id', deleteEquipment);
+apiRouter.get('/Equipments', requireAuth, getEquipments);
+apiRouter.post('/Equipments', requireAuth, requireRole(['Admin']), createEquipment);
+apiRouter.put('/Equipments/:id', requireAuth, requireRole(['Admin']), updateEquipment);
+apiRouter.delete('/Equipments/:id', requireAuth, requireRole(['Admin']), deleteEquipment);
 
 // ─── Analytics & System ───
 apiRouter.get('/analytics', requireAuth, getAnalytics);
 apiRouter.get('/system/logs', requireAuth, requireRole(['Admin']), getSystemLogs);
 apiRouter.get('/system/audit', requireAuth, requireRole(['Admin']), getAuditLogs);
 apiRouter.get('/system/db-analytics', requireAuth, requireRole(['Admin']), getDatabaseAnalytics);
+apiRouter.get('/system/reports', requireAuth, getDatabaseAnalytics);
 apiRouter.post('/system/report-issue', requireAuth, reportIssue);
 
 // ─── Trash Bin (Soft-Delete Recovery & Purge) ───

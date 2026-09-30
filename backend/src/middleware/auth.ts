@@ -1,7 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'portflow-production-jwt-secret-key-change-in-env';
+function requireJwtSecret(): string {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+        throw new Error('JWT_SECRET is not configured. Add a strong secret to the backend environment.');
+    }
+    return secret;
+}
 
 export interface AuthUser {
     id: number;
@@ -25,7 +31,7 @@ export function generateToken(user: AuthUser): string {
             role: user.role,
             fullName: user.fullName,
         },
-        JWT_SECRET,
+        requireJwtSecret(),
         { expiresIn: '7d' }
     );
 }
@@ -34,20 +40,16 @@ export function generateToken(user: AuthUser): string {
  * Middleware: Verify Bearer JWT token from Authorization header.
  */
 export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+    if (!process.env.JWT_SECRET) {
+        res.status(500).json({
+            success: false,
+            message: 'Authentication service is not configured.',
+        });
+        return;
+    }
+
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        // Fallback: check x-user-email for backward compatibility if present
-        const fallbackEmail = req.headers['x-user-email'] as string;
-        if (fallbackEmail) {
-            req.user = {
-                id: 1,
-                email: fallbackEmail,
-                role: fallbackEmail.includes('admin') ? 'Admin' : 'Operator',
-                fullName: fallbackEmail.includes('admin') ? 'Administrator' : 'Operator',
-            };
-            return next();
-        }
-
         res.status(401).json({
             success: false,
             message: 'Authentication required. Missing or invalid Bearer token.',
@@ -57,7 +59,7 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
 
     const token = authHeader.substring(7).trim();
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as AuthUser;
+        const decoded = jwt.verify(token, requireJwtSecret()) as AuthUser;
         req.user = decoded;
         next();
     } catch (err: any) {

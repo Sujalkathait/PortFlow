@@ -18,6 +18,9 @@ frontend/.env
 
 # Persistent data files
 backend/data/
+*.db
+*.db-journal
+backend/prisma/*.db
 
 # Logs
 logs/

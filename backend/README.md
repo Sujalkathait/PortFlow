@@ -20,11 +20,12 @@ Here is the exact file tree of everything inside the `backend/` directory:
 backend/
 ├── .env                           # Secret environment variables (database URL, JWT secret)
 ├── .env.example                   # Example template showing required environment variables
+├── index.js                       # Production entrypoint ('node index.js' for Render)
 ├── jest.config.js                 # Configuration for Jest automated test runner
+├── nodemon.json                   # Configuration for nodemon dev watcher
 ├── package.json                   # Project metadata, scripts, and npm dependencies
 ├── package-lock.json              # Exact installed versions of dependencies
 ├── README.md                      # This comprehensive backend guide
-├── render.yaml                    # Cloud deployment blueprint for Render hosting
 ├── test_workflow.js               # Quick integration test script for API workflows
 ├── tsconfig.json                  # TypeScript compiler settings for backend
 ├── prisma/                        # Database ORM schema & local SQLite development file
@@ -101,8 +102,9 @@ backend/
 | `package.json` | Lists the libraries the backend uses (Express, Prisma, bcrypt, jsonwebtoken, etc.) and run scripts. |
 | `package-lock.json` | Keeps track of the exact library versions downloaded from npm so builds are consistent. |
 | `tsconfig.json` | Configures TypeScript rules (like strict mode and compile targets). |
+| `index.js` | Production entrypoint (`node index.js`) used by Render to launch compiled output. |
+| `nodemon.json` | Configures nodemon development auto-restart behavior for TypeScript files. |
 | `jest.config.js` | Configures Jest to run unit tests in `src/os/__tests__/`. |
-| `render.yaml` | Tells Render cloud hosting how to build and deploy the backend online. |
 | `test_workflow.js` | A test script you can run (`node test_workflow.js`) to quickly test your API routes. |
 
 ---
@@ -207,12 +209,20 @@ sequenceDiagram
    ```bash
    npx prisma generate
    ```
-5. Start the backend development server:
+5. Start the backend development server (with Nodemon hot-reload):
    ```bash
    npm run dev
    ```
-   *The server will start at `http://localhost:10000`.*
-6. Run OS kernel unit tests:
+   *The server will start at `http://localhost:10000` and automatically reload whenever `src/` files change.*
+
+6. Build and run in production (suitable for Render):
+   ```bash
+   npm run build
+   npm start
+   ```
+   *`npm start` runs `node index.js`, which executes the production compiled output.*
+
+7. Run OS kernel unit tests:
    ```bash
    npm test
    ```

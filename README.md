@@ -1,16 +1,7 @@
 <div align="center">
-  <img src="./frontend/public/image/favicon.png" alt="PortFlow Logo" width="180" />
+  <img src="./frontend/public/image/primarylogo.png" alt="PortFlow Logo" width="460" />
 
 # ⚓ PortFlow — Smart Maritime Port Management System
-
-```text
-  _____           _   ______ _               
- |  __ \         | | |  ____| |              
- | |__) |__  _ __| |_| |__  | | _____      __
- |  ___/ _ \| '__| __|  __| | |/ _ \ \ /\ / /
- | |  | (_) | |  | |_| |    | | (_) \ V  V / 
- |_|   \___/|_|   \__|_|    |_|\___/ \_/\_/  
-```
 
 **An Intelligent Full-Stack Maritime Operations Suite with Custom OS & DBMS Simulation Engines**
 
@@ -142,19 +133,30 @@ flowchart TD
 
 ## ✨ User Roles & Core Features
 
-### 👑 Port Administrator (System Controller)
-- **Executive Command Center**: High-level dashboard showing active ships, cargo throughput, crane utilization, and live logs.
-- **Operations Dispatcher**: Create tasks with dynamic custom crane and berth allocation; dispatch processes through the OS scheduler.
-- **Vessel & Cargo Management**: Register incoming ships, assign berths, track container weights and TEU capacity.
-- **Equipment Configuration**: Dynamically provision cranes and berths with automatic OS Mutex and Semaphore registration.
-- **Scheduling Engine**: Switch scheduling algorithms (FCFS $\leftrightarrow$ SJF $\leftrightarrow$ Priority) on the fly and inspect waiting queues.
-- **Unified Trash Bin**: Inspect, restore, or permanently purge soft-deleted records across all collections.
-
-### 👷 Terminal Operator (Ground Operations)
-- **Personalized Job Queue**: View only tasks assigned to the logged-in operator.
-- **Step-by-Step Execution**: Start jobs (`Running`), acquire equipment locks, and complete tasks (`Completed`).
-- **Cargo Status Updates**: Mark container status transitions (`On Ship` $\rightarrow$ `In Yard` $\rightarrow$ `Dispatched`).
-- **Issue Reporting**: Instantly report broken cranes, berth bottlenecks, or delays to administrators.
+| Module | Admin |  Operator |
+| :--- | :--- | :--- |
+| **Primary Role** | Manages the whole port and system | Handles daily terminal operations |
+| **Dashboard** | Views all port activities and resources | Views assigned work and task status |
+| **Operations** | Creates, assigns, updates and manages all operations | Creates and updates assigned operations |
+| **Ships** | Manages ships, schedules and assignments | Views assigned ships and updates operational status |
+| **Cargo** | Manages and monitors all cargo and yard activities | Handles cargo movement and status updates |
+| **Berths** | Assigns and manages berths | Uses assigned berth and views its status |
+| **Cranes** | Assigns and manages cranes | Uses assigned crane and reports problems |
+| **Trucks** | Manages truck allocation and availability | Uses assigned trucks |
+| **Scheduling** | Uses and monitors the automatic scheduler | Uses and monitors the automatic scheduler |
+| **Scheduling Algorithm** | Uses and configures the active algorithm (FCFS / SJF / Priority) | Uses the configured algorithm |
+| **Ready / Running / Waiting Queue** | Monitors all queues and processes | Views relevant queues and assigned jobs |
+| **Process Execution** | Monitors port processes | Executes assigned processes |
+| **Resource & Locks** | Monitors resource allocation and Mutex/Semaphore locks | Views assigned resource status |
+| **Deadlock / Banker's Algorithm** | Monitors deadlock and resource state | Views warnings and reports issues |
+| **Analytics** | Views complete port analytics | Views operational/assigned analytics |
+| **Reports** | Reviews and manages reports | Creates and views operational reports |
+| **Incidents** | Receives and resolves incidents | Reports operational incidents |
+| **System Logs** | Monitors system activity | ❌ No access |
+| **Database Analytics** | Monitors database/system health | ❌ No access |
+| **Audit Trail** | Reviews user and system activities | ❌ No access |
+| **Trash / Recovery** | Restores or permanently removes deleted data | ❌ No access |
+| **User Management** | Manages users and roles | ❌ No access |
 
 ---
 

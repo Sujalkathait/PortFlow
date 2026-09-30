@@ -75,7 +75,10 @@ export class AuthService implements IAuthService {
             throw new Error('Invalid email or password.');
         }
 
-        const passwordMatch = await bcrypt.compare(password, user.password_hash);
+        let passwordMatch = await bcrypt.compare(password, user.password_hash);
+        if (!passwordMatch && typeof password === 'string' && password.trim() !== password) {
+            passwordMatch = await bcrypt.compare(password.trim(), user.password_hash);
+        }
         if (!passwordMatch) {
             throw new Error('Invalid email or password.');
         }

@@ -25,7 +25,7 @@ export class Mutex {
                 const nextProcess = this.waitingQueue.shift();
                 if (nextProcess && (nextProcess as any)._mutexResolve) {
                     this.owner = nextProcess;
-                    nextProcess.status = 'READY';
+                    nextProcess.status = 'RUNNING';
                     (nextProcess as any)._mutexResolve();
                     delete (nextProcess as any)._mutexResolve;
                 }

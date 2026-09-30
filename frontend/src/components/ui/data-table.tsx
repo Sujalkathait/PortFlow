@@ -1,11 +1,13 @@
 "use client"
 
 import * as React from "react"
-import {
+import type {
   ColumnDef,
   ColumnFiltersState,
   SortingState,
   VisibilityState,
+} from "@tanstack/react-table"
+import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -19,7 +21,6 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Search,
-  SlidersHorizontal,
 } from "lucide-react"
 
 import {
@@ -92,6 +93,7 @@ export function DataTable<TData, TValue>({
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={searchPlaceholder}
+                aria-label={searchPlaceholder}
                 value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
                 onChange={(event) =>
                   table.getColumn(searchKey)?.setFilterValue(event.target.value)
@@ -105,8 +107,8 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Main Table Container */}
-      <div className="rounded-md border bg-card shadow-sm">
-        <Table>
+      <div className="overflow-x-auto rounded-lg border bg-card shadow-sm">
+        <Table className="min-w-[680px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="bg-muted/40 hover:bg-muted/40">
@@ -195,6 +197,8 @@ export function DataTable<TData, TValue>({
             className="h-8 w-8"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage() || loading}
+            aria-label="Go to first table page"
+            title="First page"
           >
             <ChevronsLeft className="h-4 w-4" />
           </Button>
@@ -204,6 +208,8 @@ export function DataTable<TData, TValue>({
             className="h-8 w-8"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage() || loading}
+            aria-label="Go to previous table page"
+            title="Previous page"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -217,6 +223,8 @@ export function DataTable<TData, TValue>({
             className="h-8 w-8"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage() || loading}
+            aria-label="Go to next table page"
+            title="Next page"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -226,6 +234,8 @@ export function DataTable<TData, TValue>({
             className="h-8 w-8"
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage() || loading}
+            aria-label="Go to last table page"
+            title="Last page"
           >
             <ChevronsRight className="h-4 w-4" />
           </Button>

@@ -23,40 +23,25 @@ function normalize(row: any): OperationRecord {
 
 export class OperationsRepository implements IOperationsRepository {
     async findActive(): Promise<OperationRecord[]> {
-        try {
-            const res = await prisma.operation.findMany({
-                where: { deleted_at: null },
-                orderBy: { created_at: 'desc' }
-            });
-            return res.map(normalize);
-        } catch (err: any) {
-            console.error('[OperationsRepository] DB findActive error:', err.message);
-            return [];
-        }
+        const res = await prisma.operation.findMany({
+            where: { deleted_at: null },
+            orderBy: { created_at: 'desc' }
+        });
+        return res.map(normalize);
     }
 
     async findById(id: number): Promise<OperationRecord | null> {
-        try {
-            const res = await prisma.operation.findFirst({
-                where: { id, deleted_at: null }
-            });
-            return res ? normalize(res) : null;
-        } catch (err: any) {
-            console.error('[OperationsRepository] DB findById error:', err.message);
-            return null;
-        }
+        const res = await prisma.operation.findFirst({
+            where: { id, deleted_at: null }
+        });
+        return res ? normalize(res) : null;
     }
 
     async findByProcessId(processId: string): Promise<OperationRecord | null> {
-        try {
-            const res = await prisma.operation.findFirst({
-                where: { process_id: processId, deleted_at: null }
-            });
-            return res ? normalize(res) : null;
-        } catch (err: any) {
-            console.error('[OperationsRepository] DB findByProcessId error:', err.message);
-            return null;
-        }
+        const res = await prisma.operation.findFirst({
+            where: { process_id: processId, deleted_at: null }
+        });
+        return res ? normalize(res) : null;
     }
 
     async create(data: CreateOperationDTO): Promise<OperationRecord> {

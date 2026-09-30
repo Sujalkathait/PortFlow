@@ -5,8 +5,13 @@ import { AuthenticatedRequest } from '../middleware/auth';
 
 const operationsService = new OperationsService();
 
-// Helper to get user email from authenticated JWT request or fallback header
-const getUser = (req: AuthenticatedRequest) => req.user?.email || (req.headers['x-user-email'] as string) || 'unknown';
+const getUser = (req: AuthenticatedRequest) => req.user?.email || 'unknown';
+
+const getRecordId = (value: string | string[]): number | null => {
+    if (Array.isArray(value)) return null;
+    const id = Number(value);
+    return Number.isInteger(id) && id > 0 ? id : null;
+};
 
 /** GET /api/operations — list all active operations */
 export const getOperations = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -28,8 +33,8 @@ export const getOperations = async (req: AuthenticatedRequest, res: Response): P
 /** GET /api/operations/:id — get single operation */
 export const getOperationById = async (req: Request, res: Response): Promise<void> => {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) {
+        const id = getRecordId(req.params.id);
+        if (id === null) {
             res.status(400).json({ success: false, message: 'Invalid operation ID' });
             return;
         }
@@ -72,8 +77,8 @@ export const startOperation = async (req: AuthenticatedRequest, res: Response): 
 /** PUT /api/operations/:id — update operation */
 export const updateOperation = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) {
+        const id = getRecordId(req.params.id);
+        if (id === null) {
             res.status(400).json({ success: false, message: 'Invalid operation ID' });
             return;
         }
@@ -92,8 +97,8 @@ export const updateOperation = async (req: AuthenticatedRequest, res: Response):
 /** DELETE /api/operations/:id — soft-delete operation */
 export const deleteOperation = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) {
+        const id = getRecordId(req.params.id);
+        if (id === null) {
             res.status(400).json({ success: false, message: 'Invalid operation ID' });
             return;
         }

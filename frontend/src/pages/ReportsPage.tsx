@@ -1,11 +1,15 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Database, RefreshCw, AlertCircle, Server, Table as TableIcon, Zap, CheckCircle2 } from 'lucide-react';
+import { Database, RefreshCw, AlertCircle, Zap } from 'lucide-react';
 import { API_BASE_URL } from '../lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/auth/AuthProvider';
 
 export function ReportsPage() {
+    const { profile } = useAuth();
+    const isAdmin = profile?.role === 'Admin';
+
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -37,9 +41,17 @@ export function ReportsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Administration</p>
-                    <h1 className="text-2xl font-bold tracking-tight text-foreground">Database Analytics & Diagnostics</h1>
-                    <p className="text-sm text-muted-foreground">PostgreSQL telemetry, row cardinality, and live relational JOIN benchmark latency</p>
+                    <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                        {isAdmin ? 'System Diagnostics' : 'Operational Reporting'}
+                    </p>
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                        {isAdmin ? 'Database Analytics & Diagnostics' : 'Operational Activity & Statistics Report'}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        {isAdmin
+                            ? 'PostgreSQL telemetry, row cardinality, and live relational JOIN benchmark latency'
+                            : 'Port operational throughput, active vessel capacity, and container inventory metrics'}
+                    </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>

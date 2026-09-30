@@ -1,14 +1,12 @@
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { apiRouter } from './routes/api';
-import { initDatabase, checkDatabaseConnection } from './config/database';
+import { initDatabase, checkDatabaseConnection, isDatabaseConnected } from './config/database';
 import { seedDefaultAccounts } from './controllers/auth.controller';
 
-dotenv.config();
-
 const app = express();
-const port = process.env.PORT || 10000;
+const port = Number(process.env.PORT || 10000);
 
 // CORS configuration for Vercel frontend & production environments
 const corsOrigin = process.env.CORS_ORIGIN || '*';
@@ -82,7 +80,7 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 // Start Server & Bootstrap Database
 const server = app.listen(port, async () => {
     console.log(`\n======================================================`);
-    console.log(`  ⚓ PortFlow Production Backend`);
+    console.log(`  ⚓ PortFlow ${process.env.NODE_ENV === 'production' ? 'Production' : 'Development'} Backend`);
     console.log(`  Listening on port: ${port}`);
     console.log(`  Health Check: http://localhost:${port}/health`);
     console.log(`  API Base: http://localhost:${port}/api`);
@@ -90,7 +88,21 @@ const server = app.listen(port, async () => {
 
     // Initialize database tables & seed accounts
     await initDatabase();
-    await seedDefaultAccounts();
+    if (isDatabaseConnected()) {
+        await seedDefaultAccounts();
+    } else {
+        console.warn('[Auth] Skipping demo-account seeding because the database is unavailable.');
+    }
+});
+
+server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`\n[Server Error] Port ${port} is already in use.`);
+        console.error(`Set PORT to an unused value, or stop the existing PortFlow process before starting another instance.`);
+    } else {
+        console.error('\n[Server Error] Server failed to start:', err);
+    }
+    process.exitCode = 1;
 });
 
 // Graceful Shutdown for Cloud Orchestration (Render / Docker)

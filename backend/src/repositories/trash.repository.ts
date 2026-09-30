@@ -68,7 +68,7 @@ export class TrashRepository implements ITrashRepository {
             return all.sort((a, b) => new Date(b.deleted_at).getTime() - new Date(a.deleted_at).getTime());
         } catch (err: any) {
             console.error('[TrashRepository] DB getTrash error:', err.message);
-            return [];
+            throw err;
         }
     }
 
@@ -114,7 +114,7 @@ export class TrashRepository implements ITrashRepository {
             };
         } catch (err: any) {
             console.error('[TrashRepository] DB emptyTrash error:', err.message);
-            return { count: 0, total: 0, details: { operations: 0, ships: 0, Cargos: 0, Equipments: 0 } };
+            throw err;
         }
     }
 }

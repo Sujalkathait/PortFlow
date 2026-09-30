@@ -83,7 +83,8 @@ frontend/
     ├── layouts/                   # Shared wrapper layouts for page views
     ├── lib/                       # Infrastructure libraries and API client
     │   ├── api.ts                 # Unified HTTP API client (injects auth tokens, handles errors)
-    │   └── supabase.ts            # Optional Supabase client initialization
+    │   ├── supabase.ts            # Optional Supabase client initialization
+    │   └── utils.ts               # Classnames (cn) merging helper for Shadcn/UI
     └── pages/                     # Full-page view components mapped to routes
         ├── AdminDashboard.tsx     # Shortcut route redirecting to Admin Dashboard
         ├── CargoPage.tsx          # Cargo inventory and container tracking page
@@ -103,13 +104,13 @@ frontend/
 
 ---
 
-## 🔍 3. Purpose of Every Folder & File in Simple English
+## 🔍 3. Purpose of Every Folder &
 
 ### Root Configuration Files
 
 | File Name | What It Does (In Simple Terms) |
 | :--- | :--- |
-| `.env` | Stores local frontend settings like `VITE_API_BASE_URL=http://localhost:10000/api`. |
+| `.env` | Stores local frontend settings like `VITE_API_BASE_URL=http://localhost:3000/api`. |
 | `.env.example` | Safe template showing what environment variables are needed. |
 | `index.html` | The single HTML page loaded by the browser where React mounts inside `<div id="root">`. |
 | `package.json` | Lists the libraries used (React 19, Lucide icons, TanStack Table, Tailwind) and scripts (`dev`, `build`). |
@@ -178,8 +179,9 @@ These are the complete views shown to users:
 - **`LogsPage.tsx` & `ReportsPage.tsx`**: System health telemetry, audit trails, and downloadable reports.
 - **`ReportIssuePage.tsx`**: Operator form to report broken cranes or berth bottlenecks.
 
-#### 6. API Client (`src/lib/`)
+#### 6. Utilities & API Client (`src/lib/`)
 - **`src/lib/api.ts`**: The central communication bridge. When any page needs data, it calls `api.operations.list()` or `api.ships.create()`. It automatically attaches your JWT login token to every request and handles network errors gracefully.
+- **`src/lib/utils.ts`**: Helper utility exporting the `cn` function (using `clsx`) for conditionally combining Tailwind CSS classes across all Shadcn UI components.
 
 ---
 

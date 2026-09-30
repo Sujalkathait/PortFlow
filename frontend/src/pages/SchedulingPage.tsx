@@ -1,13 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-    Cpu, Clock, Lock, Unlock, Anchor, ShieldCheck, Play, RefreshCw, AlertCircle, AlertTriangle, CheckCircle2
+    Cpu, Clock, Lock, Unlock, Anchor, ShieldCheck, Play, RefreshCw, AlertCircle, CheckCircle2
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/auth/AuthProvider';
 
 export function SchedulingPage() {
+    const { profile } = useAuth();
+    const isAdmin = profile?.role === 'Admin';
+
     const [osState, setOsState] = useState<any>(null);
     const [metrics, setMetrics] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -77,22 +80,30 @@ export function SchedulingPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Operating System Engine</p>
-                    <h1 className="text-2xl font-bold tracking-tight text-foreground">OS Scheduler & Concurrency Monitor</h1>
-                    <p className="text-sm text-muted-foreground">Real-time CPU Scheduling · Mutex Lock Allocation · Semaphores · Deadlock Detection</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                        {isAdmin ? 'OS Scheduler & Concurrency Monitor' : 'Process Scheduling & Resource Locks'}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        {isAdmin
+                            ? 'Real-time CPU Scheduling · Mutex Lock Allocation · Semaphores · Deadlock Detection'
+                            : 'Live Process Monitoring · Active Locks & Semaphores · Deadlock Warning Telemetry'}
+                    </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
                         <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         Refresh
                     </Button>
-                    <Button
-                        size="sm"
-                        onClick={() => void handleDispatch()}
-                        disabled={readyQueue.length === 0}
-                    >
-                        <Play className="mr-2 h-4 w-4" />
-                        Dispatch Next Process
-                    </Button>
+                    {isAdmin && (
+                        <Button
+                            size="sm"
+                            onClick={() => void handleDispatch()}
+                            disabled={readyQueue.length === 0}
+                        >
+                            <Play className="mr-2 h-4 w-4" />
+                            Dispatch Next Process
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -118,29 +129,41 @@ export function SchedulingPage() {
                             <Cpu className="h-5 w-5" />
                         </div>
                         <div>
-                            <div className="font-semibold text-sm">Active CPU Scheduling Algorithm</div>
-                            <div className="text-xs text-muted-foreground">Select how operations in the ready queue get dispatched</div>
+                            <div className="font-semibold text-sm">
+                                {isAdmin ? 'Active CPU Scheduling Algorithm' : 'Current Scheduling Algorithm'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                                {isAdmin ? 'Select how operations in the ready queue get dispatched' : 'Operations dispatched according to active port policy'}
+                            </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground hidden md:inline">Current: <span className="font-semibold text-foreground">{schedulerType}</span></span>
-                        <div className="flex rounded-md border p-1 bg-muted/40">
-                            {(['FCFS', 'SJF', 'PRIORITY'] as const).map((algo) => (
-                                <button
-                                    key={algo}
-                                    type="button"
-                                    onClick={() => void handleAlgoChange(algo)}
-                                    className={`px-3 py-1 text-xs font-semibold rounded transition-all ${
-                                        schedulerType === algo
-                                            ? 'bg-background text-foreground shadow-sm'
-                                            : 'text-muted-foreground hover:text-foreground'
-                                    }`}
-                                >
-                                    {algo}
-                                </button>
-                            ))}
+                    {isAdmin ? (
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground hidden md:inline">Current: <span className="font-semibold text-foreground">{schedulerType}</span></span>
+                            <div className="flex rounded-md border p-1 bg-muted/40">
+                                {(['FCFS', 'SJF', 'PRIORITY'] as const).map((algo) => (
+                                    <button
+                                        key={algo}
+                                        type="button"
+                                        onClick={() => void handleAlgoChange(algo)}
+                                        className={`px-3 py-1 text-xs font-semibold rounded transition-all ${
+                                            schedulerType === algo
+                                                ? 'bg-background text-foreground shadow-sm'
+                                                : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                    >
+                                        {algo}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <span className="px-3 py-1 rounded-md bg-primary/10 text-primary font-mono text-xs font-bold border border-primary/20">
+                                {schedulerType} ACTIVE
+                            </span>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 

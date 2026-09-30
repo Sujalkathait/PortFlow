@@ -24,6 +24,11 @@ export function AppSidebar({ role }: { role: string }) {
 
     const basePath = role === 'Admin' ? '/admin' : '/operator';
 
+    const handleSignOut = async () => {
+        await signOut();
+        navigate('/login', { replace: true });
+    };
+
     const getActivePage = () => {
         const path = location.pathname.replace(basePath, '').replace(/^\//, '');
         if (!path || path === 'dashboard') return 'dashboard';
@@ -49,16 +54,18 @@ export function AppSidebar({ role }: { role: string }) {
         { page: 'operations', label: 'My Operations', icon: Settings },
         { page: 'ships', label: 'Ships', icon: Ship },
         { page: 'Cargos', label: 'Cargo', icon: Boxes },
+        { page: 'Equipments', label: 'Berths & Cranes', icon: Truck },
         { page: 'scheduling', label: 'Scheduling', icon: Cpu },
+        { page: 'reports', label: 'Operational Reports', icon: Database },
         { page: 'report-issue', label: 'Report Issue', icon: AlertTriangle },
     ];
 
     const items = role === 'Admin' ? adminItems : operatorItems;
 
     return (
-        <Sidebar>
+        <Sidebar collapsible="icon">
             <SidebarHeader>
-                <div className="flex items-center gap-2 p-2">
+                <div className="flex items-center gap-2 px-2 py-3">
                     <Anchor size={20} className="text-primary" />
                     <span className="font-bold text-lg">PORTFLOW</span>
                 </div>
@@ -73,6 +80,7 @@ export function AppSidebar({ role }: { role: string }) {
                                     <SidebarMenuButton 
                                         isActive={activePage === page}
                                         onClick={() => navigate(page === 'dashboard' ? basePath : `${basePath}/${page}`)}
+                                        tooltip={label}
                                     >
                                         <Icon />
                                         <span>{label}</span>
@@ -86,7 +94,7 @@ export function AppSidebar({ role }: { role: string }) {
             <SidebarFooter>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton onClick={() => void signOut()} className="text-red-500 hover:text-red-600">
+                        <SidebarMenuButton onClick={() => void handleSignOut()} tooltip="Sign out" className="text-destructive hover:text-destructive">
                             <LogOut />
                             <span>Sign Out</span>
                         </SidebarMenuButton>

@@ -1,9 +1,4 @@
-/**
- * PortFlow Production API Client
- * Dynamically resolves API base URL from VITE_API_BASE_URL.
- * Connects securely to Node.js/Express backend on Render / Localhost.
- * Automatically injects JWT Bearer authorization tokens.
- */
+// PortFlow API Client
 
 const rawBase = import.meta.env.VITE_API_BASE_URL;
 // If user sets 'https://api.domain.com', append '/api' if not already present
@@ -35,7 +30,7 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     let res: Response;
     try {
         res = await fetch(url, { ...options, headers });
-    } catch (err: any) {
+    } catch {
         throw new Error(
             `Unable to connect to PortFlow backend API (${API_BASE_URL}). Please verify backend is running and CORS is configured.`
         );

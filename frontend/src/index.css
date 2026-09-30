@@ -83,12 +83,35 @@
   --shadow: 0 2px 12px rgba(8, 36, 74, 0.06);
   --sidebar-width: 240px;
   --header-height: 60px;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; background: var(--canvas); color: var(--ink); }
 button, input, select, textarea { font: inherit; }
-button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #f5ad2a; outline-offset: 2px; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid hsl(var(--ring)); outline-offset: 2px; }
+
+.skip-link {
+  position: fixed;
+  left: var(--space-4);
+  top: -5rem;
+  z-index: 200;
+  border-radius: var(--radius-sm);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus { top: var(--space-4); }
 
 /* ─── Layout ─── */
 .app-layout {

@@ -1,7 +1,9 @@
 import { useEffect, useState, type FormEvent, useCallback, useMemo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
-import { Plus, Trash2, X, Truck, Anchor, AlertCircle, CheckCircle2, RefreshCw, Warehouse, ArrowUpDown } from 'lucide-react';
+import type { ColumnDef } from '@tanstack/react-table';
+import { Plus, Trash2, X, Truck, Anchor, AlertCircle, CheckCircle2, RefreshCw, Warehouse, ArrowUpDown, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import { useAuth } from '@/auth/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -9,7 +11,7 @@ import { DataTable } from '@/components/ui/data-table';
 
 interface EquipmentRecord {
     id: number;
-    Equipment_id?: string;
+    equipment_id?: string;
     name: string;
     type: string;
     status: string;
@@ -18,6 +20,10 @@ interface EquipmentRecord {
 }
 
 export function EquipmentPage() {
+    const navigate = useNavigate();
+    const { profile } = useAuth();
+    const isAdmin = profile?.role === 'Admin';
+
     const [equipments, setEquipments] = useState<EquipmentRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -63,7 +69,7 @@ export function EquipmentPage() {
             await api.Equipments.create({
                 name: name.trim(),
                 type,
-                Equipment_id: equipmentId.trim() || undefined,
+                equipment_id: equipmentId.trim() || undefined,
             });
             setSuccess('Equipment added successfully to database');
             setShowCreate(false);
@@ -107,7 +113,7 @@ export function EquipmentPage() {
 
     const columns: ColumnDef<EquipmentRecord>[] = useMemo(() => [
         {
-            accessorKey: 'Equipment_id',
+            accessorKey: 'equipment_id',
             header: ({ column }) => (
                 <Button
                     variant="ghost"
@@ -121,7 +127,7 @@ export function EquipmentPage() {
             ),
             cell: ({ row }) => (
                 <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-muted text-foreground border">
-                    {row.original.Equipment_id || `EQ-${row.original.id}`}
+                    {row.original.equipment_id || `EQ-${row.original.id}`}
                 </span>
             ),
         },
@@ -159,19 +165,27 @@ export function EquipmentPage() {
             header: 'Status',
             cell: ({ row }) => {
                 const r = row.original;
+                const statusColors = r.status === 'Available'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800'
+                    : r.status === 'Occupied'
+                    ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800'
+                    : r.status === 'Maintenance'
+                    ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800'
+                    : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800';
+
+                if (!isAdmin) {
+                    return (
+                        <span className={`inline-flex items-center text-xs font-semibold rounded-full px-2.5 py-1 border ${statusColors}`}>
+                            {r.status}
+                        </span>
+                    );
+                }
+
                 return (
                     <select
                         value={r.status}
                         onChange={e => void handleUpdateStatus(r.id, e.target.value)}
-                        className={`text-xs font-medium rounded-full px-2.5 py-1 border transition-colors cursor-pointer ${
-                            r.status === 'Available'
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800'
-                                : r.status === 'Occupied'
-                                ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800'
-                                : r.status === 'Maintenance'
-                                ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800'
-                                : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800'
-                        }`}
+                        className={`text-xs font-medium rounded-full px-2.5 py-1 border transition-colors cursor-pointer ${statusColors}`}
                     >
                         <option value="Available">Available</option>
                         <option value="Occupied">Occupied</option>
@@ -196,19 +210,32 @@ export function EquipmentPage() {
             header: () => <div className="text-right">Actions</div>,
             cell: ({ row }) => (
                 <div className="flex items-center justify-end">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => void handleDelete(row.original.id)}
-                        title="Move to Trash"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {isAdmin ? (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => void handleDelete(row.original.id)}
+                            title="Move to Trash"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                            onClick={() => navigate('/operator/report-issue')}
+                            title="Report Problem"
+                        >
+                            <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                            Report Problem
+                        </Button>
+                    )}
                 </div>
             ),
         },
-    ], []);
+    ], [isAdmin, navigate]);
 
     return (
         <div className="space-y-6">
@@ -216,18 +243,24 @@ export function EquipmentPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Port Infrastructure</p>
-                    <h1 className="text-2xl font-bold tracking-tight text-foreground">Equipment & Infrastructure</h1>
-                    <p className="text-sm text-muted-foreground">Manage port berths, heavy cranes, transport trucks, and container yards</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                        {isAdmin ? 'Equipment & Infrastructure' : 'Assigned Berths, Cranes & Trucks'}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        {isAdmin ? 'Manage port berths, heavy cranes, transport trucks, and container yards' : 'View assigned berth status, crane availability, and report issues'}
+                    </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
                         <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         Refresh
                     </Button>
-                    <Button size="sm" onClick={() => setShowCreate(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Equipment
-                    </Button>
+                    {isAdmin && (
+                        <Button size="sm" onClick={() => setShowCreate(true)}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Equipment
+                        </Button>
+                    )}
                 </div>
             </div>
 

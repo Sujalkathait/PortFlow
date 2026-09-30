@@ -56,7 +56,7 @@ export interface ITrashService {
     getTrash(): Promise<TrashedRecord[]>;
     restoreItem(collection: string, id: number): Promise<any>;
     permanentlyDeleteItem(collection: string, id: number): Promise<boolean>;
-    emptyAllTrash(): Promise<{ count: number }>;
+    emptyAllTrash(): Promise<{ count: number; total: number; details: Record<string, number> }>;
 }
 
 export interface IAuthService {

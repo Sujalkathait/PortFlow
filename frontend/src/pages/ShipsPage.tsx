@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent, useCallback, useMemo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 import { Plus, Trash2, X, Ship, AlertCircle, CheckCircle2, RefreshCw, ArrowUpDown } from 'lucide-react';
 import { api } from '../lib/api';
+import { useAuth } from '@/auth/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -19,6 +20,9 @@ interface ShipRecord {
 }
 
 export function ShipsPage() {
+    const { profile } = useAuth();
+    const isAdmin = profile?.role === 'Admin';
+
     const [ships, setShips] = useState<ShipRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -214,10 +218,10 @@ export function ShipsPage() {
                 </span>
             ),
         },
-        {
+        ...(isAdmin ? [{
             id: 'actions',
             header: () => <div className="text-right">Actions</div>,
-            cell: ({ row }) => (
+            cell: ({ row }: { row: any }) => (
                 <div className="flex items-center justify-end">
                     <Button
                         variant="ghost"
@@ -230,8 +234,8 @@ export function ShipsPage() {
                     </Button>
                 </div>
             ),
-        },
-    ], []);
+        }] : []),
+    ], [isAdmin]);
 
     return (
         <div className="space-y-6">
@@ -239,18 +243,24 @@ export function ShipsPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Vessel Management</p>
-                    <h1 className="text-2xl font-bold tracking-tight text-foreground">Ships Registry</h1>
-                    <p className="text-sm text-muted-foreground">Register, track berthing locations, and manage vessels in port</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                        {isAdmin ? 'Ships Registry & Management' : 'Assigned Vessels & Status'}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        {isAdmin ? 'Register, track berthing locations, and manage vessels in port' : 'Monitor vessel schedules and update operational berthing status'}
+                    </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
                         <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         Refresh
                     </Button>
-                    <Button size="sm" onClick={() => setShowCreate(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Register Ship
-                    </Button>
+                    {isAdmin && (
+                        <Button size="sm" onClick={() => setShowCreate(true)}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Register Ship
+                        </Button>
+                    )}
                 </div>
             </div>
 

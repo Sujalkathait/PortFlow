@@ -7,21 +7,21 @@ export interface SchedulingStrategy {
 export class FCFSStrategy implements SchedulingStrategy {
     schedule(processes: Process[]): Process | null {
         // Sort by arrival time
-        return processes.sort((a, b) => a.arrivalTime - b.arrivalTime)[0] || null;
+        return processes.slice().sort((a, b) => a.arrivalTime - b.arrivalTime)[0] || null;
     }
 }
 
 export class SJFStrategy implements SchedulingStrategy {
     schedule(processes: Process[]): Process | null {
         // Sort by burst time
-        return processes.sort((a, b) => a.burstTime - b.burstTime)[0] || null;
+        return processes.slice().sort((a, b) => a.burstTime - b.burstTime)[0] || null;
     }
 }
 
 export class PriorityStrategy implements SchedulingStrategy {
     schedule(processes: Process[]): Process | null {
         // Sort by priority (higher priority number = higher priority)
-        return processes.sort((a, b) => b.priority - a.priority)[0] || null;
+        return processes.slice().sort((a, b) => b.priority - a.priority)[0] || null;
     }
 }
 

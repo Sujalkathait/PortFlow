@@ -21,7 +21,7 @@ export class FrontendOperationsService implements IFrontendOperationsService {
     }
 
     async getById(id: number): Promise<OperationRecord> {
-        return api.operations.getById(id);
+        return api.operations.get(id);
     }
 
     async create(data: CreateOperationFormInput): Promise<OperationRecord> {

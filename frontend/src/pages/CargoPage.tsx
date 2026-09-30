@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent, useCallback, useMemo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 import { Plus, Trash2, X, Boxes, AlertCircle, CheckCircle2, RefreshCw, ArrowUpDown, Box } from 'lucide-react';
 import { api } from '../lib/api';
+import { useAuth } from '@/auth/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -9,7 +10,7 @@ import { DataTable } from '@/components/ui/data-table';
 
 interface CargoRecord {
     id: number;
-    Cargo_number: string;
+    cargo_number: string;
     size_type: string;
     weight_tons: number;
     cargo_type: string;
@@ -20,6 +21,9 @@ interface CargoRecord {
 }
 
 export function CargoPage() {
+    const { profile } = useAuth();
+    const isAdmin = profile?.role === 'Admin';
+
     const [cargos, setCargos] = useState<CargoRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -67,7 +71,7 @@ export function CargoPage() {
 
         try {
             await api.Cargos.create({
-                Cargo_number: number.trim(),
+                cargo_number: number.trim(),
                 size_type: sizeType,
                 weight_tons: Number(weight) || 0,
                 cargo_type: cargoType.trim() || 'General',
@@ -112,7 +116,7 @@ export function CargoPage() {
 
     const columns: ColumnDef<CargoRecord>[] = useMemo(() => [
         {
-            accessorKey: 'Cargo_number',
+            accessorKey: 'cargo_number',
             header: ({ column }) => (
                 <Button
                     variant="ghost"
@@ -128,7 +132,7 @@ export function CargoPage() {
                 <div className="flex items-center gap-2">
                     <Box className="h-4 w-4 text-muted-foreground" />
                     <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-muted text-foreground border">
-                        {row.original.Cargo_number}
+                        {row.original.cargo_number}
                     </span>
                 </div>
             ),
@@ -213,10 +217,10 @@ export function CargoPage() {
                 );
             },
         },
-        {
+        ...(isAdmin ? [{
             id: 'actions',
             header: () => <div className="text-right">Actions</div>,
-            cell: ({ row }) => (
+            cell: ({ row }: { row: any }) => (
                 <div className="flex items-center justify-end">
                     <Button
                         variant="ghost"
@@ -229,8 +233,8 @@ export function CargoPage() {
                     </Button>
                 </div>
             ),
-        },
-    ], []);
+        }] : []),
+    ], [isAdmin]);
 
     return (
         <div className="space-y-6">
@@ -238,18 +242,24 @@ export function CargoPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Cargo & Container Tracking</p>
-                    <h1 className="text-2xl font-bold tracking-tight text-foreground">Cargo Inventory</h1>
-                    <p className="text-sm text-muted-foreground">Track containers, manifest status, yard locations, and customs clearance</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                        {isAdmin ? 'Cargo Inventory & Management' : 'Cargo Movement & Handling'}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        {isAdmin ? 'Track containers, manifest status, yard locations, and customs clearance' : 'Handle container movement and update yard tracking status'}
+                    </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
                         <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         Refresh
                     </Button>
-                    <Button size="sm" onClick={() => setShowCreate(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Cargo
-                    </Button>
+                    {isAdmin && (
+                        <Button size="sm" onClick={() => setShowCreate(true)}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Cargo
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -286,7 +296,7 @@ export function CargoPage() {
                     <DataTable
                         columns={columns}
                         data={cargos}
-                        searchKey="Cargo_number"
+                        searchKey="cargo_number"
                         searchPlaceholder="Filter by Cargo number..."
                         loading={loading}
                         emptyMessage="No cargo found. Click 'Add Cargo' to register a new container."
