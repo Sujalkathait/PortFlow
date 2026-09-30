@@ -26,10 +26,8 @@ backend/
 ├── package.json                   # Project metadata, scripts, and npm dependencies
 ├── package-lock.json              # Exact installed versions of dependencies
 ├── README.md                      # This comprehensive backend guide
-├── test_workflow.js               # Quick integration test script for API workflows
 ├── tsconfig.json                  # TypeScript compiler settings for backend
-├── prisma/                        # Database ORM schema & local SQLite development file
-│   ├── dev.db                     # Local SQLite database file for testing
+├── prisma/                        # Database ORM schema
 │   └── schema.prisma              # Prisma data schema (maps models to database tables)
 ├── supabase/                      # Raw SQL database migrations and schema definitions
 │   └── schema.sql                 # SQL script defining tables, foreign keys, and indexes
@@ -114,7 +112,6 @@ backend/
 | Folder / File | What It Does |
 | :--- | :--- |
 | `prisma/schema.prisma` | The database blueprint. Defines models (`User`, `Ship`, `Cargo`, `Operation`, `Equipment`) and maps them to tables. |
-| `prisma/dev.db` | A local SQLite database file used if PostgreSQL is not active. |
 | `supabase/schema.sql` | The raw PostgreSQL SQL script that sets up tables, primary keys, and indexes directly on Supabase. |
 
 ---
