@@ -99,3 +99,51 @@ frontend/src/features/operations/
 └── types/         # Specific DTOs
 ```
 **Why?** It prevents huge, cluttered global folders. If you need to fix a bug in Operations, you only look inside the `operations/` folder.
+
+---
+
+## 6. Database Schema & Phased Implementation (The 12 Tables)
+
+PortFlow is designed with a comprehensive 12-table ER diagram to support all operations, from ship arrival to warehouse dispatch and billing. To ensure smooth development and proper OS concept integration, the database implementation is split into phases.
+
+### Full LLD Architecture (All 12 Tables)
+The complete architecture requires the following 12 entities:
+1. **users** - System access, roles (Admin/Operator), and authentication.
+2. **ships** - Vessel details, IMO numbers, capacities, and arrival status.
+3. **berths** - Docking locations and occupancy status (Semaphore controlled).
+4. **cranes** - Lifting equipment and availability status (Mutex controlled).
+5. **operations** - The central jobs/processes handled by the OS Simulator.
+6. **containers** - Individual TEU units tracked within the port.
+7. **cargo** - General freight records associated with ships.
+8. **warehouses** - Storage locations and remaining capacity.
+9. **trucks** - Land transport vehicles assigned for pick-up/drop-off.
+10. **inspections** - Security and safety check records for cargo.
+11. **customs** - Clearance records for import/export regulations.
+12. **bills** - Automated invoices generated from operations and storage duration.
+
+#### ER Diagram (12 Tables)
+```mermaid
+erDiagram
+    users ||--o{ operations : "manages"
+    users ||--o{ inspections : "performs"
+    ships ||--o{ operations : "undergoes"
+    ships ||--o{ cargo : "carries"
+    ships }o--o| berths : "docks at"
+    operations }o--o| cranes : "uses"
+    operations ||--o{ bills : "generates"
+    cargo ||--o{ containers : "split into"
+    cargo ||--o{ inspections : "subject to"
+    cargo ||--o| customs : "cleared by"
+    containers }o--o| warehouses : "stored in"
+    containers }o--o| trucks : "transported by"
+```
+
+### Phase 2 Implementation (Core Engine)
+For Phase 2, we implement the core subset of these tables required for basic port operations and OS simulations (Scheduling, Mutexes, Semaphores). The Phase 2 tables are:
+1. **users** (`User`)
+2. **ships** (`Ship`)
+3. **cargo** (`Cargo`)
+4. **operations** (`Operation` - The PCB in our OS simulation)
+5. **equipment** (`Equipment` - A combined table managing both `cranes` and `berths`)
+
+*Note: Phase 3 will introduce the remaining tables (`containers`, `warehouses`, `trucks`, `inspections`, `customs`, `bills`) along with advanced OS concepts like multi-resource deadlocks and RAG analysis.*
