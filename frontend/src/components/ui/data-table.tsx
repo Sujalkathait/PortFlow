@@ -41,7 +41,7 @@ interface DataTableProps<TData, TValue> {
   searchKey?: string
   searchPlaceholder?: string
   loading?: boolean
-  emptyMessage?: string
+  emptyMessage?: React.ReactNode
   actionSlot?: React.ReactNode
 }
 
@@ -194,7 +194,7 @@ export function DataTable<TData, TValue>({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="h-9 w-9"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage() || loading}
             aria-label="Go to first table page"
@@ -205,7 +205,7 @@ export function DataTable<TData, TValue>({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="h-9 w-9"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage() || loading}
             aria-label="Go to previous table page"
@@ -220,7 +220,7 @@ export function DataTable<TData, TValue>({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="h-9 w-9"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage() || loading}
             aria-label="Go to next table page"
@@ -231,7 +231,7 @@ export function DataTable<TData, TValue>({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="h-9 w-9"
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage() || loading}
             aria-label="Go to last table page"

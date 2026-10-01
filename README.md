@@ -78,7 +78,7 @@ flowchart TD
             ProcessMgr --> Scheduler[CPU Scheduler FCFS / SJF / Priority]
             Scheduler --> MutexLocks[Mutex Locks - Cranes]
             Scheduler --> Semaphores[Semaphores - Berths]
-            MutexLocks & Semaphores --> Deadlock[Deadlock Detector RAG]
+            MutexLocks & Semaphores --> Deadlock[Deadlock Detector WFG]
         end
 
         subgraph Data_Layer["Data Access Layer"]
@@ -89,7 +89,7 @@ flowchart TD
 
     subgraph Storage["Database (Supabase / PostgreSQL)"]
         PrismaORM --> PostgresDB[(PostgreSQL Database)]
-        PostgresDB --> Tables[Users / Ships / Berths / Cargo / Operations]
+        PostgresDB --> Tables[Users / Ships / Equipment / Cargo / Operations]
     end
 ```
 
@@ -113,7 +113,7 @@ flowchart TD
 | **Ready Queue** | Waiting line for equipment | Queue where operations wait until cranes and berths are allocated. | [`backend/src/os/Scheduler.ts`](./backend/src/os/Scheduler.ts) |
 | **Mutex Lock** | Exclusive Crane access | Only **one** job can operate a specific crane simultaneously to avoid collisions. | [`backend/src/os/Mutex.ts`](./backend/src/os/Mutex.ts) |
 | **Counting Semaphore** | Berth capacity slots | Limits simultaneous docking to the available parking berths. | [`backend/src/os/Semaphore.ts`](./backend/src/os/Semaphore.ts) |
-| **Deadlock Detection** | Circular wait detection | Continuously checks Resource Allocation Graphs (RAG) to detect circular waits. | [`backend/src/os/DeadlockDetector.ts`](./backend/src/os/DeadlockDetector.ts) |
+| **Deadlock Detection** | Circular wait detection | Continuously checks Wait-For Graphs (WFG) to detect circular waits. | [`backend/src/os/DeadlockDetector.ts`](./backend/src/os/DeadlockDetector.ts) |
 | **Telemetry & Metrics**| CPU utilization metrics | Tracks exact Waiting Time ($W_t$) and Turnaround Time ($T_t$) per process. | [`backend/src/services/operations.service.ts`](./backend/src/services/operations.service.ts) |
 
 ---
@@ -129,6 +129,119 @@ flowchart TD
 | **Aggregate Analytics** | Real-time reporting | SQL aggregate queries (`COUNT`, `AVG`, `SUM`) compute port KPIs, turnaround averages, and berth loads. |
 | **Transactions** | Atomic state consistency | Ensures OS lock release and database record updates succeed or roll back together. |
 
+### Detailed Entity Relationship (ER) Diagram & Schema Breakdown
+To maintain a streamlined, high-performance database, PortFlow deliberately uses a minimalist **5-table architecture** to handle the core requirements without unnecessary joins or database bloat. 
+
+Almost every piece of port data ties back to the central `operations` table, which bridges the gap between physical objects (Ships, Equipment) and digital execution (OS Kernel).
+
+```mermaid
+erDiagram
+    users ||--o{ operations : "initiates (created_by)"
+    ships ||--o{ cargo : "carries (ship_name)"
+    ships ||--o{ operations : "involved in (ship_name)"
+    equipment ||--o{ operations : "allocated to (crane_id, berth_id)"
+    
+    users {
+        Int id PK
+        String email UK
+        String password_hash
+        String full_name
+        String role
+        DateTime created_at
+        DateTime updated_at
+        DateTime deleted_at "nullable"
+        String deleted_by "nullable"
+    }
+    
+    ships {
+        Int id PK
+        String imo_number UK
+        String name
+        String vessel_type
+        Int capacity_teu
+        String status
+        String berth_id "nullable"
+        String created_by
+        DateTime created_at
+        DateTime deleted_at "nullable"
+        String deleted_by "nullable"
+    }
+    
+    cargo {
+        Int id PK
+        String cargo_number UK
+        String size_type
+        Float weight_tons
+        String cargo_type
+        String current_location
+        String ship_name FK
+        String status
+        String created_by
+        DateTime created_at
+        DateTime deleted_at "nullable"
+        String deleted_by "nullable"
+    }
+    
+    equipment {
+        Int id PK
+        String equipment_id UK
+        String name
+        String type
+        String status
+        String assigned_to "nullable"
+        String created_by
+        DateTime created_at
+        DateTime deleted_at "nullable"
+        String deleted_by "nullable"
+    }
+    
+    operations {
+        Int id PK
+        String process_id UK "nullable"
+        String operation_type
+        String ship_name FK
+        String crane_id FK
+        String berth_id FK
+        Int priority
+        String status
+        DateTime start_time "nullable"
+        DateTime end_time "nullable"
+        Int waiting_time_ms "nullable"
+        Int turnaround_time_ms "nullable"
+        String created_by
+        DateTime created_at
+        DateTime deleted_at "nullable"
+        String deleted_by "nullable"
+    }
+```
+
+#### The Minimalist Table Philosophy
+By distilling the database into these **5 Core Entities**, we achieve high-speed ACID transactions while perfectly supporting the OS Simulator:
+
+1. **`users` Table (Authentication & RBAC):** 
+   - Stores operator and admin credentials.
+   - Manages role-based access control (RBAC), determining who can dispatch jobs to the OS scheduler.
+
+2. **`ships` Table (The Primary Client):**
+   - Represents the physical vessels arriving at the port.
+   - Tracks the `imo_number` (International Maritime Organization identifier).
+   - *Relationship:* A single ship can carry multiple `cargo` items and spawn multiple `operations`.
+
+3. **`cargo` Table (The Workload):**
+   - Represents the individual shipping containers.
+   - Tied directly to a ship via `ship_name` and tracks its journey through the port via `current_location`.
+
+4. **`equipment` Table (The OS Resources):**
+   - This table maps directly to the OS Simulator's **Mutexes** and **Semaphores**.
+   - `type` differentiates between a `Crane` (Mutex, 1:1 lock) and a `Berth` (Semaphore, pooled resource).
+   - `assigned_to` holds the `process_id` of the operation currently locking it, bridging the DB and the Node.js OS memory.
+
+5. **`operations` Table (The OS Process Control Block):**
+   - The heart of PortFlow. Every row here acts as a **Process Control Block (PCB)** for the OS Simulator.
+   - Tracks the lifecycle of a job (`READY`, `RUNNING`, `WAITING`, `COMPLETED`).
+   - Stores telemetry data (`waiting_time_ms`, `turnaround_time_ms`) generated by the OS Scheduler (FCFS/SJF).
+   - Connects the Ship (client), the Crane (mutex), and the Berth (semaphore) into a single transactional row.
+
 ---
 
 ## ✨ User Roles & Core Features
@@ -142,7 +255,6 @@ flowchart TD
 | **Cargo** | Manages and monitors all cargo and yard activities | Handles cargo movement and status updates |
 | **Berths** | Assigns and manages berths | Uses assigned berth and views its status |
 | **Cranes** | Assigns and manages cranes | Uses assigned crane and reports problems |
-| **Trucks** | Manages truck allocation and availability | Uses assigned trucks |
 | **Scheduling** | Uses and monitors the automatic scheduler | Uses and monitors the automatic scheduler |
 | **Scheduling Algorithm** | Uses and configures the active algorithm (FCFS / SJF / Priority) | Uses the configured algorithm |
 | **Ready / Running / Waiting Queue** | Monitors all queues and processes | Views relevant queues and assigned jobs |
@@ -170,6 +282,7 @@ portflow/
 │   ├── PHASE_1.md                 # Phase 1: 10% Foundation Milestone
 │   ├── PHASE_2.md                 # Phase 2: 40% Core Working Implementation
 │   ├── PHASE_3.md                 # Phase 3: 50% Advanced Deployment Roadmap
+│   ├── FUTURE_PHASES.md           # Future Phases: Postponed Advanced Features
 │   └── PortFlow_PostgreSQL_Prisma_Guide.pdf # Database design reference guide
 ├── backend/                       # Node.js + Express + TypeScript Backend
 │   ├── README.md                  # Comprehensive backend guide & architecture walkthrough
@@ -252,7 +365,8 @@ PortFlow comes pre-seeded with developer accounts for instant evaluation:
 - [x] **Phase 1: Project Foundation (10%)** — Architectural mapping, entity-relationship modeling, and OS simulation design.
 - [x] **Phase 2: Core Working Implementation (40%)** — Working Admin & Operator panels, OS scheduling algorithms, Mutex locks, Semaphores, Prisma ORM, and CRUD REST APIs.
 - [x] **LLD Architectural Refactoring** — Full decoupling with Domain Models, DTOs, Repository Interfaces, Service Layer, and Feature-based folder structure.
-- [ ] **Phase 3: Advanced Logistics & Cloud Deployment (50%)** — Real-time WebSocket telemetry, customs clearance workflow, multi-yard optimization, and production cloud hosting.
+- [x] **Phase 3: Dashboards & Analytics (50%)** — Comprehensive Admin/Operator dashboards, system analytics, logging, equipment management, and production cloud hosting.
+- [ ] **Phase 4: Advanced Logistics (Future Phases)** — Real-time WebSocket telemetry, customs clearance workflow, trucks, billing, and active RAG deadlock recovery.
 
 ---
 
@@ -262,6 +376,7 @@ For in-depth explanations and developer cheat-sheets, explore our dedicated guid
 - 📖 **[Backend Guide](./backend/README.md)**: Deep dive into the backend directory, routes, controllers, services, repositories, and OS simulation kernel.
 - 🎨 **[Frontend Guide](./frontend/README.md)**: Breakdown of React components, custom hooks, feature-based modularity, and Tailwind styling.
 - 🏛️ **[LLD Architecture Guide](./LLD_ARCHITECTURE.md)**: Low-Level Design specification covering SOLID principles, design patterns, and feature-based vs flat-based directory trade-offs.
+- 🔮 **[Future Phases Guide](./folder/FUTURE_PHASES.md)**: Roadmap for postponed advanced features like Preemptive Scheduling and active RAG Deadlock Recovery.
 
 ---
 

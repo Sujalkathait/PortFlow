@@ -299,7 +299,13 @@ export function CargoPage() {
                         searchKey="cargo_number"
                         searchPlaceholder="Filter by Cargo number..."
                         loading={loading}
-                        emptyMessage="No cargo found. Click 'Add Cargo' to register a new container."
+                        emptyMessage={
+                            <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+                                <Boxes className="h-12 w-12 opacity-20 mb-4" />
+                                <h3 className="font-semibold text-lg text-foreground">No cargo found</h3>
+                                <p className="text-sm max-w-sm mt-1">There are no containers in the database. Click "Add Cargo" to register one.</p>
+                            </div>
+                        }
                     />
                 </CardContent>
             </Card>

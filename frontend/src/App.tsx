@@ -17,7 +17,6 @@ const ShipsPage = lazy(async () => ({ default: (await import('./pages/ShipsPage'
 const CargoPage = lazy(async () => ({ default: (await import('./pages/CargoPage')).CargoPage }));
 const EquipmentPage = lazy(async () => ({ default: (await import('./pages/EquipmentPage')).EquipmentPage }));
 const SchedulingPage = lazy(async () => ({ default: (await import('./pages/SchedulingPage')).SchedulingPage }));
-const TrashPage = lazy(async () => ({ default: (await import('./pages/TrashPage')).TrashPage }));
 const LogsPage = lazy(async () => ({ default: (await import('./pages/LogsPage')).LogsPage }));
 const ReportsPage = lazy(async () => ({ default: (await import('./pages/ReportsPage')).ReportsPage }));
 const ReportIssuePage = lazy(async () => ({ default: (await import('./pages/ReportIssuePage')).ReportIssuePage }));
@@ -47,7 +46,7 @@ function DashboardLayout({ role, children }: { role: Role; children: React.React
         <SidebarProvider>
             <AppSidebar role={role} />
             <a className="skip-link" href="#main-content-area">Skip to main content</a>
-            <div className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden h-screen">
+            <div className="flex-1 flex flex-col min-w-0 bg-muted/20 dark:bg-background overflow-hidden h-screen">
                 <header className="flex h-16 items-center justify-between border-b bg-background/95 px-3 sm:px-4 lg:px-6 gap-3">
                     <div className="flex items-center gap-4">
                         <SidebarTrigger />
@@ -159,13 +158,6 @@ function App() {
                         <ProtectedRoute role="Admin">
                             <DashboardLayout role="Admin">
                                 <ReportsPage />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/admin/trash" element={
-                        <ProtectedRoute role="Admin">
-                            <DashboardLayout role="Admin">
-                                <TrashPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />

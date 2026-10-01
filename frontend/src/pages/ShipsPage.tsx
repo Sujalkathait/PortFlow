@@ -300,7 +300,13 @@ export function ShipsPage() {
                         searchKey="name"
                         searchPlaceholder="Filter vessels by name..."
                         loading={loading}
-                        emptyMessage="No vessels registered in the port database. Click 'Register Ship' to add one."
+                        emptyMessage={
+                            <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+                                <Ship className="h-12 w-12 opacity-20 mb-4" />
+                                <h3 className="font-semibold text-lg text-foreground">No vessels registered</h3>
+                                <p className="text-sm max-w-sm mt-1">There are no vessels in the registry. Click "Register Ship" to add one.</p>
+                            </div>
+                        }
                     />
                 </CardContent>
             </Card>

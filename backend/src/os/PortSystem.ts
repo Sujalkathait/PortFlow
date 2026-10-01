@@ -58,8 +58,8 @@ export class PortSystem {
 
         process.start();
 
-        // Try to acquire locks
-        const locksToAcquire = process.requiredEquipments;
+        // Try to acquire locks in a consistent globally sorted order to prevent deadlocks
+        const locksToAcquire = [...process.requiredEquipments].sort();
         for (const res of locksToAcquire) {
             if (this.mutexes.has(res)) {
                 await this.mutexes.get(res)!.lock(process);

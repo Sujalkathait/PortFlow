@@ -1,11 +1,11 @@
 import {
     LayoutDashboard, Ship, Anchor, Truck, Settings,
-    LogOut, Trash2, Cpu, Boxes, Database, ScrollText, AlertTriangle
+    LogOut, Cpu, Boxes, Database, ScrollText, AlertTriangle
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, type Role } from '../auth/AuthProvider';
 
-export type Page = 'dashboard' | 'operations' | 'ships' | 'Cargos' | 'Equipments' | 'scheduling' | 'trash' | 'logs' | 'reports' | 'report-issue';
+export type Page = 'dashboard' | 'operations' | 'ships' | 'Cargos' | 'Equipments' | 'scheduling' | 'logs' | 'reports' | 'report-issue';
 
 export function Sidebar({ role, isOpen, onClose }: {
     role: Role;
@@ -41,7 +41,6 @@ export function Sidebar({ role, isOpen, onClose }: {
         { page: 'scheduling', label: 'Scheduling', icon: Cpu },
         { page: 'logs', label: 'System Logs', icon: ScrollText },
         { page: 'reports', label: 'Reports', icon: Database },
-        { page: 'trash', label: 'Trash Bin', icon: Trash2 },
     ];
 
     const operatorItems: { page: Page; label: string; icon: any }[] = [

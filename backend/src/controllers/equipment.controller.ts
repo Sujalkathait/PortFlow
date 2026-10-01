@@ -54,7 +54,20 @@ export const updateEquipment = async (req: AuthenticatedRequest, res: Response):
             return;
         }
 
-        const updated = await equipmentService.updateEquipment(id, req.body);
+        const { name, status, type, assigned_to } = req.body;
+
+        const validStatuses = ['Available', 'In Use', 'Maintenance', 'Decommissioned'];
+        if (status !== undefined && !validStatuses.includes(status)) {
+            res.status(400).json({ success: false, message: `Status must be one of: ${validStatuses.join(', ')}` });
+            return;
+        }
+
+        if (name !== undefined && (typeof name !== 'string' || !name.trim())) {
+            res.status(400).json({ success: false, message: 'Invalid name' });
+            return;
+        }
+
+        const updated = await equipmentService.updateEquipment(id, { name, status, type, assigned_to });
         if (!updated) {
             res.status(404).json({ success: false, message: 'Equipment not found' });
             return;

@@ -168,22 +168,5 @@ export const api = {
     analytics: {
         get: () => request<any>('/analytics'),
     },
-
-    // ─── Trash Bin ───
-    trash: {
-        list: () => request<any[]>('/trash'),
-        restore: (collection: string, id: number) =>
-            request<any>(`/trash/${collection}/${id}/restore`, {
-                method: 'POST',
-            }),
-        permanentDelete: (collection: string, id: number) =>
-            request<any>(`/trash/${collection}/${id}`, {
-                method: 'DELETE',
-            }),
-        emptyAll: () =>
-            request<{ success: boolean; message: string; details: any }>('/trash', {
-                method: 'DELETE',
-            }),
-    },
 };
 

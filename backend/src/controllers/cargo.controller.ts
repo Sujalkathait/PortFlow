@@ -53,7 +53,20 @@ export const updateCargo = async (req: AuthenticatedRequest, res: Response): Pro
             res.status(400).json({ success: false, message: 'Invalid Cargo ID' });
             return;
         }
-        const updated = await cargoService.updateCargo(id, req.body);
+        const { cargo_number, size_type, weight_tons, cargo_type, current_location, ship_name, status } = req.body;
+        
+        if (weight_tons !== undefined && (typeof weight_tons !== 'number' || weight_tons < 0)) {
+            res.status(400).json({ success: false, message: 'weight_tons must be a positive number' });
+            return;
+        }
+
+        const validStatuses = ['In Yard', 'Loaded', 'Discharged'];
+        if (status !== undefined && !validStatuses.includes(status)) {
+            res.status(400).json({ success: false, message: `Status must be one of: ${validStatuses.join(', ')}` });
+            return;
+        }
+
+        const updated = await cargoService.updateCargo(id, { cargo_number, size_type, weight_tons, cargo_type, current_location, ship_name, status });
         if (!updated) {
             res.status(404).json({ success: false, message: 'Cargo not found' });
             return;

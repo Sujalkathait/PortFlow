@@ -117,7 +117,7 @@ export function DashboardPage({ role }: { role: string }) {
                     <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{role} PORTFLOW CONSOLE</p>
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">Port Operations Overview</h1>
                     <p className="text-sm text-muted-foreground">
-                        Real-time port telemetry, OS process queuing, and PostgreSQL relational allocations
+                        Live overview of port operations and resources.
                     </p>
                 </div>
                 <div className="flex flex-col sm:items-end gap-1.5">
@@ -197,9 +197,9 @@ export function DashboardPage({ role }: { role: string }) {
                         {role === 'Admin' ? (
                             <>
                                 <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase">Total Ships</CardTitle>
-                                        <Ship className="h-4 w-4 text-sky-500" />
+                                        <Ship className="h-4 w-4 text-muted-foreground opacity-70" />
                                     </CardHeader>
                                     <CardContent>
                                         {loading ? <Skeleton className="h-8 w-16" /> : (
@@ -210,9 +210,9 @@ export function DashboardPage({ role }: { role: string }) {
                                 </Card>
 
                                 <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase">Active Operations</CardTitle>
-                                        <Anchor className="h-4 w-4 text-emerald-500" />
+                                        <Anchor className="h-4 w-4 text-muted-foreground opacity-70" />
                                     </CardHeader>
                                     <CardContent>
                                         {loading ? <Skeleton className="h-8 w-16" /> : (
@@ -223,9 +223,9 @@ export function DashboardPage({ role }: { role: string }) {
                                 </Card>
 
                                 <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase">Ready / Queued</CardTitle>
-                                        <Timer className="h-4 w-4 text-amber-500" />
+                                        <Timer className="h-4 w-4 text-muted-foreground opacity-70" />
                                     </CardHeader>
                                     <CardContent>
                                         {loading ? <Skeleton className="h-8 w-16" /> : (
@@ -236,9 +236,9 @@ export function DashboardPage({ role }: { role: string }) {
                                 </Card>
 
                                 <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase">Running Jobs</CardTitle>
-                                        <Play className="h-4 w-4 text-blue-500" />
+                                        <Play className="h-4 w-4 text-muted-foreground opacity-70" />
                                     </CardHeader>
                                     <CardContent>
                                         {loading ? <Skeleton className="h-8 w-16" /> : (
@@ -262,9 +262,9 @@ export function DashboardPage({ role }: { role: string }) {
                                 </Card>
 
                                 <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase">Available Berths</CardTitle>
-                                        <Anchor className="h-4 w-4 text-cyan-500" />
+                                        <Anchor className="h-4 w-4 text-muted-foreground opacity-70" />
                                     </CardHeader>
                                     <CardContent>
                                         {loading ? <Skeleton className="h-8 w-16" /> : (
@@ -275,9 +275,9 @@ export function DashboardPage({ role }: { role: string }) {
                                 </Card>
 
                                 <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase">Available Cranes</CardTitle>
-                                        <Truck className="h-4 w-4 text-orange-500" />
+                                        <Truck className="h-4 w-4 text-muted-foreground opacity-70" />
                                     </CardHeader>
                                     <CardContent>
                                         {loading ? <Skeleton className="h-8 w-16" /> : (
@@ -288,9 +288,9 @@ export function DashboardPage({ role }: { role: string }) {
                                 </Card>
 
                                 <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase">Available Trucks</CardTitle>
-                                        <Truck className="h-4 w-4 text-emerald-500" />
+                                        <Truck className="h-4 w-4 text-muted-foreground opacity-70" />
                                     </CardHeader>
                                     <CardContent>
                                         {loading ? <Skeleton className="h-8 w-16" /> : (
@@ -303,9 +303,9 @@ export function DashboardPage({ role }: { role: string }) {
                         ) : (
                             <>
                                 <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase">Active Jobs</CardTitle>
-                                        <Anchor className="h-4 w-4 text-emerald-500" />
+                                        <Anchor className="h-4 w-4 text-muted-foreground opacity-70" />
                                     </CardHeader>
                                     <CardContent>
                                         {loading ? <Skeleton className="h-8 w-16" /> : (
@@ -314,9 +314,9 @@ export function DashboardPage({ role }: { role: string }) {
                                     </CardContent>
                                 </Card>
                                 <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase">Running Jobs</CardTitle>
-                                        <Play className="h-4 w-4 text-amber-500" />
+                                        <Play className="h-4 w-4 text-muted-foreground opacity-70" />
                                     </CardHeader>
                                     <CardContent>
                                         {loading ? <Skeleton className="h-8 w-16" /> : (
@@ -336,9 +336,9 @@ export function DashboardPage({ role }: { role: string }) {
                                     </CardContent>
                                 </Card>
                                 <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                    <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase">Avg Wait Time</CardTitle>
-                                        <Timer className="h-4 w-4 text-blue-500" />
+                                        <Timer className="h-4 w-4 text-muted-foreground opacity-70" />
                                     </CardHeader>
                                     <CardContent>
                                         {loading ? <Skeleton className="h-8 w-16" /> : (
@@ -355,10 +355,10 @@ export function DashboardPage({ role }: { role: string }) {
                         <CardHeader className="flex flex-row items-center justify-between">
                             <div>
                                 <CardTitle className="text-base font-semibold flex items-center gap-2">
-                                    <Anchor className="h-4 w-4 text-primary" /> Live Port Operations Feed
+                                    <Anchor className="h-4 w-4 text-primary" /> Live Port Operations
                                 </CardTitle>
                                 <CardDescription>
-                                    Real-time processes undergoing discharge, inspection, and crane handling.
+                                    Active processes and current status.
                                 </CardDescription>
                             </div>
                             <Button
@@ -377,10 +377,10 @@ export function DashboardPage({ role }: { role: string }) {
                                     ))}
                                 </div>
                             ) : operations.length === 0 ? (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    <Anchor className="mx-auto mb-2 h-8 w-8 opacity-40" />
-                                    <h3 className="font-semibold text-foreground">No operations active</h3>
-                                    <p className="text-xs mt-1">Schedule new port operations from the Operations page.</p>
+                                <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+                                    <Anchor className="h-12 w-12 opacity-20 mb-4" />
+                                    <h3 className="font-semibold text-lg text-foreground">No operations active</h3>
+                                    <p className="text-sm max-w-sm mt-1">Schedule new port operations from the Operations page.</p>
                                 </div>
                             ) : (
                                 <div className="rounded-md border">

@@ -46,21 +46,23 @@ export class OperationsRepository implements IOperationsRepository {
 
     async create(data: CreateOperationDTO): Promise<OperationRecord> {
         try {
-            const res = await prisma.operation.create({
-                data: {
-                    operation_type: data.operationType,
-                    ship_name: data.shipName,
-                    crane_id: data.craneId || 'None',
-                    berth_id: data.berthId || 'Berth 1',
-                    priority: data.priority || 1,
-                    status: 'Queued',
-                    created_by: data.created_by
-                }
-            });
-            const processId = `op-${res.id}`;
-            const updated = await prisma.operation.update({
-                where: { id: res.id },
-                data: { process_id: processId }
+            const updated = await prisma.$transaction(async (tx) => {
+                const res = await tx.operation.create({
+                    data: {
+                        operation_type: data.operationType,
+                        ship_name: data.shipName,
+                        crane_id: data.craneId || 'None',
+                        berth_id: data.berthId || 'Berth 1',
+                        priority: data.priority || 1,
+                        status: 'Queued',
+                        created_by: data.created_by
+                    }
+                });
+                const processId = `op-${res.id}`;
+                return await tx.operation.update({
+                    where: { id: res.id },
+                    data: { process_id: processId }
+                });
             });
             return normalize(updated);
         } catch (err: any) {

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar"
 import {
     LayoutDashboard, Ship, Anchor, Truck, Settings,
-    LogOut, Trash2, Cpu, Boxes, Database, ScrollText, AlertTriangle
+    LogOut, Cpu, Boxes, Database, ScrollText, AlertTriangle
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
@@ -46,7 +46,6 @@ export function AppSidebar({ role }: { role: string }) {
         { page: 'scheduling', label: 'Scheduling', icon: Cpu },
         { page: 'logs', label: 'System Logs', icon: ScrollText },
         { page: 'reports', label: 'Reports', icon: Database },
-        { page: 'trash', label: 'Trash Bin', icon: Trash2 },
     ];
 
     const operatorItems = [

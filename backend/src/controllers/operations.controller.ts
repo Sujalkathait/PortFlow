@@ -82,6 +82,18 @@ export const updateOperation = async (req: AuthenticatedRequest, res: Response):
             res.status(400).json({ success: false, message: 'Invalid operation ID' });
             return;
         }
+
+        // Ownership Check
+        const existingOp = await operationsService.getOperationById(id);
+        if (!existingOp) {
+            res.status(404).json({ success: false, message: `Operation ${id} not found` });
+            return;
+        }
+        if (req.user?.role !== 'Admin' && existingOp.created_by !== req.user?.email) {
+            res.status(403).json({ success: false, message: 'Access denied. You can only modify your own operations.' });
+            return;
+        }
+
         const updated = await operationsService.updateOperation(id, req.body);
         if (!updated) {
             res.status(404).json({ success: false, message: `Operation ${id} not found` });

@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { apiRouter } from './routes/api';
 import { initDatabase, checkDatabaseConnection, isDatabaseConnected } from './config/database';
 import { seedDefaultAccounts } from './controllers/auth.controller';
@@ -8,10 +10,23 @@ import { seedDefaultAccounts } from './controllers/auth.controller';
 const app = express();
 const port = Number(process.env.PORT || 10000);
 
+// Security middleware
+app.use(helmet());
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+// Apply the rate limiting middleware to API calls only
+app.use('/api', apiLimiter);
+
 // CORS configuration for Vercel frontend & production environments
 const corsOrigin = process.env.CORS_ORIGIN || '*';
 app.use(cors({
-    origin: corsOrigin === '*' ? true : corsOrigin.split(',').map(s => s.trim()),
+    origin: corsOrigin === '*' ? '*' : corsOrigin.split(',').map(s => s.trim()),
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-user-email'],

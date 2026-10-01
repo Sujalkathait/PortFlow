@@ -11,7 +11,6 @@ import {
   Plus,
   Play,
   Search,
-  Trash2,
   Wrench,
   AlertTriangle,
 } from "lucide-react"
@@ -111,10 +110,6 @@ export function CommandMenu({ role = "Admin" }: CommandMenuProps) {
                 <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/reports`))}>
                   <FileText className="mr-2 h-4 w-4" />
                   <span>Reports & Analytics</span>
-                </CommandItem>
-                <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/trash`))}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  <span>Recycle / Trash Bin</span>
                 </CommandItem>
               </>
             )}

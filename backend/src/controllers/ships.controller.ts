@@ -72,7 +72,25 @@ export const updateShip = async (req: AuthenticatedRequest, res: Response): Prom
             res.status(400).json({ success: false, message: 'Invalid ship ID' });
             return;
         }
-        const updated = await shipsService.updateShip(id, req.body);
+        const { name, status, vessel_type, capacity_teu, berth_id } = req.body;
+        
+        if (capacity_teu !== undefined && (typeof capacity_teu !== 'number' || capacity_teu < 0)) {
+            res.status(400).json({ success: false, message: 'capacity_teu must be a positive number' });
+            return;
+        }
+
+        const validStatuses = ['Arriving', 'Docked', 'Departed'];
+        if (status !== undefined && !validStatuses.includes(status)) {
+            res.status(400).json({ success: false, message: `Status must be one of: ${validStatuses.join(', ')}` });
+            return;
+        }
+
+        if (name !== undefined && (typeof name !== 'string' || !name.trim())) {
+            res.status(400).json({ success: false, message: 'Invalid name' });
+            return;
+        }
+
+        const updated = await shipsService.updateShip(id, { name, status, vessel_type, capacity_teu, berth_id });
         if (!updated) {
             res.status(404).json({ success: false, message: 'Ship not found' });
             return;
