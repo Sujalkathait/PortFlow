@@ -18,11 +18,7 @@ export const getOperations = async (req: AuthenticatedRequest, res: Response): P
     try {
         let ops = await operationsService.getOperations();
         
-        // Terminal Operator: My Jobs - View only assigned operations
-        if (req.user && req.user.role === 'Operator') {
-            ops = ops.filter(op => op.created_by === req.user!.email);
-        }
-        
+
         res.status(200).json(ops);
     } catch (error: any) {
         console.error('[OperationsController] getOperations error:', error);
@@ -89,10 +85,7 @@ export const updateOperation = async (req: AuthenticatedRequest, res: Response):
             res.status(404).json({ success: false, message: `Operation ${id} not found` });
             return;
         }
-        if (req.user?.role !== 'Admin' && existingOp.created_by !== req.user?.email) {
-            res.status(403).json({ success: false, message: 'Access denied. You can only modify your own operations.' });
-            return;
-        }
+
 
         const updated = await operationsService.updateOperation(id, req.body);
         if (!updated) {

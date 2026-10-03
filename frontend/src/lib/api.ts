@@ -75,6 +75,10 @@ export const api = {
                 body: JSON.stringify(body),
             }),
         me: () => request<{ success: boolean; user: any }>('/auth/me'),
+        deleteAccount: () =>
+            request<{ success: boolean; message: string }>('/auth/account', {
+                method: 'DELETE',
+            }),
     },
 
     // ─── Operations CRUD ───
@@ -167,6 +171,23 @@ export const api = {
     // ─── Analytics ───
     analytics: {
         get: () => request<any>('/analytics'),
+    },
+
+    // ─── Trash Bin & Recovery ───
+    trash: {
+        list: () => request<any[]>('/trash'),
+        restore: (collection: string, id: number) =>
+            request<{ success: boolean; message: string; data: any }>(`/trash/restore/${collection}/${id}`, {
+                method: 'POST',
+            }),
+        permanentDelete: (collection: string, id: number) =>
+            request<{ success: boolean; message: string }>(`/trash/${collection}/${id}`, {
+                method: 'DELETE',
+            }),
+        empty: () =>
+            request<{ success: boolean; message: string; details: any }>('/trash/empty', {
+                method: 'DELETE',
+            }),
     },
 };
 

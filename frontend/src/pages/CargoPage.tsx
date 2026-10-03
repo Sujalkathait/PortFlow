@@ -3,6 +3,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { Plus, Trash2, X, Boxes, AlertCircle, CheckCircle2, RefreshCw, ArrowUpDown, Box } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '@/auth/AuthProvider';
+import { useAutoDismiss } from '@/hooks/use-auto-dismiss';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -27,7 +28,7 @@ export function CargoPage() {
     const [cargos, setCargos] = useState<CargoRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [success, showSuccess] = useAutoDismiss(6000);
     const [showCreate, setShowCreate] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
@@ -61,7 +62,7 @@ export function CargoPage() {
         if (submitting) return;
         setSubmitting(true);
         setError('');
-        setSuccess('');
+        showSuccess('');
 
         if (!number.trim()) {
             setError('Cargo identifier number is required');
@@ -78,7 +79,7 @@ export function CargoPage() {
                 current_location: location.trim() || 'Yard',
                 ship_name: shipName.trim(),
             });
-            setSuccess('Cargo registered successfully in database');
+            showSuccess('Cargo registered successfully in database');
             setShowCreate(false);
             setNumber('');
             setWeight('');
@@ -96,7 +97,7 @@ export function CargoPage() {
     const handleUpdateStatus = async (id: number, status: string) => {
         try {
             await api.Cargos.update(id, { status });
-            setSuccess(`Cargo status updated to ${status}`);
+            showSuccess(`Cargo status updated to ${status}`);
             void load();
         } catch (e: any) {
             setError(e.message || 'Failed to update cargo status');
@@ -107,7 +108,7 @@ export function CargoPage() {
         if (!window.confirm('Move this cargo to Trash?')) return;
         try {
             await api.Cargos.delete(id);
-            setSuccess('Cargo moved to Trash Bin');
+            showSuccess('Cargo moved to Trash Bin');
             void load();
         } catch (e: any) {
             setError(e.message || 'Failed to delete cargo');

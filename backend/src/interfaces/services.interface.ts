@@ -63,4 +63,5 @@ export interface IAuthService {
     register(data: RegisterUserDTO): Promise<AuthResponseDTO>;
     login(data: LoginDTO): Promise<AuthResponseDTO>;
     getCurrentUser(userId: number): Promise<any>;
+    deleteAccount(userId: number, deletedBy: string): Promise<boolean>;
 }

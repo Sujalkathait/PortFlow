@@ -28,7 +28,7 @@ We use a highly normalized PostgreSQL schema managed via Prisma. The primary ent
 Located in `src/os/`, this engine treats port operations as "OS Processes".
 - **Scheduling**: FCFS, SJF, and Priority algorithms determine which job leaves the Ready Queue first.
 - **Synchronization**: Uses **Mutexes** for 1:1 resource locking (e.g., Cranes) and **Semaphores** for counted resources (e.g., Berths).
-- **Deadlock Detection**: Continuously runs a Wait-For Graph (WFG) DFS cycle detection to alert Admins of blocked jobs.
+- **Deadlock Detection**: Continuously runs a Wait-For Graph (WFG) DFS cycle detection to alert operators of blocked jobs.
 
 ## 🚀 Setup Instructions
 1. Install dependencies:

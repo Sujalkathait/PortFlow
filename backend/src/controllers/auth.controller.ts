@@ -8,33 +8,21 @@ import { prisma } from '../config/prisma';
 // Seed or verify default accounts
 export async function seedDefaultAccounts(): Promise<void> {
     try {
-        const adminHash = await bcrypt.hash('Password123!', 10);
         const operatorHash = await bcrypt.hash('Password123!', 10);
 
         // Upsert ensures the account is created if missing, or reset if soft-deleted/stale
-        await prisma.user.upsert({
-            where: { email: 'admin@portflow.com' },
-            create: {
-                email: 'admin@portflow.com',
-                password_hash: adminHash,
-                full_name: 'Port Administrator',
-                role: 'Admin',
-            },
-            update: { password_hash: adminHash, deleted_at: null, deleted_by: null },
-        });
-
         await prisma.user.upsert({
             where: { email: 'operator@portflow.com' },
             create: {
                 email: 'operator@portflow.com',
                 password_hash: operatorHash,
-                full_name: 'Crane Operator',
+                full_name: 'Terminal Operator',
                 role: 'Operator',
             },
             update: { password_hash: operatorHash, deleted_at: null, deleted_by: null },
         });
 
-        console.log('[Auth] Verified default demo accounts: admin@portflow.com / operator@portflow.com with Password123!');
+        console.log('[Auth] Verified default demo account: operator@portflow.com with Password123!');
     } catch (err: any) {
         console.error('[Auth] Notice: Could not seed default accounts:', err.message);
     }
@@ -94,4 +82,23 @@ export async function getMe(req: AuthenticatedRequest, res: Response): Promise<v
         success: true,
         user: req.user,
     });
+}
+
+// DELETE /api/auth/account
+export async function deleteAccount(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (!req.user) {
+        res.status(401).json({ success: false, message: 'Not authenticated.' });
+        return;
+    }
+
+    try {
+        await authService.deleteAccount(req.user.id, req.user.email);
+        res.status(200).json({
+            success: true,
+            message: 'Your PortFlow account has been deleted successfully.',
+        });
+    } catch (err: any) {
+        console.error('[Auth] Delete account error:', err.message);
+        res.status(500).json({ success: false, message: 'Failed to delete account.' });
+    }
 }

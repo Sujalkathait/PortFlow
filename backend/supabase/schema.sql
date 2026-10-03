@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(120) NOT NULL CHECK (char_length(full_name) BETWEEN 2 AND 120),
-    role VARCHAR(50) NOT NULL DEFAULT 'Operator' CHECK (role IN ('Admin', 'Operator')),
+    role VARCHAR(50) NOT NULL DEFAULT 'Operator' CHECK (role IN ('Operator')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ DEFAULT NULL,
@@ -137,13 +137,13 @@ CREATE INDEX IF NOT EXISTS idx_equipment_type ON public.equipment(type);
 CREATE INDEX IF NOT EXISTS idx_equipment_status ON public.equipment(status);
 CREATE INDEX IF NOT EXISTS idx_equipment_deleted_at ON public.equipment(deleted_at);
 
--- 9. DEFAULT ACCOUNTS (admin@portflow.com & operator@portflow.com / Password123!)
-INSERT INTO public.users (email, password_hash, full_name, role)
+-- 9. DEFAULT ACCOUNTS (operator@portflow.com / Password123!)
+INSERT INTO public.users (email, password_hash, full_name, role, updated_at)
 VALUES 
-    ('admin@portflow.com', crypt('Password123!', gen_salt('bf', 10)), 'Port Administrator', 'Admin'),
-    ('operator@portflow.com', crypt('Password123!', gen_salt('bf', 10)), 'Crane Operator', 'Operator')
+    ('operator@portflow.com', crypt('Password123!', gen_salt('bf', 10)), 'Terminal Operator', 'Operator', NOW())
 ON CONFLICT (email) DO UPDATE SET
     password_hash = EXCLUDED.password_hash,
     full_name = EXCLUDED.full_name,
     role = EXCLUDED.role,
+    updated_at = NOW(),
     deleted_at = NULL;

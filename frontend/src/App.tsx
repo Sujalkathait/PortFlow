@@ -2,13 +2,14 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth, type Role } from './auth/AuthProvider';
 import { ProtectedRoute } from './auth/ProtectedRoute';
-import { Bell, ChevronDown, ShieldCheck } from 'lucide-react';
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/app-sidebar";
 import { CommandMenu } from "./components/command-menu";
 import { ThemeToggle } from './components/theme-toggle';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
+
+import { useNavigate } from 'react-router-dom';
 
 const Login = lazy(async () => ({ default: (await import('./pages/Login')).Login }));
 const DashboardPage = lazy(async () => ({ default: (await import('./pages/DashboardPage')).DashboardPage }));
@@ -17,9 +18,8 @@ const ShipsPage = lazy(async () => ({ default: (await import('./pages/ShipsPage'
 const CargoPage = lazy(async () => ({ default: (await import('./pages/CargoPage')).CargoPage }));
 const EquipmentPage = lazy(async () => ({ default: (await import('./pages/EquipmentPage')).EquipmentPage }));
 const SchedulingPage = lazy(async () => ({ default: (await import('./pages/SchedulingPage')).SchedulingPage }));
-const LogsPage = lazy(async () => ({ default: (await import('./pages/LogsPage')).LogsPage }));
-const ReportsPage = lazy(async () => ({ default: (await import('./pages/ReportsPage')).ReportsPage }));
-const ReportIssuePage = lazy(async () => ({ default: (await import('./pages/ReportIssuePage')).ReportIssuePage }));
+const TrashPage = lazy(async () => ({ default: (await import('./pages/TrashPage')).TrashPage }));
+const ProfilePage = lazy(async () => ({ default: (await import('./pages/ProfilePage')).ProfilePage }));
 
 function RouteLoading() {
     return <main className="page-loader" aria-live="polite">Loading workspace…</main>;
@@ -28,6 +28,7 @@ function RouteLoading() {
 function DashboardLayout({ role, children }: { role: Role; children: React.ReactNode }) {
     const { profile } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
 
     const userName = profile?.full_name || profile?.email || role;
     const userInitial = userName.charAt(0).toUpperCase();
@@ -47,7 +48,7 @@ function DashboardLayout({ role, children }: { role: Role; children: React.React
             <AppSidebar role={role} />
             <a className="skip-link" href="#main-content-area">Skip to main content</a>
             <div className="flex-1 flex flex-col min-w-0 bg-muted/20 dark:bg-background overflow-hidden h-screen">
-                <header className="flex h-16 items-center justify-between border-b bg-background/95 px-3 sm:px-4 lg:px-6 gap-3">
+                <header className="flex h-14 items-center justify-between border-b bg-background/95 px-3 sm:px-4 lg:px-6 gap-3">
                     <div className="flex items-center gap-4">
                         <SidebarTrigger />
                         <span className="text-sm font-medium text-muted-foreground hidden md:block">
@@ -57,16 +58,13 @@ function DashboardLayout({ role, children }: { role: Role; children: React.React
 
                     <div className="flex items-center gap-1.5 sm:gap-3 flex-1 justify-end max-w-xl">
                         <CommandMenu role={role} />
-                        
-                        <div className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
-                            <ShieldCheck size={14} />
-                            Live
-                        </div>
                         <ThemeToggle dark={dark} onToggle={() => setDark(value => !value)} />
-                        <button type="button" className="relative grid size-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Notifications: none unread" title="Notifications">
-                            <Bell aria-hidden="true" className="size-4" />
-                        </button>
-                        <div className="flex items-center gap-2.5 pl-2 border-l">
+                        <button
+                            type="button"
+                            onClick={() => navigate(role === 'Admin' ? '/admin/profile' : '/operator/profile')}
+                            className="flex items-center gap-2.5 pl-2 border-l hover:opacity-80 transition text-left cursor-pointer bg-transparent border-t-0 border-r-0 border-b-0"
+                            title="View My Profile"
+                        >
                             <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm">
                                 {userInitial}
                             </div>
@@ -74,8 +72,7 @@ function DashboardLayout({ role, children }: { role: Role; children: React.React
                                 <div className="text-xs font-semibold leading-none">{userName}</div>
                                 <div className="text-[11px] text-muted-foreground mt-0.5">{role}</div>
                             </div>
-                            <ChevronDown aria-hidden="true" className="hidden lg:block size-3.5 text-muted-foreground" />
-                        </div>
+                        </button>
                     </div>
                 </header>
 
@@ -147,20 +144,22 @@ function App() {
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
-                    <Route path="/admin/logs" element={
+                    <Route path="/admin/trash" element={
                         <ProtectedRoute role="Admin">
                             <DashboardLayout role="Admin">
-                                <LogsPage />
+                                <TrashPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
-                    <Route path="/admin/reports" element={
+                    <Route path="/admin/profile" element={
                         <ProtectedRoute role="Admin">
                             <DashboardLayout role="Admin">
-                                <ReportsPage />
+                                <ProfilePage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
+                    <Route path="/admin/logs" element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="/admin/reports" element={<Navigate to="/admin/dashboard" replace />} />
 
                     {/* Operator Protected Routes */}
                     <Route path="/operator" element={
@@ -212,20 +211,22 @@ function App() {
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
-                    <Route path="/operator/reports" element={
+                    <Route path="/operator/trash" element={
                         <ProtectedRoute role="Operator">
                             <DashboardLayout role="Operator">
-                                <ReportsPage />
+                                <TrashPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
-                    <Route path="/operator/report-issue" element={
+                    <Route path="/operator/profile" element={
                         <ProtectedRoute role="Operator">
                             <DashboardLayout role="Operator">
-                                <ReportIssuePage />
+                                <ProfilePage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
+                    <Route path="/operator/reports" element={<Navigate to="/operator/dashboard" replace />} />
+                    <Route path="/operator/report-issue" element={<Navigate to="/operator/dashboard" replace />} />
 
                     {/* Fallback Catch-All */}
                     <Route path="*" element={<Navigate to="/login" replace />} />

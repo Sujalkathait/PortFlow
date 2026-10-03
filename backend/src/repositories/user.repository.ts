@@ -51,6 +51,22 @@ export class UserRepository implements IUserRepository {
         }
     }
 
+    async softDelete(id: number, deletedBy: string): Promise<UserRecord | null> {
+        try {
+            const user = await prisma.user.update({
+                where: { id },
+                data: {
+                    deleted_at: new Date(),
+                    deleted_by: deletedBy,
+                }
+            });
+            return normalize(user);
+        } catch (err: any) {
+            console.error('[UserRepository] softDelete error:', err.message);
+            return null;
+        }
+    }
+
     async count(): Promise<number> {
         return prisma.user.count({ where: { deleted_at: null } });
     }

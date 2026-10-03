@@ -4,15 +4,14 @@ import {
   Anchor,
   Box,
   Cpu,
-  FileText,
-  HardDrive,
   Home,
   LogOut,
   Plus,
   Play,
   Search,
   Wrench,
-  AlertTriangle,
+  User,
+  Trash2,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -98,27 +97,19 @@ export function CommandMenu({ role = "Admin" }: CommandMenuProps) {
               <span>CPU Scheduling & Algorithms</span>
             </CommandItem>
             {role === "Admin" && (
-              <>
-                <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/Equipments`))}>
-                  <Wrench className="mr-2 h-4 w-4" />
-                  <span>Equipment & Cranes</span>
-                </CommandItem>
-                <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/logs`))}>
-                  <HardDrive className="mr-2 h-4 w-4" />
-                  <span>System Audit Logs</span>
-                </CommandItem>
-                <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/reports`))}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  <span>Reports & Analytics</span>
-                </CommandItem>
-              </>
-            )}
-            {role === "Operator" && (
-              <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/report-issue`))}>
-                <AlertTriangle className="mr-2 h-4 w-4" />
-                <span>Report Issue</span>
+              <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/Equipments`))}>
+                <Wrench className="mr-2 h-4 w-4" />
+                <span>Equipment & Cranes</span>
               </CommandItem>
             )}
+            <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/trash`))}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              <span>Trash Bin & Recovery</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/profile`))}>
+              <User className="mr-2 h-4 w-4" />
+              <span>My Profile & Settings</span>
+            </CommandItem>
           </CommandGroup>
 
           <CommandSeparator />

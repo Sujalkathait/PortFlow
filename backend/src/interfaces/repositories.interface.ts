@@ -71,4 +71,5 @@ export interface IUserRepository {
     findByEmail(email: string): Promise<UserRecord | null>;
     findById(id: number): Promise<UserRecord | null>;
     create(data: { email: string; password_hash: string; full_name: string; role: string }): Promise<UserRecord>;
+    softDelete(id: number, deletedBy: string): Promise<UserRecord | null>;
 }

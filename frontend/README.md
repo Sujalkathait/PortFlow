@@ -1,13 +1,12 @@
 # PortFlow Frontend
 
-The frontend is a modern web application built with **React, TypeScript, Vite, and Tailwind CSS**. It provides dashboards for Admins and Operators.
+The frontend is a modern web application built with **React, TypeScript, Vite, and Tailwind CSS**. It provides a unified dashboard for Terminal Operators.
 
 ## 🏗️ Folder Structure
 - **`components/ui/`**: Reusable UI parts (buttons, modals).
 - **`features/`**: Feature-specific logic (Hooks, Services).
 - **`lib/api.ts`**: API client to talk to the Node.js backend.
 - **`pages/`**: Full-page views:
-  - `AdminDashboard.tsx` / `OperatorDashboard.tsx`
   - `DashboardPage.tsx`
   - `CargoPage.tsx`
   - `ShipsPage.tsx`
@@ -32,5 +31,4 @@ The frontend is a modern web application built with **React, TypeScript, Vite, a
    ```
 
 ## 👥 Roles
-- **Admin**: Has full access to manage ships, cranes, and view OS metrics.
-- **Operator**: Can only view and update their assigned operations.
+- **Terminal Operator**: Has full access to manage ships, cranes, view OS metrics, and update assigned operations.

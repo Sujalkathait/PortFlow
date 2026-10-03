@@ -3,6 +3,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { Plus, Trash2, X, Ship, AlertCircle, CheckCircle2, RefreshCw, ArrowUpDown } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '@/auth/AuthProvider';
+import { useAutoDismiss } from '@/hooks/use-auto-dismiss';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -26,7 +27,7 @@ export function ShipsPage() {
     const [ships, setShips] = useState<ShipRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [success, showSuccess] = useAutoDismiss(6000);
     const [showCreate, setShowCreate] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
@@ -60,7 +61,7 @@ export function ShipsPage() {
         if (submitting) return;
         setSubmitting(true);
         setError('');
-        setSuccess('');
+        showSuccess('');
 
         if (!name.trim()) {
             setError('Ship name is required');
@@ -78,7 +79,7 @@ export function ShipsPage() {
                 capacity_teu: Number(capacity) || 0,
                 berth_id: chosenBerth || null,
             });
-            setSuccess('Ship registered successfully in database');
+            showSuccess('Ship registered successfully in database');
             setShowCreate(false);
             setName('');
             setImo('');
@@ -96,7 +97,7 @@ export function ShipsPage() {
     const handleUpdateStatus = async (id: number, status: string) => {
         try {
             await api.ships.update(id, { status });
-            setSuccess(`Ship status updated to ${status}`);
+            showSuccess(`Ship status updated to ${status}`);
             void load();
         } catch (e: any) {
             setError(e.message || 'Failed to update ship status');
@@ -107,7 +108,7 @@ export function ShipsPage() {
         if (!window.confirm('Move this ship to Trash?')) return;
         try {
             await api.ships.delete(id);
-            setSuccess('Ship moved to Trash Bin');
+            showSuccess('Ship moved to Trash Bin');
             void load();
         } catch (e: any) {
             setError(e.message || 'Failed to delete ship');

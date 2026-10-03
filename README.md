@@ -39,7 +39,7 @@ Modern commercial ports operate 24/7, coordinating massive container ships, heav
 1. **Custom OS Simulation Kernel**: Treats port jobs as operating system **processes**, manages scarce crane access through **Mutex locks**, models berth parking capacity using counting **Semaphores**, and dynamically schedules waiting jobs via selectable algorithms (**FCFS, SJF, Priority**).
 2. **Robust Database Layer**: Powered by PostgreSQL and Prisma ORM, utilizing 3NF relational normalization, foreign-key constraints, soft-delete audit trails, and transactional integrity.
 3. **Enterprise Low-Level Design (LLD)**: Built with clean separation of responsibilities on both backend (Controllers $\rightarrow$ Services $\rightarrow$ Repositories $\rightarrow$ Models/Interfaces) and frontend (Smart Containers $\rightarrow$ ViewModels/Custom Hooks $\rightarrow$ Presentational Components).
-4. **Interactive Operations Terminal**: A modern React 19 web suite featuring an **Admin Management Portal** and an **Operator Ground Terminal**.
+4. **Interactive Operations Terminal**: A modern React 19 web suite featuring a unified **Terminal Operator Ground Portal**.
 
 ---
 
@@ -246,29 +246,26 @@ By distilling the database into these **5 Core Entities**, we achieve high-speed
 
 ## ✨ User Roles & Core Features
 
-| Module | Admin |  Operator |
-| :--- | :--- | :--- |
-| **Primary Role** | Manages the whole port and system | Handles daily terminal operations |
-| **Dashboard** | Views all port activities and resources | Views assigned work and task status |
-| **Operations** | Creates, assigns, updates and manages all operations | Creates and updates assigned operations |
-| **Ships** | Manages ships, schedules and assignments | Views assigned ships and updates operational status |
-| **Cargo** | Manages and monitors all cargo and yard activities | Handles cargo movement and status updates |
-| **Berths** | Assigns and manages berths | Uses assigned berth and views its status |
-| **Cranes** | Assigns and manages cranes | Uses assigned crane and reports problems |
-| **Scheduling** | Uses and monitors the automatic scheduler | Uses and monitors the automatic scheduler |
-| **Scheduling Algorithm** | Uses and configures the active algorithm (FCFS / SJF / Priority) | Uses the configured algorithm |
-| **Ready / Running / Waiting Queue** | Monitors all queues and processes | Views relevant queues and assigned jobs |
-| **Process Execution** | Monitors port processes | Executes assigned processes |
-| **Resource & Locks** | Monitors resource allocation and Mutex/Semaphore locks | Views assigned resource status |
-| **Deadlock / Banker's Algorithm** | Monitors deadlock and resource state | Views warnings and reports issues |
-| **Analytics** | Views complete port analytics | Views operational/assigned analytics |
-| **Reports** | Reviews and manages reports | Creates and views operational reports |
-| **Incidents** | Receives and resolves incidents | Reports operational incidents |
-| **System Logs** | Monitors system activity | ❌ No access |
-| **Database Analytics** | Monitors database/system health | ❌ No access |
-| **Audit Trail** | Reviews user and system activities | ❌ No access |
-| **Trash / Recovery** | Restores or permanently removes deleted data | ❌ No access |
-| **User Management** | Manages users and roles | ❌ No access |
+PortFlow utilizes a unified **Terminal Operator** role, which has comprehensive access to oversee and execute all port operations:
+
+| Module | Terminal Operator Capabilities |
+| :--- | :--- |
+| **Primary Role** | Manages the whole port system and daily terminal operations |
+| **Dashboard** | Views all port activities, resource statuses, and metrics |
+| **Operations** | Creates, assigns, updates, and manages all operations and processes |
+| **Ships** | Manages ships, schedules, and operational assignments |
+| **Cargo** | Manages and monitors all cargo and yard activities |
+| **Berths** | Assigns and manages berths, views status |
+| **Cranes** | Assigns and manages cranes, reports problems |
+| **Scheduling** | Uses and monitors the automatic OS scheduler |
+| **Scheduling Algorithm** | Configures the active algorithm (FCFS / SJF / Priority) and observes process queuing |
+| **Process Execution** | Monitors and executes port processes in real-time |
+| **Resource & Locks** | Monitors resource allocation and Mutex/Semaphore locks |
+| **Deadlock / Banker's Algorithm** | Monitors deadlock state, warnings, and system health |
+| **Analytics** | Views complete port analytics and telemetry |
+| **Trash / Recovery Bin** | Full 1-click restore across all collections & permanent purge / empty trash |
+| **My Profile & Account** | Simple profile overview & self-service account management |
+| **System Logs & Reports** | Streamlined for focused terminal operations |
 
 ---
 
@@ -349,23 +346,22 @@ npm run dev
 
 ## 🔑 Test Credentials
 
-PortFlow comes pre-seeded with developer accounts for instant evaluation:
+PortFlow comes pre-seeded with a developer account for instant evaluation:
 
 | Role | Email Address | Password | Permissions |
 | :--- | :--- | :--- | :--- |
-| **Port Administrator** | `admin@portflow.com` | `Password123!` | Full admin access, equipment setup, OS scheduling, reports, trash recovery |
-| **Crane Operator** | `operator@portflow.com` | `Password123!` | Ground terminal, task execution, cargo updates, breakdown reporting |
+| **Terminal Operator** | `operator@portflow.com` | `Password123!` | Full system access, equipment setup, OS scheduling, reports, trash recovery, and ground operations |
 
-*(One-click demo login buttons are also provided directly on the Login page).*
+*(A one-click demo login button is also provided directly on the Login page).*
 
 ---
 
 ## 📈 Project Milestones & Roadmap
 
 - [x] **Phase 1: Project Foundation (10%)** — Architectural mapping, entity-relationship modeling, and OS simulation design.
-- [x] **Phase 2: Core Working Implementation (40%)** — Working Admin & Operator panels, OS scheduling algorithms, Mutex locks, Semaphores, Prisma ORM, and CRUD REST APIs.
+- [x] **Phase 2: Core Working Implementation (40%)** — Working Terminal Operator panel, OS scheduling algorithms, Mutex locks, Semaphores, Prisma ORM, and CRUD REST APIs.
 - [x] **LLD Architectural Refactoring** — Full decoupling with Domain Models, DTOs, Repository Interfaces, Service Layer, and Feature-based folder structure.
-- [x] **Phase 3: Dashboards & Analytics (50%)** — Comprehensive Admin/Operator dashboards, system analytics, logging, equipment management, and production cloud hosting.
+- [x] **Phase 3: Dashboards & Analytics (50%)** — Comprehensive Terminal Operator dashboards, system analytics, logging, equipment management, and production cloud hosting.
 - [ ] **Phase 4: Advanced Logistics (Future Phases)** — Real-time WebSocket telemetry, customs clearance workflow, trucks, billing, and active RAG deadlock recovery.
 
 ---

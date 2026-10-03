@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 import { apiRouter } from './routes/api';
 import { initDatabase, checkDatabaseConnection, isDatabaseConnected } from './config/database';
 import { seedDefaultAccounts } from './controllers/auth.controller';
+import { seedDatabase } from './config/seed';
 
 const app = express();
 const port = Number(process.env.PORT || 10000);
@@ -13,11 +14,14 @@ const port = Number(process.env.PORT || 10000);
 // Security middleware
 app.use(helmet());
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    max: isDev ? 10000 : 3000, // Generous limit for real-time telemetry and polling
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many requests. Please wait a moment and try again.' },
 });
 
 // Apply the rate limiting middleware to API calls only
@@ -28,8 +32,8 @@ const corsOrigin = process.env.CORS_ORIGIN || '*';
 app.use(cors({
     origin: corsOrigin === '*' ? '*' : corsOrigin.split(',').map(s => s.trim()),
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-user-email'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-user-email', 'Accept', 'Origin', 'X-Requested-With'],
 }));
 
 // Request parsing
@@ -105,6 +109,7 @@ const server = app.listen(port, async () => {
     await initDatabase();
     if (isDatabaseConnected()) {
         await seedDefaultAccounts();
+        await seedDatabase();
     } else {
         console.warn('[Auth] Skipping demo-account seeding because the database is unavailable.');
     }

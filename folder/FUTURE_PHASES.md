@@ -27,4 +27,4 @@ While the current OS kernel supports non-preemptive FCFS, SJF, and Priority sche
 - **Expanded Schema:** Adding the remaining 7 tables (`TRUCKS`, `WAREHOUSES`, `INSPECTIONS`, `CUSTOMS`, `BILLS`, etc.) to fully realize the 12-table blueprint.
 
 ## ⚡ 4. Real-Time WebSockets
-- **Socket.io / SSE Integration:** Upgrading the current React Query / HTTP polling system to a persistent WebSocket connection. This will allow the Admin Dashboard to reflect OS kernel state changes (like lock acquisitions and queue movements) instantly with real-time animations.
+- **Socket.io / SSE Integration:** Upgrading the current React Query / HTTP polling system to a persistent WebSocket connection. This will allow the Dashboard to reflect OS kernel state changes (like lock acquisitions and queue movements) instantly with real-time animations.

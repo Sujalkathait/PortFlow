@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sidebar"
 import {
     LayoutDashboard, Ship, Anchor, Truck, Settings,
-    LogOut, Cpu, Boxes, Database, ScrollText, AlertTriangle
+    LogOut, Cpu, Boxes, User, Trash2
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
@@ -44,8 +44,8 @@ export function AppSidebar({ role }: { role: string }) {
         { page: 'Cargos', label: 'Cargo', icon: Boxes },
         { page: 'Equipments', label: 'Berths & Cranes', icon: Truck },
         { page: 'scheduling', label: 'Scheduling', icon: Cpu },
-        { page: 'logs', label: 'System Logs', icon: ScrollText },
-        { page: 'reports', label: 'Reports', icon: Database },
+        { page: 'trash', label: 'Trash Bin', icon: Trash2 },
+        { page: 'profile', label: 'My Profile', icon: User },
     ];
 
     const operatorItems = [
@@ -55,8 +55,8 @@ export function AppSidebar({ role }: { role: string }) {
         { page: 'Cargos', label: 'Cargo', icon: Boxes },
         { page: 'Equipments', label: 'Berths & Cranes', icon: Truck },
         { page: 'scheduling', label: 'Scheduling', icon: Cpu },
-        { page: 'reports', label: 'Operational Reports', icon: Database },
-        { page: 'report-issue', label: 'Report Issue', icon: AlertTriangle },
+        { page: 'trash', label: 'Trash Bin', icon: Trash2 },
+        { page: 'profile', label: 'My Profile', icon: User },
     ];
 
     const items = role === 'Admin' ? adminItems : operatorItems;

@@ -108,7 +108,7 @@ PortFlow is designed with a comprehensive 12-table ER diagram to support all ope
 
 ### Full LLD Architecture (All 12 Tables)
 The complete architecture requires the following 12 entities:
-1. **users** - System access, roles (Admin/Operator), and authentication.
+1. **users** - System access, roles (Terminal Operator), and authentication.
 2. **ships** - Vessel details, IMO numbers, capacities, and arrival status.
 3. **berths** - Docking locations and occupancy status (Semaphore controlled).
 4. **cranes** - Lifting equipment and availability status (Mutex controlled).

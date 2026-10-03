@@ -72,7 +72,7 @@ export const reportIssue = async (req: AuthenticatedRequest, res: Response): Pro
         const { title, description } = req.body;
         // In a real system, we'd save this to an issues table. For now, we mock success.
         console.log(`[Issue Reported] by ${req.user?.email}: ${title} - ${description}`);
-        res.status(201).json({ success: true, message: 'Issue reported successfully. Admin has been notified.' });
+        res.status(201).json({ success: true, message: 'Issue reported successfully. System has recorded the issue.' });
     } catch (error: any) {
         res.status(500).json({ success: false, message: 'Failed to report issue.' });
     }

@@ -15,10 +15,9 @@ Phase 2 transforms the Phase 1 blueprint into a working software application. Th
 ## 🔐 2. Core Port Modules Built
 We implemented the essential business logic required to operate the port:
 1. **Authentication & RBAC:** Secure login with JWT. 
-   - *Admins* have full God-mode access.
-   - *Operators* can only update their assigned cargo statuses.
+   - *Terminal Operators* have full access to manage resources and statuses.
 2. **Ships & Cargo:** CRUD interfaces to register incoming vessels and their container manifests.
-3. **Physical Resources:** Admins can define how many Berths and Cranes physically exist at the port.
+3. **Physical Resources:** Terminal Operators can define how many Berths and Cranes physically exist at the port.
 4. **Operations Hub:** The heart of Phase 2. Users create a Port Job (e.g., "Unload Ship X"), which is instantly handed over to the OS Simulator.
 
 ---
@@ -30,7 +29,7 @@ This is where the application shines. When a Port Job is created, it enters the 
 We built three algorithms to manage the **Ready Queue**:
 - **FCFS (First Come First Serve):** Jobs run in chronological order.
 - **SJF (Shortest Job First):** The system scans the queue and executes the job that will finish the fastest, minimizing average waiting time.
-- **Priority Scheduling:** Admins can flag VIP cargo to jump the line.
+- **Priority Scheduling:** Terminal Operators can flag VIP cargo to jump the line.
 
 ```mermaid
 flowchart LR
@@ -62,7 +61,7 @@ sequenceDiagram
 ### C. Deadlock Detection (Wait-For Graph)
 If two jobs get stuck waiting for each other, it causes a Deadlock. 
 - In Phase 2, the system constantly runs a **Depth-First Search (DFS)** algorithm to detect cycles in the Wait-For Graph.
-- If a cycle is found, it throws a giant red **Deadlock Warning** on the Admin dashboard.
+- If a cycle is found, it throws a giant red **Deadlock Warning** on the dashboard.
 
 ---
 

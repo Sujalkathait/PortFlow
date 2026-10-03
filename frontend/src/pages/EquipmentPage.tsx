@@ -4,6 +4,7 @@ import { Plus, Trash2, X, Truck, Anchor, AlertCircle, CheckCircle2, RefreshCw, W
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '@/auth/AuthProvider';
+import { useAutoDismiss } from '@/hooks/use-auto-dismiss';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -27,7 +28,7 @@ export function EquipmentPage() {
     const [equipments, setEquipments] = useState<EquipmentRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [success, showSuccess] = useAutoDismiss(6000);
     const [showCreate, setShowCreate] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
@@ -57,7 +58,7 @@ export function EquipmentPage() {
         if (submitting) return;
         setSubmitting(true);
         setError('');
-        setSuccess('');
+        showSuccess('');
 
         if (!name.trim()) {
             setError('Equipment name is required');
@@ -71,7 +72,7 @@ export function EquipmentPage() {
                 type,
                 equipment_id: equipmentId.trim() || undefined,
             });
-            setSuccess('Equipment added successfully to database');
+            showSuccess('Equipment added successfully to database');
             setShowCreate(false);
             setName('');
             setEquipmentId('');
@@ -86,7 +87,7 @@ export function EquipmentPage() {
     const handleUpdateStatus = async (id: number, status: string) => {
         try {
             await api.Equipments.update(id, { status });
-            setSuccess(`Equipment status updated to ${status}`);
+            showSuccess(`Equipment status updated to ${status}`);
             void load();
         } catch (e: any) {
             setError(e.message || 'Failed to update equipment');
@@ -97,7 +98,7 @@ export function EquipmentPage() {
         if (!window.confirm('Move this equipment to Trash?')) return;
         try {
             await api.Equipments.delete(id);
-            setSuccess('Equipment moved to Trash Bin');
+            showSuccess('Equipment moved to Trash Bin');
             void load();
         } catch (e: any) {
             setError(e.message || 'Failed to delete equipment');

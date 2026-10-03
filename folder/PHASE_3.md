@@ -14,8 +14,8 @@ Phase 3 builds upon the Core Engine from Phase 2 by adding comprehensive system 
 
 ## 🖥️ 2. Comprehensive Frontend Dashboards
 We expanded the React UI to provide distinct experiences tailored to user roles:
-1. **Admin Dashboard:** A high-level overview of port analytics, active operations, and system health.
-2. **Operator Dashboard:** A focused view allowing operators to manage the specific operations and cargo assigned to them.
+1. **Terminal Operator Dashboard:** A high-level overview of port analytics, active operations, and system health.
+2. **Operations Hub:** A focused view allowing operators to manage the specific operations and cargo assigned to them.
 3. **Equipment Management:** A dedicated interface (`EquipmentPage.tsx`) to track the status, assignment, and health of Cranes and Berths.
 
 ---
@@ -24,7 +24,7 @@ We expanded the React UI to provide distinct experiences tailored to user roles:
 To maintain visibility over the OS kernel and database, we introduced powerful observability tools:
 1. **System Analytics:** New APIs (`/api/analytics`, `/api/system/db-analytics`) provide real-time metrics on process turnaround times, queue lengths, and resource utilization.
 2. **System & Audit Logs:** Dedicated tracking (`LogsPage.tsx`, `ReportsPage.tsx`) for system events, ensuring full traceability of who initiated which port job and when.
-3. **Issue Reporting:** A module allowing operators to report hardware malfunctions or software issues directly to administrators (`ReportIssuePage.tsx`).
+3. **Issue Reporting:** A module allowing operators to log hardware malfunctions or software issues (`ReportIssuePage.tsx`).
 
 ---
 
