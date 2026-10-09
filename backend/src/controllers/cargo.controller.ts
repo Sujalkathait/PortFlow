@@ -60,7 +60,7 @@ export const updateCargo = async (req: AuthenticatedRequest, res: Response): Pro
             return;
         }
 
-        const validStatuses = ['In Yard', 'Loaded', 'Discharged'];
+        const validStatuses = ['On Ship', 'In Yard', 'Cleared', 'In Transit', 'Loaded', 'Discharged', 'Dispatched'];
         if (status !== undefined && !validStatuses.includes(status)) {
             res.status(400).json({ success: false, message: `Status must be one of: ${validStatuses.join(', ')}` });
             return;

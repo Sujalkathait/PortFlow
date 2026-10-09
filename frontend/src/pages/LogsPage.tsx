@@ -48,7 +48,7 @@ export function LogsPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Administration</p>
+                    <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">System Activity</p>
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">System & Audit Logs</h1>
                     <p className="text-sm text-muted-foreground">Monitor real-time system events, application errors, and user mutation audits</p>
                 </div>
@@ -138,7 +138,7 @@ export function LogsPage() {
                                 <ShieldCheck className="h-4 w-4 text-primary" /> User Actions & Mutation Audit
                             </CardTitle>
                             <CardDescription>
-                                Tamper-evident trail of who performed administrative and operator tasks.
+                                Tamper-evident trail of actions and terminal operator tasks.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>

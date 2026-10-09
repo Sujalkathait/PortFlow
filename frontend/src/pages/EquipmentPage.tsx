@@ -1,9 +1,7 @@
 import { useEffect, useState, type FormEvent, useCallback, useMemo } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Plus, Trash2, X, Truck, Anchor, AlertCircle, CheckCircle2, RefreshCw, Warehouse, ArrowUpDown, AlertTriangle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Plus, Trash2, X, Truck, Anchor, AlertCircle, CheckCircle2, RefreshCw, Warehouse, ArrowUpDown } from 'lucide-react';
 import { api } from '../lib/api';
-import { useAuth } from '@/auth/AuthProvider';
 import { useAutoDismiss } from '@/hooks/use-auto-dismiss';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,10 +19,6 @@ interface EquipmentRecord {
 }
 
 export function EquipmentPage() {
-    const navigate = useNavigate();
-    const { profile } = useAuth();
-    const isAdmin = profile?.role === 'Admin';
-
     const [equipments, setEquipments] = useState<EquipmentRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -174,14 +168,6 @@ export function EquipmentPage() {
                     ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800'
                     : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800';
 
-                if (!isAdmin) {
-                    return (
-                        <span className={`inline-flex items-center text-xs font-semibold rounded-full px-2.5 py-1 border ${statusColors}`}>
-                            {r.status}
-                        </span>
-                    );
-                }
-
                 return (
                     <select
                         value={r.status}
@@ -211,32 +197,19 @@ export function EquipmentPage() {
             header: () => <div className="text-right">Actions</div>,
             cell: ({ row }) => (
                 <div className="flex items-center justify-end">
-                    {isAdmin ? (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => void handleDelete(row.original.id)}
-                            title="Move to Trash"
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    ) : (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 px-2 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-                            onClick={() => navigate('/operator/report-issue')}
-                            title="Report Problem"
-                        >
-                            <AlertTriangle className="h-3.5 w-3.5 mr-1" />
-                            Report Problem
-                        </Button>
-                    )}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => void handleDelete(row.original.id)}
+                        title="Move to Trash"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
                 </div>
             ),
         },
-    ], [isAdmin, navigate]);
+    ], []);
 
     return (
         <div className="space-y-6">
@@ -245,10 +218,10 @@ export function EquipmentPage() {
                 <div>
                     <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Port Infrastructure</p>
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                        {isAdmin ? 'Equipment & Infrastructure' : 'Assigned Berths, Cranes & Trucks'}
+                        Equipment Management
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        {isAdmin ? 'Manage port berths, heavy cranes, transport trucks, and container yards' : 'View assigned berth status, crane availability, and report issues'}
+                        Manage port berths, heavy cranes, transport trucks, and container yards
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -256,12 +229,10 @@ export function EquipmentPage() {
                         <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         Refresh
                     </Button>
-                    {isAdmin && (
-                        <Button size="sm" onClick={() => setShowCreate(true)}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Equipment
-                        </Button>
-                    )}
+                    <Button size="sm" onClick={() => setShowCreate(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Equipment
+                    </Button>
                 </div>
             </div>
 

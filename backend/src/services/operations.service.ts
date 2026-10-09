@@ -82,12 +82,13 @@ export class OperationsService implements IOperationsService {
         const opId = Number(result.id.replace('op-', ''));
         const op = await this.repo.findById(opId);
         if (op) {
+            const isCompleted = result.status === 'TERMINATED' || result.remainingTime <= 0;
             await this.repo.update(opId, {
-                status: 'Completed',
+                status: isCompleted ? 'Completed' : 'Running',
                 start_time: result.startTime ? new Date(result.startTime).toISOString() : new Date().toISOString(),
-                end_time: new Date().toISOString(),
+                end_time: isCompleted ? new Date().toISOString() : undefined,
                 waiting_time_ms: result.waitingTime,
-                turnaround_time_ms: result.turnaroundTime,
+                turnaround_time_ms: isCompleted ? result.turnaroundTime : undefined,
             });
         }
 

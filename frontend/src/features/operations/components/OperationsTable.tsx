@@ -14,7 +14,6 @@ interface OperationsTableProps {
     onUpdateStatus: (id: number, status: string) => void;
     onEdit: (op: OperationRecord) => void;
     onDelete: (id: number) => void;
-    isAdmin?: boolean;
 }
 
 export function OperationsTable({
@@ -23,7 +22,6 @@ export function OperationsTable({
     onUpdateStatus,
     onEdit,
     onDelete,
-    isAdmin = true,
 }: OperationsTableProps) {
     const columns: ColumnDef<OperationRecord>[] = useMemo(() => [
         {
@@ -173,22 +171,20 @@ export function OperationsTable({
                         >
                             <Sliders className="h-3.5 w-3.5" />
                         </Button>
-                        {isAdmin && (
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                                onClick={() => onDelete(op.id)}
-                                title="Move to Trash"
-                            >
-                                <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                        )}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                            onClick={() => onDelete(op.id)}
+                            title="Move to Trash"
+                        >
+                            <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
                     </div>
                 );
             },
         },
-    ], [onUpdateStatus, onEdit, onDelete, isAdmin]);
+    ], [onUpdateStatus, onEdit, onDelete]);
 
     return (
         <DataTable

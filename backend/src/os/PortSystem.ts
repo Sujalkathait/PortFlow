@@ -1,10 +1,10 @@
 import { Process } from './Process';
-import { Scheduler, FCFSStrategy, SJFStrategy, PriorityStrategy } from './Scheduler';
+import { Scheduler, FCFSStrategy, SJFStrategy, PriorityStrategy, RoundRobinStrategy } from './Scheduler';
 import { Mutex } from './Mutex';
 import { Semaphore } from './Semaphore';
 import { DeadlockDetector } from './DeadlockDetector';
 
-export type SchedulingAlgo = 'FCFS' | 'SJF' | 'PRIORITY';
+export type SchedulingAlgo = 'FCFS' | 'SJF' | 'ROUND_ROBIN' | 'PRIORITY';
 
 export class PortSystem {
     private static instance: PortSystem;
@@ -32,6 +32,7 @@ export class PortSystem {
         this.currentAlgo = algo;
         if (algo === 'FCFS') this.scheduler.setStrategy(new FCFSStrategy());
         else if (algo === 'SJF') this.scheduler.setStrategy(new SJFStrategy());
+        else if (algo === 'ROUND_ROBIN') this.scheduler.setStrategy(new RoundRobinStrategy(2000));
         else if (algo === 'PRIORITY') this.scheduler.setStrategy(new PriorityStrategy());
     }
 
@@ -67,8 +68,13 @@ export class PortSystem {
             }
         }
 
-        // Simulate some processing time
-        await new Promise(resolve => setTimeout(resolve, process.burstTime));
+        const isRoundRobin = this.currentAlgo === 'ROUND_ROBIN';
+        const quantum = 2000;
+        const currentBurst = process.remainingTime > 0 ? process.remainingTime : process.burstTime;
+        const timeToRun = isRoundRobin ? Math.min(currentBurst, quantum) : currentBurst;
+
+        // Simulate processing time
+        await new Promise(resolve => setTimeout(resolve, timeToRun));
 
         // Release locks
         for (const res of process.heldEquipments) {
@@ -77,6 +83,15 @@ export class PortSystem {
             }
         }
         process.heldEquipments = [];
+
+        if (isRoundRobin) {
+            process.remainingTime = currentBurst - timeToRun;
+            if (process.remainingTime > 0) {
+                process.status = 'READY';
+                this.scheduler.addProcess(process);
+                return process;
+            }
+        }
 
         process.finish();
         this.executedProcesses.push(process);

@@ -46,7 +46,7 @@ export function ReportIssuePage() {
             <div>
                 <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Operator Support</p>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">Report Incident / Technical Issue</h1>
-                <p className="text-sm text-muted-foreground">Submit operational anomalies, crane equipment faults, or vessel conflicts for administrative review</p>
+                <p className="text-sm text-muted-foreground">Submit operational anomalies, crane equipment faults, or vessel conflicts for logging & review</p>
             </div>
 
             {/* Notification Alerts */}
@@ -69,7 +69,7 @@ export function ReportIssuePage() {
                         <AlertTriangle className="h-4 w-4 text-amber-500" /> Incident Report Form
                     </CardTitle>
                     <CardDescription>
-                        Details submitted here are dispatched into the system audit log and alerted to administrators.
+                        Details submitted here are dispatched into the system audit log.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

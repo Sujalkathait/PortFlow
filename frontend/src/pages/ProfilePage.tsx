@@ -26,9 +26,8 @@ export function ProfilePage() {
 
   const fullName = profile?.full_name || 'Portflow User';
   const email = profile?.email || 'user@portflow.com';
-  const role = profile?.role || 'Operator';
   const initial = fullName.charAt(0).toUpperCase();
-  const basePath = role === 'Admin' ? '/admin' : '/operator';
+  const basePath = '/operator';
 
   const handleDeleteAccount = async () => {
     setBusy(true);
@@ -75,13 +74,9 @@ export function ProfilePage() {
                 <CardTitle className="text-xl font-bold">{fullName}</CardTitle>
                 <CardDescription className="text-sm mt-0.5">{email}</CardDescription>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                    role === 'Admin' 
-                      ? 'bg-primary/10 text-primary border border-primary/30' 
-                      : 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/30'
-                  }`}>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/30">
                     <Shield className="w-3 h-3" />
-                    {role === 'Admin' ? 'Port Administrator' : 'Terminal Operator'}
+                    Terminal Operator
                   </span>
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -128,7 +123,7 @@ export function ProfilePage() {
               <div>
                 <div className="text-xs text-muted-foreground font-medium">Assigned Role</div>
                 <div className="text-sm font-semibold text-foreground">
-                  {role === 'Admin' ? 'Port Administrator' : 'Terminal Operator'}
+                  Terminal Operator
                 </div>
               </div>
             </div>
@@ -174,7 +169,7 @@ export function ProfilePage() {
           {!confirmDelete ? (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-destructive/20">
               <div className="text-xs text-muted-foreground">
-                Once deleted, you will need an administrator or new registration to regain access.
+                Once deleted, you will need a new registration to regain access.
               </div>
               <Button
                 variant="destructive"

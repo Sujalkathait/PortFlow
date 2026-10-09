@@ -31,11 +31,11 @@ interface CommandMenuProps {
   role?: string
 }
 
-export function CommandMenu({ role = "Admin" }: CommandMenuProps) {
+export function CommandMenu(_props: CommandMenuProps = {}) {
   const [open, setOpen] = React.useState(false)
   const navigate = useNavigate()
   const { signOut } = useAuth()
-  const basePath = role === "Admin" ? "/admin" : "/operator"
+  const basePath = "/operator"
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -96,12 +96,10 @@ export function CommandMenu({ role = "Admin" }: CommandMenuProps) {
               <Cpu className="mr-2 h-4 w-4" />
               <span>CPU Scheduling & Algorithms</span>
             </CommandItem>
-            {role === "Admin" && (
-              <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/Equipments`))}>
-                <Wrench className="mr-2 h-4 w-4" />
-                <span>Equipment & Cranes</span>
-              </CommandItem>
-            )}
+            <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/Equipments`))}>
+              <Wrench className="mr-2 h-4 w-4" />
+              <span>Equipment & Cranes</span>
+            </CommandItem>
             <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/trash`))}>
               <Trash2 className="mr-2 h-4 w-4" />
               <span>Trash Bin & Recovery</span>

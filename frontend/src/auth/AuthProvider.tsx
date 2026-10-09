@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { api } from '../lib/api';
 
-export type Role = 'Admin' | 'Operator';
+export type Role = 'Operator';
 
 export type Profile = {
     id: number | string;
@@ -29,7 +29,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const saved = localStorage.getItem(USER_KEY);
         if (!saved) return null;
         try {
-            return JSON.parse(saved) as Profile;
+            const parsed = JSON.parse(saved) as Profile;
+            return { ...parsed, role: 'Operator' };
         } catch {
             return null;
         }
@@ -51,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         id: res.user.id,
                         email: res.user.email,
                         full_name: res.user.fullName || res.user.full_name || res.user.email,
-                        role: res.user.role,
+                        role: 'Operator',
                     };
                     setUser(verifiedUser);
                     localStorage.setItem(USER_KEY, JSON.stringify(verifiedUser));
@@ -86,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 id: res.user.id,
                 email: res.user.email,
                 full_name: res.user.full_name || res.user.email,
-                role: res.user.role,
+                role: 'Operator',
             };
             localStorage.setItem(TOKEN_KEY, res.token);
             localStorage.setItem(USER_KEY, JSON.stringify(loggedUser));
@@ -97,15 +98,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const register = async (email: string, password: string, fullName: string, role?: Role): Promise<Profile> => {
+    const register = async (email: string, password: string, fullName: string, _role?: Role): Promise<Profile> => {
         setLoading(true);
         try {
-            const res = await api.auth.register({ email, password, fullName, role });
+            const res = await api.auth.register({ email, password, fullName, role: 'Operator' });
             const registeredUser: Profile = {
                 id: res.user.id,
                 email: res.user.email,
                 full_name: res.user.full_name,
-                role: res.user.role,
+                role: 'Operator',
             };
             localStorage.setItem(TOKEN_KEY, res.token);
             localStorage.setItem(USER_KEY, JSON.stringify(registeredUser));

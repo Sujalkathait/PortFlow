@@ -8,7 +8,7 @@ import {
 import { getShips, getShipById, createShip, updateShip, deleteShip } from '../controllers/ships.controller';
 import { getCargos, createCargo, updateCargo, deleteCargo } from '../controllers/cargo.controller';
 import { getEquipments, createEquipment, updateEquipment, deleteEquipment } from '../controllers/equipment.controller';
-import { register, login, getMe, deleteAccount } from '../controllers/auth.controller';
+import { register, login, getMe, deleteAccount, forgotPassword, verifyOTP, resetPassword } from '../controllers/auth.controller';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { getSystemLogs, getAuditLogs, getDatabaseAnalytics, reportIssue } from '../controllers/system.controller';
 import { getTrash, restoreItem, emptyTrash, permanentDeleteItem } from '../controllers/trash.controller';
@@ -25,9 +25,12 @@ const authLimiter = rateLimit({
     message: { success: false, message: 'Too many authentication attempts. Please wait a moment and try again.' },
 });
 
-// ─── Authentication Endpoints ───
+// ─── Authentication & Password Recovery Endpoints ───
 apiRouter.post('/auth/register', authLimiter, register);
 apiRouter.post('/auth/login', authLimiter, login);
+apiRouter.post('/auth/forgot-password', authLimiter, forgotPassword);
+apiRouter.post('/auth/verify-otp', authLimiter, verifyOTP);
+apiRouter.post('/auth/reset-password', authLimiter, resetPassword);
 apiRouter.get('/auth/me', requireAuth, getMe);
 apiRouter.delete('/auth/account', requireAuth, deleteAccount);
 

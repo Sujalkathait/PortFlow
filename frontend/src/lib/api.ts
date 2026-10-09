@@ -64,7 +64,7 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 export const api = {
     // ─── Authentication ───
     auth: {
-        register: (body: { email: string; password: string; fullName: string; role?: 'Admin' | 'Operator' }) =>
+        register: (body: { email: string; password: string; fullName: string; role?: 'Operator' | string }) =>
             request<{ success: boolean; message: string; token: string; user: any }>('/auth/register', {
                 method: 'POST',
                 body: JSON.stringify(body),
@@ -78,6 +78,21 @@ export const api = {
         deleteAccount: () =>
             request<{ success: boolean; message: string }>('/auth/account', {
                 method: 'DELETE',
+            }),
+        forgotPassword: (email: string) =>
+            request<{ success: boolean; message: string; debugOtp?: string }>('/auth/forgot-password', {
+                method: 'POST',
+                body: JSON.stringify({ email }),
+            }),
+        verifyOTP: (email: string, otp: string) =>
+            request<{ success: boolean; message: string }>('/auth/verify-otp', {
+                method: 'POST',
+                body: JSON.stringify({ email, otp }),
+            }),
+        resetPassword: (body: { email: string; otp: string; newPassword: string }) =>
+            request<{ success: boolean; message: string }>('/auth/reset-password', {
+                method: 'POST',
+                body: JSON.stringify(body),
             }),
     },
 

@@ -149,7 +149,7 @@ export function TrashPage() {
       case 'Cargos':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-            <Boxes className="w-3.5 h-3.5" /> Cargo
+            <Boxes className="w-3.5 h-3.5" /> Container
           </span>
         );
       case 'Equipments':
@@ -176,7 +176,7 @@ export function TrashPage() {
             <Trash2 className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Recovery Bin</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Trash & Recovery</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Restore soft-deleted records or permanently purge terminal data.
             </p>

@@ -82,7 +82,7 @@ export function SchedulingPage() {
                         <span className="text-xs font-bold tracking-widest uppercase">OS Engine</span>
                     </div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        Scheduler & Concurrency
+                        OS Scheduler & Resource Control
                     </h1>
                     <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xl">
                         Real-time CPU Scheduling, Mutex Lock Allocation, Semaphores, and Deadlock Detection.
@@ -138,19 +138,19 @@ export function SchedulingPage() {
                     </div>
                     <div className="flex items-center gap-3 w-full md:w-auto">
                         <span className="text-sm text-slate-500 hidden lg:inline">Current Policy:</span>
-                        <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 p-1 bg-white dark:bg-slate-950 shadow-sm w-full md:w-auto">
-                            {(['FCFS', 'SJF', 'PRIORITY'] as const).map((algo) => (
+                        <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 p-1 bg-white dark:bg-slate-950 shadow-sm w-full md:w-auto flex-wrap">
+                            {(['FCFS', 'SJF', 'ROUND_ROBIN', 'PRIORITY'] as const).map((algo) => (
                                 <button
                                     key={algo}
                                     type="button"
                                     onClick={() => void handleAlgoChange(algo)}
-                                    className={`flex-1 md:flex-none px-4 py-2 text-xs font-bold rounded-md transition-all ${
+                                    className={`flex-1 md:flex-none px-3.5 py-2 text-xs font-bold rounded-md transition-all ${
                                         schedulerType === algo
                                             ? 'bg-blue-600 text-white shadow-sm'
                                             : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
                                     }`}
                                 >
-                                    {algo}
+                                    {algo === 'ROUND_ROBIN' ? 'Round Robin' : algo}
                                 </button>
                             ))}
                         </div>
@@ -166,10 +166,13 @@ export function SchedulingPage() {
                         <Cpu className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{schedulerType}</div>
+                        <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                            {schedulerType === 'ROUND_ROBIN' ? 'Round Robin' : schedulerType}
+                        </div>
                         <p className="text-xs font-medium text-slate-500 mt-1">
                             {schedulerType === 'FCFS' && 'First-Come, First-Served'}
                             {schedulerType === 'SJF' && 'Shortest Job First'}
+                            {schedulerType === 'ROUND_ROBIN' && 'Round Robin (Time Quantum: 2000ms)'}
                             {schedulerType === 'PRIORITY' && 'Highest Priority First'}
                         </p>
                     </CardContent>
@@ -398,6 +401,162 @@ export function SchedulingPage() {
                     </Card>
                 </div>
             )}
+
+            {/* Scheduling Algorithm Comparison Matrix */}
+            <Card className="shadow-sm border-slate-200 dark:border-slate-800">
+                <CardHeader className="border-b bg-slate-50/50 dark:bg-slate-900/20 px-6 py-4">
+                    <CardTitle className="text-base font-semibold flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                            <Cpu className="h-4 w-4 text-blue-600 dark:text-blue-500" />
+                            Scheduling Algorithm Comparison Matrix
+                        </span>
+                        <span className="text-xs font-normal text-slate-500">
+                            Theoretical & Empirical Evaluation
+                        </span>
+                    </CardTitle>
+                    <CardDescription>
+                        Comparative evaluation of CPU scheduling policies applied to port crane allocation, vessel berthing, and container throughput.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs">
+                            <thead className="bg-slate-100/75 dark:bg-slate-900/50 border-b text-slate-600 dark:text-slate-400 uppercase font-bold tracking-wider">
+                                <tr>
+                                    <th className="px-6 py-3.5">Algorithm</th>
+                                    <th className="px-6 py-3.5">Selection Criteria</th>
+                                    <th className="px-6 py-3.5">Preemptive</th>
+                                    <th className="px-6 py-3.5">Avg Waiting Time</th>
+                                    <th className="px-6 py-3.5">Starvation Risk</th>
+                                    <th className="px-6 py-3.5">Port Operation Fit</th>
+                                    <th className="px-6 py-3.5">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                                <tr className={schedulerType === 'FCFS' ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}>
+                                    <td className="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">
+                                        FCFS (First-Come, First-Served)
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                        Arrival Time (FIFO)
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                        Non-preemptive
+                                    </td>
+                                    <td className="px-6 py-4 text-amber-700 dark:text-amber-400 font-semibold">
+                                        High (Convoy Effect)
+                                    </td>
+                                    <td className="px-6 py-4 text-emerald-700 dark:text-emerald-400">
+                                        None (Strict Order)
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                        Standard vessel docking queues; fair queueing without special priority
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {schedulerType === 'FCFS' ? (
+                                            <span className="px-2.5 py-1 text-[11px] font-bold rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                                                Active
+                                            </span>
+                                        ) : (
+                                            <span className="text-slate-400">Inactive</span>
+                                        )}
+                                    </td>
+                                </tr>
+
+                                <tr className={schedulerType === 'SJF' ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}>
+                                    <td className="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">
+                                        SJF (Shortest Job First)
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                        Shortest Burst Duration
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                        Non-preemptive
+                                    </td>
+                                    <td className="px-6 py-4 text-emerald-700 dark:text-emerald-400 font-semibold">
+                                        Optimal (Minimum Waiting)
+                                    </td>
+                                    <td className="px-6 py-4 text-red-700 dark:text-red-400">
+                                        High (Long operations starved)
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                        Fast container inspections, quick offloading, maximizing turnarounds
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {schedulerType === 'SJF' ? (
+                                            <span className="px-2.5 py-1 text-[11px] font-bold rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                                                Active
+                                            </span>
+                                        ) : (
+                                            <span className="text-slate-400">Inactive</span>
+                                        )}
+                                    </td>
+                                </tr>
+
+                                <tr className={schedulerType === 'ROUND_ROBIN' ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}>
+                                    <td className="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">
+                                        Round Robin (Time-Slice)
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                        FIFO + Time Quantum (2000ms)
+                                    </td>
+                                    <td className="px-6 py-4 text-blue-700 dark:text-blue-400 font-semibold">
+                                        Preemptive
+                                    </td>
+                                    <td className="px-6 py-4 text-blue-700 dark:text-blue-400 font-semibold">
+                                        Moderate (Fair Distribution)
+                                    </td>
+                                    <td className="px-6 py-4 text-emerald-700 dark:text-emerald-400">
+                                        Zero (Guaranteed Quantum)
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                        Multi-vessel simultaneous offloading; shared quay crane time slots
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {schedulerType === 'ROUND_ROBIN' ? (
+                                            <span className="px-2.5 py-1 text-[11px] font-bold rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                                                Active
+                                            </span>
+                                        ) : (
+                                            <span className="text-slate-400">Inactive</span>
+                                        )}
+                                    </td>
+                                </tr>
+
+                                <tr className={schedulerType === 'PRIORITY' ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}>
+                                    <td className="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">
+                                        Priority Scheduling
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                        Highest Numerical Priority
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                        Non-preemptive
+                                    </td>
+                                    <td className="px-6 py-4 text-amber-700 dark:text-amber-400 font-semibold">
+                                        Variable (High for urgent jobs)
+                                    </td>
+                                    <td className="px-6 py-4 text-amber-700 dark:text-amber-400">
+                                        Medium (Low priority starved)
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                        Hazardous cargo handling, emergency vessel repair, customs clearance
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {schedulerType === 'PRIORITY' ? (
+                                            <span className="px-2.5 py-1 text-[11px] font-bold rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                                                Active
+                                            </span>
+                                        ) : (
+                                            <span className="text-slate-400">Inactive</span>
+                                        )}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }

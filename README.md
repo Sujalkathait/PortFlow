@@ -129,6 +129,26 @@ flowchart TD
 | **Aggregate Analytics** | Real-time reporting | SQL aggregate queries (`COUNT`, `AVG`, `SUM`) compute port KPIs, turnaround averages, and berth loads. |
 | **Transactions** | Atomic state consistency | Ensures OS lock release and database record updates succeed or roll back together. |
 
+### 🎓 Academic & Viva Quick-Reference (Database Engineering)
+- **3NF Normalization:**
+  - **1NF:** Atomic attributes; every table has a distinct primary key (`id SERIAL`).
+  - **2NF:** No partial functional dependencies; all attributes depend on the whole candidate key.
+  - **3NF:** No transitive functional dependencies; non-key fields depend only on primary keys.
+- **Soft-Delete Architecture (2-Phase Recovery):**
+  - Records are never destroyed with hard `DELETE` queries during standard operation.
+  - Items are stamped with `deleted_at TIMESTAMPTZ` (active queries filter `WHERE deleted_at IS NULL`).
+  - Preserves referential integrity, historical audit logs, and allows 1-click restore or permanent purge.
+- **B-Tree Indexing Strategy ($O(\log N)$):**
+  - High-cardinality search filters (`status`, `deleted_at`, `created_at DESC`, `ship_name`) are B-Tree indexed.
+  - Reduces query time complexity from $O(N)$ sequential scans to $O(\log N)$ tree lookups.
+- **Operating System to Database Mapping:**
+  - **Operations table:** Process Control Block (PCB) repository for the CPU scheduling queue.
+  - **Equipment table:** Shared physical resources (Berths = Counting Semaphores, Cranes = Mutex Locks).
+  - **Status column:** Process lifecycle states (`Queued` $\to$ `Running` $\to$ `Completed` / `Cancelled`).
+- **Supabase Security & Multi-Role Access:**
+  - Row Level Security (RLS) enforced across all public schema tables with transparent access policies.
+  - Default evaluation account pre-seeded with bcrypt hashing via `pgcrypto` (`operator@portflow.com`).
+
 ### Detailed Entity Relationship (ER) Diagram & Schema Breakdown
 To maintain a streamlined, high-performance database, PortFlow deliberately uses a minimalist **5-table architecture** to handle the core requirements without unnecessary joins or database bloat. 
 
@@ -218,9 +238,9 @@ erDiagram
 #### The Minimalist Table Philosophy
 By distilling the database into these **5 Core Entities**, we achieve high-speed ACID transactions while perfectly supporting the OS Simulator:
 
-1. **`users` Table (Authentication & RBAC):** 
-   - Stores operator and admin credentials.
-   - Manages role-based access control (RBAC), determining who can dispatch jobs to the OS scheduler.
+1. **`users` Table (Authentication):** 
+   - Stores authenticated terminal operator credentials.
+   - Manages secure JWT authentication for accessing port operations and scheduler.
 
 2. **`ships` Table (The Primary Client):**
    - Represents the physical vessels arriving at the port.

@@ -1,28 +1,10 @@
 import { Request, Response } from 'express';
 import { authService } from '../services/auth.service';
 import { AuthenticatedRequest } from '../middleware/auth';
-import bcrypt from 'bcryptjs';
 
-import { prisma } from '../config/prisma';
-
-// Seed or verify default accounts
 export async function seedDefaultAccounts(): Promise<void> {
     try {
-        const operatorHash = await bcrypt.hash('Password123!', 10);
-
-        // Upsert ensures the account is created if missing, or reset if soft-deleted/stale
-        await prisma.user.upsert({
-            where: { email: 'operator@portflow.com' },
-            create: {
-                email: 'operator@portflow.com',
-                password_hash: operatorHash,
-                full_name: 'Terminal Operator',
-                role: 'Operator',
-            },
-            update: { password_hash: operatorHash, deleted_at: null, deleted_by: null },
-        });
-
-        console.log('[Auth] Verified default demo account: operator@portflow.com with Password123!');
+        console.log('[Auth] Database account seeding skipped (demo features removed).');
     } catch (err: any) {
         console.error('[Auth] Notice: Could not seed default accounts:', err.message);
     }
@@ -100,5 +82,41 @@ export async function deleteAccount(req: AuthenticatedRequest, res: Response): P
     } catch (err: any) {
         console.error('[Auth] Delete account error:', err.message);
         res.status(500).json({ success: false, message: 'Failed to delete account.' });
+    }
+}
+
+// POST /api/auth/forgot-password
+export async function forgotPassword(req: Request, res: Response): Promise<void> {
+    try {
+        const { email } = req.body;
+        const result = await authService.requestPasswordResetOTP(email);
+        res.status(200).json(result);
+    } catch (err: any) {
+        console.error('[Auth] Forgot password error:', err.message);
+        res.status(400).json({ success: false, message: err.message || 'Failed to process password reset request.' });
+    }
+}
+
+// POST /api/auth/verify-otp
+export async function verifyOTP(req: Request, res: Response): Promise<void> {
+    try {
+        const { email, otp } = req.body;
+        const result = await authService.verifyPasswordResetOTP(email, otp);
+        res.status(200).json(result);
+    } catch (err: any) {
+        console.error('[Auth] Verify OTP error:', err.message);
+        res.status(400).json({ success: false, message: err.message || 'OTP verification failed.' });
+    }
+}
+
+// POST /api/auth/reset-password
+export async function resetPassword(req: Request, res: Response): Promise<void> {
+    try {
+        const { email, otp, newPassword } = req.body;
+        const result = await authService.resetPasswordWithOTP(email, otp, newPassword);
+        res.status(200).json(result);
+    } catch (err: any) {
+        console.error('[Auth] Reset password error:', err.message);
+        res.status(400).json({ success: false, message: err.message || 'Password reset failed.' });
     }
 }

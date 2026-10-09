@@ -4,12 +4,8 @@ import { API_BASE_URL } from '../lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAuth } from '@/auth/AuthProvider';
 
 export function ReportsPage() {
-    const { profile } = useAuth();
-    const isAdmin = profile?.role === 'Admin';
-
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -42,15 +38,13 @@ export function ReportsPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                        {isAdmin ? 'System Diagnostics' : 'Operational Reporting'}
+                        Operational Reporting
                     </p>
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                        {isAdmin ? 'Database Analytics & Diagnostics' : 'Operational Activity & Statistics Report'}
+                        Operational Activity & Statistics Report
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        {isAdmin
-                            ? 'PostgreSQL telemetry, row cardinality, and live relational JOIN benchmark latency'
-                            : 'Port operational throughput, active vessel capacity, and container inventory metrics'}
+                        Port operational throughput, active vessel capacity, and container inventory metrics
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -104,7 +98,7 @@ export function ReportsPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold font-mono">{stats.tableStats?.users ?? 0}</div>
-                                <p className="text-xs text-muted-foreground mt-1">Registered operators & admins</p>
+                                <p className="text-xs text-muted-foreground mt-1">Registered terminal operators</p>
                             </CardContent>
                         </Card>
 

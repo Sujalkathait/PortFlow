@@ -1,200 +1,319 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Eye, EyeOff, LockKeyhole, Mail, ShieldCheck,
-  User, UserCog, Zap, ArrowRight, AlertCircle, Check, X,
-  Anchor, Compass, Boxes, Radio, Clock, Cpu, Users
+  Eye, EyeOff, LockKeyhole, Mail, User,
+  AlertCircle, Check, X, ShieldCheck, Compass, Anchor,
+  Ship, Boxes, Cpu, CheckCircle2, Timer, KeyRound, ArrowLeft, RefreshCw
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
+import { api } from '../lib/api';
 import './Login.css';
 
-type Mode = 'sign-in' | 'register';
-type InfoModalType = 'features' | 'about' | null;
+type Mode = 'login' | 'signup' | 'none';
+type InfoModal = 'features' | 'about' | 'forgot' | null;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Custom high-precision SVG icons matching the reference mockup
-function ShipHeadonIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M4 19l2-8h12l2 8c-3 2-6 2-8 2s-5 0-8-2z" />
-      <path d="M7 11V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v5" />
-      <path d="M12 2v3" />
-      <path d="M9 8h6" />
-      <path d="M12 11v8" />
-    </svg>
-  );
-}
-
-function CargoContainerIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect x="2" y="6" width="20" height="12" rx="2" />
-      <line x1="6" y1="6" x2="6" y2="18" />
-      <line x1="10" y1="6" x2="10" y2="18" />
-      <line x1="14" y1="6" x2="14" y2="18" />
-      <line x1="18" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-function ShieldVerifyIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
-  );
-}
-
 export function Login() {
-  const { login, register } = useAuth();
-  const [mode, setMode] = useState<Mode>('sign-in');
-  const [infoModal, setInfoModal] = useState<InfoModalType>(null);
+  const { login, register, profile, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  // Handle URL query ?mode=signup or ?mode=login
+  const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : (searchParams.get('mode') === 'login' ? 'login' : 'none');
+  const [mode, setMode] = useState<Mode>(initialMode);
+  const [activeModal, setActiveModal] = useState<InfoModal>(null);
+
+  // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [activeDemo, setActiveDemo] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const navigate = useNavigate();
+
+  // Forgot password wizard state
+  const [forgotStep, setForgotStep] = useState<1 | 2 | 3>(1);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotOtp, setForgotOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [otpTimer, setOtpTimer] = useState<number>(30);
+  const [otpTimerActive, setOtpTimerActive] = useState<boolean>(false);
+  const [forgotBusy, setForgotBusy] = useState(false);
+  const [forgotError, setForgotError] = useState('');
+  const [forgotSuccess, setForgotSuccess] = useState('');
+
+  // 30-Second Countdown Timer for OTP Expiration
+  useEffect(() => {
+    let interval: any = null;
+    if (otpTimerActive && otpTimer > 0) {
+      interval = setInterval(() => {
+        setOtpTimer((prev) => prev - 1);
+      }, 1000);
+    } else if (otpTimer === 0) {
+      setOtpTimerActive(false);
+    }
+    return () => clearInterval(interval);
+  }, [otpTimerActive, otpTimer]);
+
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveModal(null);
+      }
+    };
+    if (activeModal) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeModal]);
+
+  // If already authenticated and not loading, redirect to authorized dashboard
+  useEffect(() => {
+    if (!authLoading && profile) {
+      navigate('/operator', { replace: true });
+    }
+  }, [authLoading, profile, navigate]);
 
   const switchMode = (newMode: Mode) => {
     setMode(newMode);
     setError('');
     setMessage('');
-    setActiveDemo(false);
+    setSearchParams(newMode === 'signup' ? { mode: 'signup' } : {});
   };
 
-  const scrollToAuth = (initialMode: Mode = 'sign-in') => {
-    switchMode(initialMode);
-    document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleDemoFill = () => {
-    setEmail('operator@portflow.com');
-    setPassword('Password123!');
-    setActiveDemo(true);
-    setError('');
-  };
-
-  const submit = async (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError('');
     setMessage('');
 
-    const cleanEmail = email.trim().toLowerCase();
-    if (!EMAIL_PATTERN.test(cleanEmail) && cleanEmail.length < 3) {
-      setError('Enter a valid work email address.');
+    let cleanEmail = email.trim().toLowerCase();
+    // Allow typing 'operator' or 'admin' directly as username
+    if (!cleanEmail.includes('@')) {
+      if (cleanEmail === 'operator' || cleanEmail === 'admin') {
+        cleanEmail = `${cleanEmail}@portflow.com`;
+      } else {
+        setError('Please enter a valid email or username.');
+        return;
+      }
+    } else if (!EMAIL_PATTERN.test(cleanEmail)) {
+      setError('Please enter a valid email address.');
       return;
     }
 
     const cleanPassword = password.trim();
     if (cleanPassword.length < 6) {
-      setError('Use at least 6 characters for your password.');
+      setError('Password must contain at least 6 characters.');
       return;
     }
 
-    if (mode === 'register' && fullName.trim().length < 2) {
-      setError('Please provide your full name.');
+    if (mode === 'signup' && fullName.trim().length < 2) {
+      setError('Please provide your full name (minimum 2 characters).');
       return;
     }
 
     setBusy(true);
 
     try {
-      let profile;
-      if (mode === 'sign-in') {
-        profile = await login(cleanEmail, cleanPassword);
+      if (mode === 'login') {
+        await login(cleanEmail, cleanPassword);
       } else {
-        profile = await register(cleanEmail, cleanPassword, fullName.trim(), 'Operator');
+        await register(cleanEmail, cleanPassword, fullName.trim(), 'Operator');
       }
 
-      navigate(profile.role === 'Admin' ? '/admin' : '/operator', { replace: true });
-    } catch (reason: any) {
-      setError(
-        reason instanceof Error
-          ? reason.message
-          : reason?.message || 'Unable to complete request. Please try again.'
-      );
+      navigate('/operator', { replace: true });
+    } catch (err: any) {
+      setError(err?.message || 'Authentication failed. Please verify your credentials and try again.');
     } finally {
       setBusy(false);
     }
   };
 
-  const isRegister = mode === 'register';
+  const openForgotPassword = () => {
+    setForgotStep(1);
+    setForgotEmail(email.trim());
+    setForgotOtp('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setForgotError('');
+    setForgotSuccess('');
+    setOtpTimer(30);
+    setOtpTimerActive(false);
+    setActiveModal('forgot');
+  };
+
+  const handleSendOTP = async (e?: FormEvent) => {
+    if (e) e.preventDefault();
+    setForgotError('');
+    setForgotSuccess('');
+
+    let clean = forgotEmail.trim().toLowerCase();
+    if (!clean) {
+      setForgotError('Please enter your email address or username.');
+      return;
+    }
+    if (!clean.includes('@') && (clean === 'operator' || clean === 'admin')) {
+      clean = `${clean}@portflow.com`;
+    }
+
+    setForgotBusy(true);
+    try {
+      const res = await api.auth.forgotPassword(clean);
+      setForgotSuccess(res.message || 'If the account exists, an OTP has been sent.');
+      setForgotStep(2);
+      setOtpTimer(30);
+      setOtpTimerActive(true);
+    } catch (err: any) {
+      setForgotError(err.message || 'Failed to send OTP code.');
+    } finally {
+      setForgotBusy(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e: FormEvent) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotSuccess('');
+
+    const cleanOtp = forgotOtp.trim();
+    if (cleanOtp.length !== 6 || !/^\d{6}$/.test(cleanOtp)) {
+      setForgotError('Please enter a valid 6-digit numeric OTP code.');
+      return;
+    }
+
+    if (otpTimer <= 0) {
+      setForgotError('OTP has expired (30s limit exceeded). Please click "Resend OTP" to generate a new code.');
+      return;
+    }
+
+    let clean = forgotEmail.trim().toLowerCase();
+    if (!clean.includes('@') && (clean === 'operator' || clean === 'admin')) {
+      clean = `${clean}@portflow.com`;
+    }
+
+    setForgotBusy(true);
+    try {
+      const res = await api.auth.verifyOTP(clean, cleanOtp);
+      setForgotSuccess(res.message || 'OTP verified successfully.');
+      setForgotStep(3);
+    } catch (err: any) {
+      setForgotError(err.message || 'Invalid or expired OTP code.');
+    } finally {
+      setForgotBusy(false);
+    }
+  };
+
+  const handleResetPassword = async (e: FormEvent) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotSuccess('');
+
+    if (newPassword.length < 6) {
+      setForgotError('New password must contain at least 6 characters.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setForgotError('Passwords do not match. Please verify both fields.');
+      return;
+    }
+
+    let clean = forgotEmail.trim().toLowerCase();
+    if (!clean.includes('@') && (clean === 'operator' || clean === 'admin')) {
+      clean = `${clean}@portflow.com`;
+    }
+
+    setForgotBusy(true);
+    try {
+      const res = await api.auth.resetPassword({
+        email: clean,
+        otp: forgotOtp.trim(),
+        newPassword
+      });
+      setActiveModal(null);
+      setMessage(res.message || 'Password updated successfully! Please sign in with your new password.');
+      setPassword('');
+      switchMode('login');
+    } catch (err: any) {
+      setForgotError(err.message || 'Password reset failed.');
+    } finally {
+      setForgotBusy(false);
+    }
+  };
 
   return (
-    <div className="portflow-landing-wrapper">
-      {/* ─── Modern Minimalist Header / Navbar ─── */}
+    <div className="portflow-page-root">
+      {/* ─── Top Navigation Bar ─── */}
       <header className="portflow-navbar">
         <div className="navbar-container">
-          {/* Logo Mark */}
-          <div className="navbar-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="logo-badge">
-              <svg viewBox="0 0 36 36" fill="none" className="w-9 h-9">
-                <path
-                  d="M18 2L4 7v11c0 8.5 6 14.5 14 16 8-1.5 14-7.5 14-16V7L18 2z"
-                  stroke="#0284c7"
-                  strokeWidth="2.3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="rgba(2, 132, 199, 0.08)"
-                />
-                <circle cx="18" cy="11" r="2.4" stroke="#0284c7" strokeWidth="2" />
-                <path d="M18 13.5V26" stroke="#0284c7" strokeWidth="2.2" strokeLinecap="round" />
-                <path d="M12 17h12" stroke="#0284c7" strokeWidth="2.2" strokeLinecap="round" />
-                <path d="M10 21c2 3.5 5 5 8 5s6-1.5 8-5" stroke="#0284c7" strokeWidth="2.2" strokeLinecap="round" />
-                <path d="M10 21l-1.5-2" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" />
-                <path d="M26 21l1.5-2" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" />
+          {/* Logo Brand: Anchor icon in water waves + PortFlow text */}
+          <div
+            className="navbar-brand"
+            onClick={() => switchMode('none')}
+            role="button"
+            tabIndex={0}
+            aria-label="PortFlow Home"
+          >
+            <div className="navbar-logo-icon" aria-hidden="true">
+              <svg viewBox="0 0 40 40" fill="none" className="logo-svg">
+                {/* Anchor Top Ring */}
+                <circle cx="20" cy="10" r="3.2" stroke="#0070f3" strokeWidth="2.4" />
+                {/* Central Shank */}
+                <path d="M20 13.5v16" stroke="#0070f3" strokeWidth="2.4" strokeLinecap="round" />
+                {/* Cross Stock */}
+                <path d="M12 18h16" stroke="#0070f3" strokeWidth="2.4" strokeLinecap="round" />
+                {/* Curved Flukes */}
+                <path d="M10 24c2 4 5.5 5.5 10 5.5s8-1.5 10-5.5" stroke="#0070f3" strokeWidth="2.4" strokeLinecap="round" />
+                <path d="M8 23.5l-2-2m28 2l2-2" stroke="#0070f3" strokeWidth="2.2" strokeLinecap="round" />
+                {/* Water Waves */}
+                <path d="M6 33.5c4-1.5 8-1.5 14 0 6 1.5 10 1.5 14 0" stroke="#0070f3" strokeWidth="2.2" strokeLinecap="round" />
+                <path d="M9 37c3.5-1 7-1 11 0 4 1 7.5 1 11 0" stroke="#0070f3" strokeWidth="1.8" strokeLinecap="round" />
               </svg>
             </div>
-            <div className="logo-text-group">
-              <span className="logo-title">PORTFLOW</span>
-            </div>
+            <span className="navbar-brand-name">
+              <span className="brand-port">Port</span>
+              <span className="brand-flow">Flow</span>
+            </span>
           </div>
 
           {/* Navigation Links */}
-          <nav className="navbar-nav">
+          <nav className="navbar-center-nav" aria-label="Main Navigation">
             <button
               type="button"
-              onClick={() => setInfoModal('features')}
-              className="nav-link"
+              className="navbar-link"
+              onClick={() => setActiveModal('features')}
             >
               Features
             </button>
             <button
               type="button"
-              onClick={() => setInfoModal('about')}
-              className="nav-link"
+              className="navbar-link"
+              onClick={() => setActiveModal('about')}
             >
               About
             </button>
           </nav>
 
-          {/* Nav Actions */}
+          {/* Action Buttons: Log in + Sign up */}
           <div className="navbar-actions">
             <button
               type="button"
-              onClick={() => {
-                switchMode('sign-in');
-                document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="btn-nav-login"
+              className={`navbar-login-btn ${mode === 'login' ? 'active' : ''}`}
+              onClick={() => switchMode('login')}
             >
               Log in
             </button>
             <button
               type="button"
-              onClick={() => {
-                switchMode('register');
-                document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="btn-nav-signup"
+              className="navbar-signup-btn"
+              onClick={() => switchMode('signup')}
             >
               Sign up
             </button>
@@ -202,455 +321,580 @@ export function Login() {
         </div>
       </header>
 
-      {/* ─── Hero Section with port_sunset_bg.jpg ─── */}
-      <section className="portflow-hero">
-        <div className="hero-overlay" />
+      {/* ─── Hero Section with Port Background & Clean Right-Aligned Login Card ─── */}
+      <main className="portflow-hero-viewport">
+        {/* Scenery Background Image */}
+        <div
+          className="hero-bg-scenery"
+          style={{ backgroundImage: `url('/image/port_sunset_bg.jpg')` }}
+          aria-hidden="true"
+        />
 
-        <div className="hero-inner">
-          <div className="hero-main-row">
-            {/* Left Column: Hero Text, Headings & Value Pillars */}
-            <div className="hero-content">
-              {/* Eyebrow Label */}
-              <div className="hero-eyebrow">
-                <span className="eyebrow-dash" />
-                <span className="eyebrow-text">
-                  INTEGRATED PORT OPERATIONS &amp; CARGO MANAGEMENT
-                </span>
-              </div>
+        {/* Soft atmospheric gradient blend for optimal photo vibrancy */}
+        <div className="hero-bg-overlay" aria-hidden="true" />
 
-              {/* Main Title */}
-              <h1 className="hero-heading">
-                Operate smarter.<br />
-                <span className="gradient-text">Move faster.</span>
-              </h1>
+        <div className="hero-main-container">
+          {/* Left area is clean & open to display the port, cranes, ship and sunset scenery without clutter */}
+          <div className="hero-scenery-space" aria-hidden="true" />
 
-              {/* Subtitle */}
-              <p className="hero-description">
-              </p>
-
-              {/* Bottom 3 Feature Pillars */}
-              <div className="hero-pillars">
-                <div className="pillar-item">
-                  <div className="pillar-icon">
-                    <ShipHeadonIcon className="w-6 h-6 text-sky-400" />
-                  </div>
-                  <div className="pillar-text">
-                    <span className="pillar-title">Smarter</span>
-                    <span className="pillar-subtitle">Operations</span>
-                  </div>
-                </div>
-
-                <div className="pillar-divider" />
-
-                <div className="pillar-item">
-                  <div className="pillar-icon">
-                    <CargoContainerIcon className="w-6 h-6 text-sky-400" />
-                  </div>
-                  <div className="pillar-text">
-                    <span className="pillar-title">Complete</span>
-                    <span className="pillar-subtitle">Cargo Visibility</span>
-                  </div>
-                </div>
-
-                <div className="pillar-divider" />
-
-                <div className="pillar-item">
-                  <div className="pillar-icon">
-                    <ShieldVerifyIcon className="w-6 h-6 text-sky-400" />
-                  </div>
-                  <div className="pillar-text">
-                    <span className="pillar-title">Reliable</span>
-                    <span className="pillar-subtitle">&amp; Secure</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Embedded Auth Card (Directly on Hero, NEVER covering main page!) */}
-            <div className="hero-auth-card" id="auth-section">
-              <div className="modal-header">
-                <div className="modal-logo-mark">
-                  <Anchor className="w-5 h-5 text-sky-400" />
-                </div>
-                <span className="modal-badge">PORTFLOW </span>
-                <h2 id="auth-modal-title" className="modal-title">
-                  {isRegister ? 'Create an Account' : 'Welcome Back'}
-                </h2>
-                <p className="modal-sub">
-                  {isRegister
-                    ? 'Join PortFlow to manage global vessels, berths & cargo.'
-                    : 'Sign in to access your PortFlow operations dashboard.'}
+          {/* Right Area: Clean White Floating Login Card */}
+          {mode !== 'none' && (
+            <div className="hero-auth-column">
+            <div className="auth-card-clean" role="region" aria-labelledby="auth-card-title">
+              {/* Card Header */}
+              <div className="auth-card-header" style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  onClick={() => switchMode('none')}
+                  aria-label="Close form"
+                  style={{ position: 'absolute', right: '-0.5rem', top: '-1rem', background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <h1 id="auth-card-title" className="auth-card-title">
+                  {mode === 'login' ? 'Welcome back' : 'Create an account'}
+                </h1>
+                <p className="auth-card-subtitle">
+                  {mode === 'login'
+                    ? 'Sign in to your PortFlow account'
+                    : 'Start managing your port operations today'}
                 </p>
               </div>
 
-              {/* Mode Switcher */}
-              <div className="modal-tabs">
-                <button
-                  type="button"
-                  onClick={() => switchMode('sign-in')}
-                  className={`modal-tab ${!isRegister ? 'active' : ''}`}
-                >
-                  Sign In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => switchMode('register')}
-                  className={`modal-tab ${isRegister ? 'active' : ''}`}
-                >
-                  Register
-                </button>
-              </div>
-
-              {/* Quick Demo Fill Card */}
-              {!isRegister && (
-                <div className="modal-demo-box">
-                  <div className="demo-header-row">
-                    <span className="demo-title">
-                      <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                      Quick Demo Access
-                    </span>
-                    <span className="demo-pass-hint">
-                      Pass: <code>Password123!</code>
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleDemoFill}
-                    className={`modal-demo-btn ${activeDemo ? 'selected' : ''}`}
-                  >
-                    <div className="demo-avatar">
-                      {activeDemo ? <Check className="w-3.5 h-3.5" /> : <UserCog className="w-3.5 h-3.5" />}
-                    </div>
-                    <div className="demo-details">
-                      <span className="demo-role">Terminal Operator Demo</span>
-                      <span className="demo-email">operator@portflow.com</span>
-                    </div>
-                  </button>
-                </div>
-              )}
-
-              {/* Auth Form */}
-              <form onSubmit={submit} noValidate className="modal-form">
-                {isRegister && (
-                  <div className="modal-field">
-                    <label htmlFor="reg-fullname">Full Name</label>
-                    <div className="field-input-box">
-                      <User className="field-icon" aria-hidden="true" />
+              {/* Form */}
+              <form onSubmit={handleSubmit} noValidate className="auth-form-clean">
+                {mode === 'signup' && (
+                  <div className="form-field-group">
+                    <label htmlFor="auth-fullname" className="form-field-label">
+                      Full Name
+                    </label>
+                    <div className="form-input-box">
+                      <User className="form-input-icon" aria-hidden="true" />
                       <input
-                        id="reg-fullname"
+                        id="auth-fullname"
                         type="text"
+                        autoComplete="name"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        placeholder="e.g. Captain Alex Rivera"
+                        placeholder="Enter your full name"
                         required
-                        className="field-input"
+                        className="form-input"
                       />
                     </div>
                   </div>
                 )}
 
-                <div className="modal-field">
-                  <label htmlFor="auth-email">Work Email</label>
-                  <div className="field-input-box">
-                    <Mail className="field-icon" aria-hidden="true" />
+                <div className="form-field-group">
+                  <label htmlFor="auth-email" className="form-field-label">
+                    Username or Email
+                  </label>
+                  <div className="form-input-box">
+                    {mode === 'signup' ? (
+                      <Mail className="form-input-icon" aria-hidden="true" />
+                    ) : (
+                      <User className="form-input-icon" aria-hidden="true" />
+                    )}
                     <input
                       id="auth-email"
-                      type="email"
-                      autoComplete="email"
+                      type="text"
+                      autoComplete="username email"
                       value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        setActiveDemo(false);
-                      }}
-                      placeholder="name@organisation.com"
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email or username"
                       required
-                      className="field-input"
+                      className="form-input"
                     />
                   </div>
                 </div>
 
-                <div className="modal-field">
-                  <label htmlFor="auth-password">Password</label>
-                  <div className="field-input-box">
-                    <LockKeyhole className="field-icon" aria-hidden="true" />
+                <div className="form-field-group">
+                  <label htmlFor="auth-password" className="form-field-label">
+                    Password
+                  </label>
+                  <div className="form-input-box">
+                    <LockKeyhole className="form-input-icon" aria-hidden="true" />
                     <input
                       id="auth-password"
                       type={showPassword ? 'text' : 'password'}
-                      autoComplete={isRegister ? 'new-password' : 'current-password'}
+                      autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                       value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        setActiveDemo(false);
-                      }}
-                      placeholder="Enter password"
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
                       required
-                      className="field-input with-action"
+                      className="form-input has-action"
                     />
                     <button
                       type="button"
-                      className="field-action-btn"
+                      className="form-password-toggle"
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword ? (
+                        <EyeOff className="toggle-eye-icon" />
+                      ) : (
+                        <Eye className="toggle-eye-icon" />
+                      )}
                     </button>
                   </div>
                 </div>
 
+                {/* Options Row: Remember me + Forgot password (login mode only) */}
+                {mode === 'login' && (
+                  <div className="form-options-row">
+                    <label className="form-checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="form-checkbox"
+                      />
+                      <span>Remember me</span>
+                    </label>
+
+                    <button
+                      type="button"
+                      className="form-forgot-btn"
+                      onClick={() => openForgotPassword()}
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
+
+                {/* Error / Success Feedback Alerts */}
                 {error && (
-                  <div className="modal-alert error" role="alert">
+                  <div className="form-alert error" role="alert">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{error}</span>
                   </div>
                 )}
 
                 {message && (
-                  <div className="modal-alert success" aria-live="polite">
+                  <div className="form-alert success" aria-live="polite">
                     <Check className="w-4 h-4 shrink-0" />
                     <span>{message}</span>
                   </div>
                 )}
 
+                {/* Submit Button (Sign in / Create account) */}
                 <button
                   type="submit"
-                  className="modal-submit-btn"
+                  className="form-submit-btn"
                   disabled={busy}
                 >
                   {busy ? (
-                    <span className="submit-loading">
-                      <span className="spinner" />
-                      Authenticating…
+                    <span className="submit-loading-state">
+                      <span className="submit-spinner" />
+                      Processing…
                     </span>
+                  ) : mode === 'login' ? (
+                    'Sign in'
                   ) : (
-                    <span className="submit-text">
-                      {isRegister ? 'Create Account' : 'Sign In to Terminal'}
-                      <ArrowRight className="w-4 h-4" />
-                    </span>
+                    'Create account'
                   )}
                 </button>
               </form>
 
-              <div className="modal-footer">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>256-bit TLS encrypted connection · PortFlow Security Guard</span>
+              {/* Footer Switch Link */}
+              <div className="auth-card-footer">
+                {mode === 'login' ? (
+                  <p>
+                    Don't have an account?{' '}
+                    <button
+                      type="button"
+                      className="footer-switch-btn"
+                      onClick={() => switchMode('signup')}
+                    >
+                      Sign up
+                    </button>
+                  </p>
+                ) : (
+                  <p>
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      className="footer-switch-btn"
+                      onClick={() => switchMode('login')}
+                    >
+                      Sign in
+                    </button>
+                  </p>
+                )}
               </div>
             </div>
           </div>
+          )}
         </div>
-      </section>
+      </main>
 
-      {/* ─── Informational Modals (Our WebApp / About) ─── */}
-      {infoModal && (
-        <div className="modal-backdrop" onClick={() => setInfoModal(null)}>
+      {/* ─── Informational Modals (Features, About, Forgot Password) ─── */}
+      {activeModal && (
+        <div className="info-modal-backdrop" onClick={() => setActiveModal(null)}>
           <div
-            className="info-modal-card"
+            className="info-modal-sheet"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
           >
+            {/* Close Button */}
             <button
               type="button"
-              className="modal-close-btn"
-              onClick={() => setInfoModal(null)}
+              className="sheet-close-btn"
+              onClick={() => setActiveModal(null)}
               aria-label="Close dialog"
             >
               <X className="w-5 h-5" />
             </button>
 
-            {infoModal === 'features' && (
-              <div>
-                <div className="modal-header">
-                  <div className="modal-logo-mark">
-                    <Compass className="w-5 h-5 text-sky-400" />
+            {/* Features Modal */}
+            {activeModal === 'features' && (
+              <div className="sheet-content">
+                <div className="sheet-header">
+                  <div className="sheet-icon-wrap">
+                    <Compass className="w-6 h-6 text-blue-600" />
                   </div>
-                  <span className="modal-badge">PLATFORM FEATURES</span>
-                  <h2 className="modal-title">Port Operating System Features</h2>
-                  <p className="modal-sub">Enterprise tools built for high-throughput global terminals.</p>
+                  <h2 className="sheet-title">PortFlow Enterprise Features</h2>
+                  <p className="sheet-subtitle">
+                    Integrated smart port operations, real-time cargo movement, and OS-level concurrency control.
+                  </p>
                 </div>
 
-                <div className="features-grid">
-                  <div className="feature-card">
-                    <Radio className="w-5 h-5 text-sky-400 mb-2" />
-                    <h3 className="feature-heading">Real-Time Vessel AIS Tracking</h3>
-                    <p className="feature-desc">Monitor approaching container ships, live ETA calculations, harbor approach queues, and automated pilotage handoffs.</p>
+                <div className="features-sheet-grid">
+                  <div className="feature-sheet-item">
+                    <Ship className="w-5 h-5 text-blue-600 mb-2" />
+                    <h3>Vessel &amp; Berth Scheduling</h3>
+                    <p>Automated berthing allocation with mutual exclusion mutex locks preventing crane conflicts.</p>
                   </div>
-                  <div className="feature-card">
-                    <Clock className="w-5 h-5 text-sky-400 mb-2" />
-                    <h3 className="feature-heading">Intelligent Berth Scheduling (OS Kernel)</h3>
-                    <p className="feature-desc">Dynamic Gantt scheduling powered by FCFS, SJF, and Priority algorithms with counting Semaphore berth allocations.</p>
+                  <div className="feature-sheet-item">
+                    <Boxes className="w-5 h-5 text-blue-600 mb-2" />
+                    <h3>Cargo &amp; Yard Visibility</h3>
+                    <p>End-to-end container tracking, weight verification, hazmat compliance, and audit trail safety.</p>
                   </div>
-                  <div className="feature-card">
-                    <Boxes className="w-5 h-5 text-sky-400 mb-2" />
-                    <h3 className="feature-heading">ISO Cargo &amp; Yard Management</h3>
-                    <p className="feature-desc">Interactive container yard stacking, reefer temperature telemetry, TEU inventory controls, and gate transaction tracking.</p>
+                  <div className="feature-sheet-item">
+                    <Cpu className="w-5 h-5 text-blue-600 mb-2" />
+                    <h3>OS Simulation Engine</h3>
+                    <p>FCFS, SJF, and Priority algorithm execution simulating CPU scheduling in maritime logistics.</p>
                   </div>
-                  <div className="feature-card">
-                    <Cpu className="w-5 h-5 text-sky-400 mb-2" />
-                    <h3 className="feature-heading">Crane Resource Locks (Mutex)</h3>
-                    <p className="feature-desc">Ship-to-Shore (STS) gantry crane dispatch with binary Mutex locking and Wait-For-Graph (WFG) deadlock prevention.</p>
-                  </div>
-                  <div className="feature-card">
-                    <Compass className="w-5 h-5 text-sky-400 mb-2" />
-                    <h3 className="feature-heading">Interactive Operator Ground Console</h3>
-                    <p className="feature-desc">Unified command interface for terminal operators with live status filters, soft-delete safety, and trash recovery.</p>
-                  </div>
-                  <div className="feature-card">
-                    <ShieldCheck className="w-5 h-5 text-sky-400 mb-2" />
-                    <h3 className="feature-heading">Enterprise Architecture &amp; Security</h3>
-                    <p className="feature-desc">React 19 + TypeScript frontend with secure JWT role-based access control (RBAC) and PostgreSQL 3NF normalized backend.</p>
+                  <div className="feature-sheet-item">
+                    <ShieldCheck className="w-5 h-5 text-blue-600 mb-2" />
+                    <h3>Secure RBAC &amp; Audit Logs</h3>
+                    <p>Role-based operator security, transaction safety, and trash bin soft-delete recovery.</p>
                   </div>
                 </div>
 
-                <div className="info-modal-cta">
+                <div className="sheet-footer-action">
                   <button
                     type="button"
+                    className="sheet-primary-btn"
                     onClick={() => {
-                      setInfoModal(null);
-                      scrollToAuth('sign-in');
+                      setActiveModal(null);
+                      switchMode('login');
                     }}
-                    className="modal-submit-btn"
                   >
-                    Launch WebApp &amp; Sign In
+                    Continue to Sign In
                   </button>
                 </div>
               </div>
             )}
 
-            {infoModal === 'about' && (
-              <div>
-                <div className="modal-header">
-                  <div className="modal-logo-mark">
-                    <Users className="w-5 h-5 text-sky-400" />
-                  </div>
-                  <span className="modal-badge">TEAM DATA DRAGONS</span>
-                  <h2 className="modal-title">Meet Team Data Dragons</h2>
-                  <p className="modal-sub">The engineering minds designing the future of smart maritime operations.</p>
-                </div>
 
-                <div className="about-text-content">
-                  <p>
-                    We are <strong>Team Data Dragons</strong> — the creators and developers behind <strong>PortFlow</strong>. Our mission is to bridge complex maritime logistics with fundamental Computer Science principles, simulating Operating System concurrency (Mutex locks, Semaphores, CPU schedulers) atop a robust 3NF relational database.
+            {/* About Modal */}
+            {activeModal === 'about' && (
+              <div className="sheet-content">
+                <div className="sheet-header">
+                  <div className="sheet-icon-wrap">
+                    <Anchor className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h2 className="sheet-title">About PortFlow</h2>
+                  <p className="sheet-subtitle">
+                    Integrated Port Operations &amp; Cargo Management System by <strong>Team Data Dragons</strong>.
                   </p>
+                </div>
 
-                  <div className="team-section-heading">
-                    <h3 className="team-group-title">Core Engineering Team</h3>
-                    <span className="team-group-sub">Roles &amp; Contributions</span>
-                  </div>
-
-                  <div className="team-grid">
-                    <div className="team-card lead">
-                      <div className="team-card-top">
-                        <div className="team-avatar lead-avatar">SK</div>
-                        <div>
-                          <div className="team-name">Sujal Kathait</div>
-                          <div className="team-role">Project Lead &amp; System Architect</div>
-                        </div>
-                      </div>
-                      <span className="team-tag lead-tag">LEAD ARCHITECT</span>
-                      <p className="team-desc">
-                        Full-Stack architecture, OS Simulation Kernel design, ER modeling, and end-to-end integration.
-                      </p>
-                    </div>
-
-                    <div className="team-card">
-                      <div className="team-card-top">
-                        <div className="team-avatar">FE</div>
-                        <div>
-                          <div className="team-name">Team Member</div>
-                          <div className="team-role">Frontend UI/UX Developer</div>
-                        </div>
-                      </div>
-                      <span className="team-tag">REACT &amp; TS</span>
-                      <p className="team-desc">
-                        React 19 SPA, modern responsive design system, and unified Terminal Operator dashboard.
-                      </p>
-                    </div>
-
-                    <div className="team-card">
-                      <div className="team-card-top">
-                        <div className="team-avatar">BE</div>
-                        <div>
-                          <div className="team-name">Team Member</div>
-                          <div className="team-role">Backend API Engineer</div>
-                        </div>
-                      </div>
-                      <span className="team-tag">NODE &amp; EXPRESS</span>
-                      <p className="team-desc">
-                        RESTful API endpoints, Inter-Process Communication (IPC), and secure JWT role-based auth.
-                      </p>
-                    </div>
-
-                    <div className="team-card">
-                      <div className="team-card-top">
-                        <div className="team-avatar">DB</div>
-                        <div>
-                          <div className="team-name">Team Member</div>
-                          <div className="team-role">Database Administrator</div>
-                        </div>
-                      </div>
-                      <span className="team-tag">POSTGRES &amp; PRISMA</span>
-                      <p className="team-desc">
-                        PostgreSQL 3NF normalized schema, Prisma ORM transactions, and soft-delete audit trails.
-                      </p>
-                    </div>
-
-                    <div className="team-card">
-                      <div className="team-card-top">
-                        <div className="team-avatar">OS</div>
-                        <div>
-                          <div className="team-name">Team Member</div>
-                          <div className="team-role">OS Scheduling Engineer</div>
-                        </div>
-                      </div>
-                      <span className="team-tag">OS SIMULATOR</span>
-                      <p className="team-desc">
-                        CPU scheduling algorithms (FCFS, SJF, Priority), process lifecycle, and ready queue management.
-                      </p>
-                    </div>
-
-                    <div className="team-card">
-                      <div className="team-card-top">
-                        <div className="team-avatar">QA</div>
-                        <div>
-                          <div className="team-name">Team Member</div>
-                          <div className="team-role">Concurrency &amp; QA Lead</div>
-                        </div>
-                      </div>
-                      <span className="team-tag">MUTEX &amp; TEST</span>
-                      <p className="team-desc">
-                        Mutex locks for cranes, berth semaphores, deadlock detection, and integration testing.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="about-stats-row">
-                    <div className="stat-item">
-                      <span className="stat-number">3</span>
-                      <span className="stat-label">OS Schedulers (FCFS/SJF/Priority)</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-number">100%</span>
-                      <span className="stat-label">Deadlock-Free Concurrency</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-number">3NF</span>
-                      <span className="stat-label">Normalized PostgreSQL</span>
+                <div className="about-sheet-body">
+                  <p>
+                    PortFlow bridges real-world marine terminal logistics with core Computer Science Operating Systems fundamentals. It demonstrates process scheduling algorithms, race condition prevention, and resource synchronization on a modern React 19 and Node.js stack.
+                  </p>
+                  <div className="about-architect-card">
+                    <div className="architect-avatar">SK</div>
+                    <div>
+                      <h4 className="architect-name">Sujal Kathait</h4>
+                      <p className="architect-role">System Architect &amp; Lead Developer</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="info-modal-cta">
+                <div className="sheet-footer-action">
                   <button
                     type="button"
-                    onClick={() => {
-                      setInfoModal(null);
-                      scrollToAuth('sign-in');
-                    }}
-                    className="modal-submit-btn"
+                    className="sheet-primary-btn"
+                    onClick={() => setActiveModal(null)}
                   >
-                    Explore Terminal Demo
+                    Close
                   </button>
                 </div>
+              </div>
+            )}
+
+            {/* Forgot Password Modal (3-Step OTP Wizard) */}
+            {activeModal === 'forgot' && (
+              <div className="sheet-content forgot-wizard-content">
+                <div className="sheet-header">
+                  <div className="sheet-icon-wrap">
+                    <KeyRound className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h2 className="sheet-title">Reset Password</h2>
+                  <p className="sheet-subtitle">
+                    {forgotStep === 1 && 'Enter your registered email address or username to receive a 6-digit verification code.'}
+                    {forgotStep === 2 && 'Enter the 6-digit OTP code sent to your email. The code expires in 30 seconds.'}
+                    {forgotStep === 3 && 'Choose a strong new password for your PortFlow operator account.'}
+                  </p>
+                </div>
+
+                {/* Step Progress Tracker */}
+                <div className="wizard-progress-bar">
+                  <div className="wizard-steps-header">
+                    <span className={`wizard-step-pill ${forgotStep >= 1 ? 'active' : ''}`}>1. Account</span>
+                    <span className="wizard-step-divider">→</span>
+                    <span className={`wizard-step-pill ${forgotStep >= 2 ? 'active' : ''}`}>2. 6-Digit OTP</span>
+                    <span className="wizard-step-divider">→</span>
+                    <span className={`wizard-step-pill ${forgotStep >= 3 ? 'active' : ''}`}>3. New Password</span>
+                  </div>
+                  <div className="wizard-track">
+                    <div
+                      className="wizard-fill"
+                      style={{
+                        width: forgotStep === 1 ? '33.33%' : forgotStep === 2 ? '66.66%' : '100%'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Notifications Alert */}
+                {forgotError && (
+                  <div className="form-alert error" role="alert" style={{ marginBottom: '1.25rem' }}>
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{forgotError}</span>
+                  </div>
+                )}
+                {forgotSuccess && (
+                  <div className="form-alert success" role="status" style={{ marginBottom: '1.25rem' }}>
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{forgotSuccess}</span>
+                  </div>
+                )}
+
+                {/* ─── Step 1: Enter Email / Username ─── */}
+                {forgotStep === 1 && (
+                  <form onSubmit={handleSendOTP} className="forgot-wizard-form">
+                    <div className="form-field-group">
+                      <label htmlFor="forgot-email-input" className="form-field-label">
+                        Username or Registered Email
+                      </label>
+                      <div className="form-input-box">
+                        <Mail className="form-input-icon" aria-hidden="true" />
+                        <input
+                          id="forgot-email-input"
+                          type="text"
+                          value={forgotEmail}
+                          onChange={(e) => setForgotEmail(e.target.value)}
+                          placeholder="e.g. operator@portflow.com"
+                          required
+                          autoFocus
+                          className="form-input"
+                        />
+                      </div>
+                      <span className="form-field-hint">
+                        If the account exists in PortFlow, a 6-digit OTP valid for 30 seconds will be generated.
+                      </span>
+                    </div>
+
+                    <div className="sheet-footer-action-row">
+                      <button
+                        type="button"
+                        className="sheet-secondary-btn"
+                        onClick={() => setActiveModal(null)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={forgotBusy || !forgotEmail.trim()}
+                        className="sheet-primary-btn"
+                      >
+                        {forgotBusy ? (
+                          <span className="btn-loading-flex">
+                            <span className="spinner-dots" /> Sending OTP...
+                          </span>
+                        ) : (
+                          'Send 6-Digit OTP'
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* ─── Step 2: Enter 6-Digit OTP (30s Expiry) ─── */}
+                {forgotStep === 2 && (
+                  <form onSubmit={handleVerifyOTP} className="forgot-wizard-form">
+                    <div className="otp-verification-card">
+                      <div className="otp-header-info">
+                        <span className="otp-target-label">Verification code sent for:</span>
+                        <span className="otp-target-email">{forgotEmail}</span>
+                      </div>
+
+                      <div className="otp-input-container">
+                        <label htmlFor="otp-input-field" className="form-field-label text-center block">
+                          Enter 6-Digit Verification Code
+                        </label>
+                        <input
+                          id="otp-input-field"
+                          type="text"
+                          maxLength={6}
+                          pattern="[0-9]*"
+                          inputMode="numeric"
+                          value={forgotOtp}
+                          onChange={(e) => setForgotOtp(e.target.value.replace(/\D/g, ''))}
+                          placeholder="000000"
+                          required
+                          autoFocus
+                          className="otp-code-input"
+                        />
+                      </div>
+
+                      {/* 30-Second Countdown Timer Badge */}
+                      <div className="otp-timer-container">
+                        {otpTimer > 0 ? (
+                          <div className="otp-countdown-pill active">
+                            <Timer className="w-4 h-4 animate-spin text-emerald-600" />
+                            <span>Valid for: <strong>{otpTimer}s</strong></span>
+                          </div>
+                        ) : (
+                          <div className="otp-countdown-pill expired">
+                            <AlertCircle className="w-4 h-4 text-red-600" />
+                            <span>OTP expired (30s limit exceeded)</span>
+                          </div>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => void handleSendOTP()}
+                          disabled={forgotBusy}
+                          className="resend-otp-btn"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${forgotBusy ? 'animate-spin' : ''}`} />
+                          Resend OTP
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="sheet-footer-action-row">
+                      <button
+                        type="button"
+                        className="sheet-secondary-btn"
+                        onClick={() => setForgotStep(1)}
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-1 inline" /> Back
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={forgotBusy || forgotOtp.length !== 6 || otpTimer <= 0}
+                        className="sheet-primary-btn"
+                      >
+                        {forgotBusy ? (
+                          <span className="btn-loading-flex">
+                            <span className="spinner-dots" /> Verifying...
+                          </span>
+                        ) : (
+                          'Verify OTP'
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* ─── Step 3: Set New Password ─── */}
+                {forgotStep === 3 && (
+                  <form onSubmit={handleResetPassword} className="forgot-wizard-form">
+                    <div className="form-field-group">
+                      <label htmlFor="forgot-new-password" className="form-field-label">
+                        New Password
+                      </label>
+                      <div className="form-input-box">
+                        <LockKeyhole className="form-input-icon" aria-hidden="true" />
+                        <input
+                          id="forgot-new-password"
+                          type={showNewPassword ? 'text' : 'password'}
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="At least 6 characters"
+                          required
+                          minLength={6}
+                          autoFocus
+                          className="form-input has-action"
+                        />
+                        <button
+                          type="button"
+                          className="form-password-toggle"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showNewPassword ? <EyeOff className="toggle-eye-icon" /> : <Eye className="toggle-eye-icon" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="form-field-group">
+                      <label htmlFor="forgot-confirm-password" className="form-field-label">
+                        Confirm New Password
+                      </label>
+                      <div className="form-input-box">
+                        <LockKeyhole className="form-input-icon" aria-hidden="true" />
+                        <input
+                          id="forgot-confirm-password"
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Re-enter your new password"
+                          required
+                          minLength={6}
+                          className="form-input has-action"
+                        />
+                        <button
+                          type="button"
+                          className="form-password-toggle"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showConfirmPassword ? <EyeOff className="toggle-eye-icon" /> : <Eye className="toggle-eye-icon" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="sheet-footer-action-row">
+                      <button
+                        type="button"
+                        className="sheet-secondary-btn"
+                        onClick={() => setForgotStep(2)}
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-1 inline" /> Back
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={forgotBusy || newPassword.length < 6 || newPassword !== confirmPassword}
+                        className="sheet-primary-btn"
+                      >
+                        {forgotBusy ? (
+                          <span className="btn-loading-flex">
+                            <span className="spinner-dots" /> Updating...
+                          </span>
+                        ) : (
+                          'Reset & Save Password'
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
             )}
           </div>

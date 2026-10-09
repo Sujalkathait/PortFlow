@@ -56,7 +56,7 @@ export const updateEquipment = async (req: AuthenticatedRequest, res: Response):
 
         const { name, status, type, assigned_to } = req.body;
 
-        const validStatuses = ['Available', 'In Use', 'Maintenance', 'Decommissioned'];
+        const validStatuses = ['Available', 'Occupied', 'Running', 'Busy', 'Maintenance', 'In Use', 'Offline', 'Decommissioned'];
         if (status !== undefined && !validStatuses.includes(status)) {
             res.status(400).json({ success: false, message: `Status must be one of: ${validStatuses.join(', ')}` });
             return;

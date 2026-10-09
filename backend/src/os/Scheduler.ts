@@ -25,6 +25,23 @@ export class PriorityStrategy implements SchedulingStrategy {
     }
 }
 
+export class RoundRobinStrategy implements SchedulingStrategy {
+    private quantum: number;
+
+    constructor(quantum: number = 2000) {
+        this.quantum = quantum;
+    }
+
+    schedule(processes: Process[]): Process | null {
+        // Round-robin picks the head of the FIFO ready queue
+        return processes[0] || null;
+    }
+
+    getQuantum(): number {
+        return this.quantum;
+    }
+}
+
 export class Scheduler {
     private strategy: SchedulingStrategy;
     private readyQueue: Process[] = [];

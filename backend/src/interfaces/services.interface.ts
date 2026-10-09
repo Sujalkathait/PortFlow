@@ -64,4 +64,7 @@ export interface IAuthService {
     login(data: LoginDTO): Promise<AuthResponseDTO>;
     getCurrentUser(userId: number): Promise<any>;
     deleteAccount(userId: number, deletedBy: string): Promise<boolean>;
+    requestPasswordResetOTP(identifier: string): Promise<{ success: boolean; message: string; debugOtp?: string }>;
+    verifyPasswordResetOTP(identifier: string, otp: string): Promise<{ success: boolean; message: string }>;
+    resetPasswordWithOTP(identifier: string, otp: string, newPassword: string): Promise<{ success: boolean; message: string }>;
 }

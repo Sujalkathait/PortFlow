@@ -8,7 +8,6 @@ interface OperationMetricsCardsProps {
     completedCount: number;
     onDispatch: () => void;
     disabled?: boolean;
-    isAdmin?: boolean;
 }
 
 export function OperationMetricsCards({
@@ -17,7 +16,6 @@ export function OperationMetricsCards({
     completedCount,
     onDispatch,
     disabled = false,
-    isAdmin = true,
 }: OperationMetricsCardsProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -35,20 +33,14 @@ export function OperationMetricsCards({
                             </div>
                         </div>
                     </div>
-                    {isAdmin ? (
-                        <Button
-                            size="sm"
-                            disabled={queuedCount === 0 || disabled}
-                            onClick={onDispatch}
-                            className="bg-primary text-primary-foreground shadow"
-                        >
-                            <Play className="mr-2 h-3.5 w-3.5" /> Dispatch Next Process
-                        </Button>
-                    ) : (
-                        <span className="px-2.5 py-1 text-xs font-medium rounded bg-muted text-muted-foreground border">
-                            Auto Scheduler Active
-                        </span>
-                    )}
+                    <Button
+                        size="sm"
+                        disabled={queuedCount === 0 || disabled}
+                        onClick={onDispatch}
+                        className="bg-primary text-primary-foreground shadow"
+                    >
+                        <Play className="mr-2 h-3.5 w-3.5" /> Dispatch Next Process
+                    </Button>
                 </CardContent>
             </Card>
 

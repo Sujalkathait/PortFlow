@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Calendar, ChevronDown } from 'lucide-react';
 import { AuthProvider, useAuth, type Role } from './auth/AuthProvider';
 import { ProtectedRoute } from './auth/ProtectedRoute';
 
@@ -8,8 +9,6 @@ import { AppSidebar } from "./components/app-sidebar";
 import { CommandMenu } from "./components/command-menu";
 import { ThemeToggle } from './components/theme-toggle';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
-
-import { useNavigate } from 'react-router-dom';
 
 const Login = lazy(async () => ({ default: (await import('./pages/Login')).Login }));
 const DashboardPage = lazy(async () => ({ default: (await import('./pages/DashboardPage')).DashboardPage }));
@@ -20,17 +19,18 @@ const EquipmentPage = lazy(async () => ({ default: (await import('./pages/Equipm
 const SchedulingPage = lazy(async () => ({ default: (await import('./pages/SchedulingPage')).SchedulingPage }));
 const TrashPage = lazy(async () => ({ default: (await import('./pages/TrashPage')).TrashPage }));
 const ProfilePage = lazy(async () => ({ default: (await import('./pages/ProfilePage')).ProfilePage }));
+const ReportIssuePage = lazy(async () => ({ default: (await import('./pages/ReportIssuePage')).ReportIssuePage }));
 
 function RouteLoading() {
     return <main className="page-loader" aria-live="polite">Loading workspace…</main>;
 }
 
-function DashboardLayout({ role, children }: { role: Role; children: React.ReactNode }) {
+function DashboardLayout({ children }: { role?: Role; children: React.ReactNode }) {
     const { profile } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
 
-    const userName = profile?.full_name || profile?.email || role;
+    const userName = profile?.full_name || profile?.email || 'Operator';
     const userInitial = userName.charAt(0).toUpperCase();
     const [dark, setDark] = useState(() => localStorage.getItem('portflow-theme') === 'dark');
 
@@ -39,39 +39,72 @@ function DashboardLayout({ role, children }: { role: Role; children: React.React
         localStorage.setItem('portflow-theme', dark ? 'dark' : 'light');
     }, [dark]);
 
+    // Live clock string matching Image: "Mon, Sep 29, 2025  21:42"
+    const [nowString, setNowString] = useState('');
+    useEffect(() => {
+        const updateTime = () => {
+            const now = new Date();
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const dayName = days[now.getDay()];
+            const monthName = months[now.getMonth()];
+            const dayNum = now.getDate();
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            setNowString(`${dayName}, ${monthName} ${dayNum}, ${year}  ${hours}:${mins}`);
+        };
+        updateTime();
+        const t = setInterval(updateTime, 30000);
+        return () => clearInterval(t);
+    }, []);
+
     // Determine current breadcrumb name
     const pathPart = location.pathname.split('/').filter(Boolean)[1] || 'dashboard';
     const pageName = pathPart.charAt(0).toUpperCase() + pathPart.slice(1).replace('-', ' ');
 
     return (
         <SidebarProvider>
-            <AppSidebar role={role} />
+            <AppSidebar />
             <a className="skip-link" href="#main-content-area">Skip to main content</a>
-            <div className="flex-1 flex flex-col min-w-0 bg-muted/20 dark:bg-background overflow-hidden h-screen">
-                <header className="flex h-14 items-center justify-between border-b bg-background/95 px-3 sm:px-4 lg:px-6 gap-3">
-                    <div className="flex items-center gap-4">
+            <div className="flex-1 flex flex-col min-w-0 bg-[#f8fafc] dark:bg-background overflow-hidden h-screen">
+                <header className="flex h-16 items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-background/95 px-4 sm:px-6 lg:px-8 gap-3">
+                    <div className="flex items-center gap-3">
                         <SidebarTrigger />
-                        <span className="text-sm font-medium text-muted-foreground hidden md:block">
-                            {role} / <span className="text-foreground">{pageName}</span>
+                        <span className="text-sm font-medium text-slate-500 hidden md:block">
+                            PortFlow / <span className="font-semibold text-slate-900 dark:text-white">{pageName}</span>
                         </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 sm:gap-3 flex-1 justify-end max-w-xl">
-                        <CommandMenu role={role} />
+                    <div className="flex items-center gap-3 sm:gap-4 flex-1 justify-end max-w-xl">
+                        <CommandMenu />
                         <ThemeToggle dark={dark} onToggle={() => setDark(value => !value)} />
+
+                        {/* Live Date & Time pill from mockup */}
+                        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs">
+                            <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                            <span>{nowString}</span>
+                        </div>
+
+                        {/* Operator Profile dropdown button */}
                         <button
                             type="button"
-                            onClick={() => navigate(role === 'Admin' ? '/admin/profile' : '/operator/profile')}
-                            className="flex items-center gap-2.5 pl-2 border-l hover:opacity-80 transition text-left cursor-pointer bg-transparent border-t-0 border-r-0 border-b-0"
+                            onClick={() => navigate('/operator/profile')}
+                            className="flex items-center gap-2.5 pl-2 hover:opacity-85 transition text-left cursor-pointer bg-transparent border-none"
                             title="View My Profile"
                         >
-                            <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm">
-                                {userInitial}
+                            <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
+                                {userInitial || 'T'}
                             </div>
-                            <div className="hidden lg:block text-left">
-                                <div className="text-xs font-semibold leading-none">{userName}</div>
-                                <div className="text-[11px] text-muted-foreground mt-0.5">{role}</div>
+                            <div className="hidden md:block text-left">
+                                <div className="text-xs font-bold leading-tight text-slate-900 dark:text-white">
+                                    {userName || 'Operator'}
+                                </div>
+                                <div className="text-[11px] text-slate-500 font-medium">
+                                    Port Operations
+                                </div>
                             </div>
+                            <ChevronDown className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                         </button>
                     </div>
                 </header>
@@ -94,139 +127,93 @@ function App() {
                     <Route path="/" element={<Navigate to="/login" replace />} />
                     <Route path="/login" element={<Login />} />
 
-                    {/* Admin Protected Routes */}
-                    <Route path="/admin" element={
-                        <ProtectedRoute role="Admin">
-                            <DashboardLayout role="Admin">
-                                <DashboardPage role="Admin" />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/admin/dashboard" element={
-                        <ProtectedRoute role="Admin">
-                            <DashboardLayout role="Admin">
-                                <DashboardPage role="Admin" />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/admin/operations" element={
-                        <ProtectedRoute role="Admin">
-                            <DashboardLayout role="Admin">
-                                <OperationsPage />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/admin/ships" element={
-                        <ProtectedRoute role="Admin">
-                            <DashboardLayout role="Admin">
-                                <ShipsPage />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/admin/Cargos" element={
-                        <ProtectedRoute role="Admin">
-                            <DashboardLayout role="Admin">
-                                <CargoPage />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/admin/Equipments" element={
-                        <ProtectedRoute role="Admin">
-                            <DashboardLayout role="Admin">
-                                <EquipmentPage />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/admin/scheduling" element={
-                        <ProtectedRoute role="Admin">
-                            <DashboardLayout role="Admin">
-                                <SchedulingPage />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/admin/trash" element={
-                        <ProtectedRoute role="Admin">
-                            <DashboardLayout role="Admin">
-                                <TrashPage />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/admin/profile" element={
-                        <ProtectedRoute role="Admin">
-                            <DashboardLayout role="Admin">
-                                <ProfilePage />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/admin/logs" element={<Navigate to="/admin/dashboard" replace />} />
-                    <Route path="/admin/reports" element={<Navigate to="/admin/dashboard" replace />} />
+                    {/* Admin Legacy Redirection */}
+                    <Route path="/admin" element={<Navigate to="/operator" replace />} />
+                    <Route path="/admin/*" element={<Navigate to="/operator" replace />} />
 
-                    {/* Operator Protected Routes */}
+                    {/* Terminal Operator Protected Routes */}
                     <Route path="/operator" element={
-                        <ProtectedRoute role="Operator">
-                            <DashboardLayout role="Operator">
-                                <DashboardPage role="Operator" />
+                        <ProtectedRoute>
+                            <DashboardLayout>
+                                <DashboardPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
                     <Route path="/operator/dashboard" element={
-                        <ProtectedRoute role="Operator">
-                            <DashboardLayout role="Operator">
-                                <DashboardPage role="Operator" />
+                        <ProtectedRoute>
+                            <DashboardLayout>
+                                <DashboardPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
                     <Route path="/operator/operations" element={
-                        <ProtectedRoute role="Operator">
-                            <DashboardLayout role="Operator">
+                        <ProtectedRoute>
+                            <DashboardLayout>
                                 <OperationsPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
                     <Route path="/operator/ships" element={
-                        <ProtectedRoute role="Operator">
-                            <DashboardLayout role="Operator">
+                        <ProtectedRoute>
+                            <DashboardLayout>
                                 <ShipsPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
                     <Route path="/operator/Cargos" element={
-                        <ProtectedRoute role="Operator">
-                            <DashboardLayout role="Operator">
+                        <ProtectedRoute>
+                            <DashboardLayout>
                                 <CargoPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
                     <Route path="/operator/Equipments" element={
-                        <ProtectedRoute role="Operator">
-                            <DashboardLayout role="Operator">
+                        <ProtectedRoute>
+                            <DashboardLayout>
                                 <EquipmentPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
                     <Route path="/operator/scheduling" element={
-                        <ProtectedRoute role="Operator">
-                            <DashboardLayout role="Operator">
+                        <ProtectedRoute>
+                            <DashboardLayout>
                                 <SchedulingPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
                     <Route path="/operator/trash" element={
-                        <ProtectedRoute role="Operator">
-                            <DashboardLayout role="Operator">
+                        <ProtectedRoute>
+                            <DashboardLayout>
                                 <TrashPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
                     <Route path="/operator/profile" element={
-                        <ProtectedRoute role="Operator">
-                            <DashboardLayout role="Operator">
+                        <ProtectedRoute>
+                            <DashboardLayout>
                                 <ProfilePage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
+                    <Route path="/operator/report-issue" element={
+                        <ProtectedRoute>
+                            <DashboardLayout>
+                                <ReportIssuePage />
+                            </DashboardLayout>
+                        </ProtectedRoute>
+                    } />
                     <Route path="/operator/reports" element={<Navigate to="/operator/dashboard" replace />} />
-                    <Route path="/operator/report-issue" element={<Navigate to="/operator/dashboard" replace />} />
+
+                    {/* Direct URL Aliases */}
+                    <Route path="/dashboard" element={<Navigate to="/operator/dashboard" replace />} />
+                    <Route path="/operations" element={<Navigate to="/operator/operations" replace />} />
+                    <Route path="/ships" element={<Navigate to="/operator/ships" replace />} />
+                    <Route path="/cargos" element={<Navigate to="/operator/Cargos" replace />} />
+                    <Route path="/equipments" element={<Navigate to="/operator/Equipments" replace />} />
+                    <Route path="/scheduling" element={<Navigate to="/operator/scheduling" replace />} />
+                    <Route path="/trash" element={<Navigate to="/operator/trash" replace />} />
+                    <Route path="/report-issue" element={<Navigate to="/operator/report-issue" replace />} />
+                    <Route path="/profile" element={<Navigate to="/operator/profile" replace />} />
 
                     {/* Fallback Catch-All */}
                     <Route path="*" element={<Navigate to="/login" replace />} />

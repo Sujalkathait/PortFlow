@@ -45,7 +45,7 @@ export const restoreItem = async (req: AuthenticatedRequest, res: Response): Pro
     }
 };
 
-/** DELETE /api/trash/:collection/:id — permanently delete an item (Admin only) */
+/** DELETE /api/trash/:collection/:id — permanently delete an item */
 export const permanentDeleteItem = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const collection = String(req.params.collection);
@@ -67,7 +67,7 @@ export const permanentDeleteItem = async (req: AuthenticatedRequest, res: Respon
     }
 };
 
-/** DELETE /api/trash/empty — purge all trashed records (Admin only) */
+/** DELETE /api/trash/empty — purge all trashed records */
 export const emptyTrash = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const result = await trashService.emptyAllTrash();

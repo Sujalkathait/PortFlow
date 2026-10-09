@@ -158,9 +158,9 @@ export const getOSState = async (_req: Request, res: Response): Promise<void> =>
 export const setOSAlgorithm = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const { algorithm } = req.body;
-        const valid = ['FCFS', 'SJF', 'PRIORITY'];
+        const valid = ['FCFS', 'SJF', 'ROUND_ROBIN', 'PRIORITY'];
         if (!valid.includes(algorithm)) {
-            res.status(400).json({ success: false, message: 'Invalid algorithm. Must be FCFS, SJF, or PRIORITY.' });
+            res.status(400).json({ success: false, message: 'Invalid algorithm. Must be FCFS, SJF, ROUND_ROBIN, or PRIORITY.' });
             return;
         }
         PortSystem.getInstance().setSchedulingAlgorithm(algorithm as any);

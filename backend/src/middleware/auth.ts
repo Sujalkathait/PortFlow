@@ -12,7 +12,7 @@ function requireJwtSecret(): string {
 export interface AuthUser {
     id: number;
     email: string;
-    role: 'Admin' | 'Operator';
+    role: 'Operator';
     fullName: string;
 }
 
@@ -71,9 +71,9 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
 }
 
 /**
- * Middleware: Restrict access to specified roles (e.g. Admin).
+ * Middleware: Restrict access to specified roles.
  */
-export function requireRole(allowedRoles: ('Admin' | 'Operator')[]) {
+export function requireRole(allowedRoles: ('Operator' | string)[]) {
     return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
         if (!req.user) {
             res.status(401).json({ success: false, message: 'Authentication required.' });

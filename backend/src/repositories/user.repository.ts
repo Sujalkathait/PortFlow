@@ -67,6 +67,22 @@ export class UserRepository implements IUserRepository {
         }
     }
 
+    async updatePassword(id: number, passwordHash: string): Promise<boolean> {
+        try {
+            await prisma.user.update({
+                where: { id },
+                data: {
+                    password_hash: passwordHash,
+                    updated_at: new Date()
+                }
+            });
+            return true;
+        } catch (err: any) {
+            console.error('[UserRepository] updatePassword error:', err.message);
+            return false;
+        }
+    }
+
     async count(): Promise<number> {
         return prisma.user.count({ where: { deleted_at: null } });
     }
