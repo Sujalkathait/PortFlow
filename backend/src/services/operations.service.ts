@@ -23,12 +23,36 @@ export class OperationsService implements IOperationsService {
         // Register default port infrastructure in OS engine
         this.portSystem.registerCrane('Crane A');
         this.portSystem.registerCrane('Crane B');
+        this.portSystem.registerCrane('Crane C');
+        this.portSystem.registerCrane('Crane D');
         this.portSystem.registerBerths('Berth 1', 1);
         this.portSystem.registerBerths('Berth 2', 1);
+        this.portSystem.registerBerths('Berth 3', 1);
+        this.portSystem.registerBerths('Berth 4', 1);
+        this.portSystem.registerBerths('Berth 5', 1);
+    }
+
+    /** Synchronize queued operations from database into OS ready queue */
+    public async syncQueuedOperations(): Promise<void> {
+        try {
+            const ops = await this.repo.findActive();
+            const queued = ops.filter(op => op.status === 'Queued');
+            for (const op of queued) {
+                if (!this.portSystem.hasProcess(op.processId)) {
+                    const reqEquip = (op.crane_id && op.crane_id !== 'None') ? [op.crane_id] : [];
+                    const burstTime = 3000 + (op.priority * 500);
+                    const proc = new Process(op.processId, burstTime, reqEquip, op.priority);
+                    this.portSystem.addProcess(proc);
+                }
+            }
+        } catch (e: any) {
+            console.error('[OperationsService] Error syncing queued operations:', e.message);
+        }
     }
 
     /** READ — all active operations with optional user filtering */
     public async getOperations(userFilter?: { role?: string; email?: string }): Promise<OperationRecord[]> {
+        await this.syncQueuedOperations();
         let ops = await this.repo.findActive();
         if (userFilter?.role === 'Operator' && userFilter?.email) {
             ops = ops.filter(op => op.created_by === userFilter.email);
@@ -75,6 +99,7 @@ export class OperationsService implements IOperationsService {
 
     /** Run the next process from the queue through the OS scheduler */
     public async dispatchNext(): Promise<{ operationId: number; process: Process } | null> {
+        await this.syncQueuedOperations();
         const result = await this.portSystem.executeNextProcess();
         if (!result) return null;
 

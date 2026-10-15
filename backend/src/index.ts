@@ -11,7 +11,6 @@ import { seedDatabase } from './config/seed';
 const app = express();
 const port = Number(process.env.PORT || 10000);
 
-// Security middleware
 app.use(helmet());
 
 const isDev = process.env.NODE_ENV !== 'production';
@@ -24,10 +23,8 @@ const apiLimiter = rateLimit({
     message: { success: false, message: 'Too many requests. Please wait a moment and try again.' },
 });
 
-// Apply the rate limiting middleware to API calls only
 app.use('/api', apiLimiter);
 
-// CORS configuration for Vercel frontend & production environments
 const corsOrigin = process.env.CORS_ORIGIN || '*';
 app.use(cors({
     origin: corsOrigin === '*' ? '*' : corsOrigin.split(',').map(s => s.trim()),
@@ -36,11 +33,9 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'x-user-email', 'Accept', 'Origin', 'X-Requested-With'],
 }));
 
-// Request parsing
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Standard security headers
 app.use((_req: Request, res: Response, next: NextFunction) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
@@ -48,7 +43,6 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
-// Production Health Check & Readiness Endpoint
 app.get('/health', async (_req: Request, res: Response) => {
     const dbHealthy = await checkDatabaseConnection();
     res.status(200).json({
@@ -60,7 +54,6 @@ app.get('/health', async (_req: Request, res: Response) => {
     });
 });
 
-// Root Welcome Endpoint
 app.get('/', (_req: Request, res: Response) => {
     res.json({
         name: 'PortFlow API',
@@ -74,10 +67,8 @@ app.get('/', (_req: Request, res: Response) => {
     });
 });
 
-// Mount Main REST API
 app.use('/api', apiRouter);
 
-// 404 Route Handler
 app.use((req: Request, res: Response) => {
     res.status(404).json({
         success: false,
@@ -85,7 +76,6 @@ app.use((req: Request, res: Response) => {
     });
 });
 
-// Centralized Production Error Handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     console.error('[ServerError]', err.stack || err.message || err);
     res.status(err.status || 500).json({
@@ -96,7 +86,6 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     });
 });
 
-// Start Server & Bootstrap Database
 const server = app.listen(port, async () => {
     console.log(`\n======================================================`);
     console.log(`  ⚓ PortFlow ${process.env.NODE_ENV === 'production' ? 'Production' : 'Development'} Backend`);
@@ -105,7 +94,6 @@ const server = app.listen(port, async () => {
     console.log(`  API Base: http://localhost:${port}/api`);
     console.log(`======================================================\n`);
 
-    // Initialize database tables & seed accounts
     await initDatabase();
     if (isDatabaseConnected()) {
         await seedDefaultAccounts();
@@ -125,7 +113,6 @@ server.on('error', (err: any) => {
     process.exitCode = 1;
 });
 
-// Graceful Shutdown for Cloud Orchestration (Render / Docker)
 const handleShutdown = (signal: string) => {
     console.log(`\nReceived ${signal}. Gracefully shutting down PortFlow server...`);
     server.close(() => {

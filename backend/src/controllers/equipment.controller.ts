@@ -10,7 +10,6 @@ const getRecordId = (value: string | string[]): number | null => {
     return Number.isInteger(id) && id > 0 ? id : null;
 };
 
-/** GET /api/equipment */
 export const getEquipments = async (_req: Request, res: Response): Promise<void> => {
     try {
         const Equipments = await equipmentService.getEquipments();
@@ -21,7 +20,6 @@ export const getEquipments = async (_req: Request, res: Response): Promise<void>
     }
 };
 
-/** POST /api/equipment */
 export const createEquipment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const { equipment_id, name, type, status } = req.body;
@@ -45,7 +43,6 @@ export const createEquipment = async (req: AuthenticatedRequest, res: Response):
     }
 };
 
-/** PUT /api/equipment/:id */
 export const updateEquipment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const id = getRecordId(req.params.id);
@@ -79,7 +76,6 @@ export const updateEquipment = async (req: AuthenticatedRequest, res: Response):
     }
 };
 
-/** DELETE /api/equipment/:id — soft delete */
 export const deleteEquipment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const id = getRecordId(req.params.id);

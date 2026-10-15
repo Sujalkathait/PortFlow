@@ -370,7 +370,7 @@ PortFlow comes pre-seeded with a developer account for instant evaluation:
 
 | Role | Email Address | Password | Permissions |
 | :--- | :--- | :--- | :--- |
-| **Terminal Operator** | `operator@portflow.com` | `Password123!` | Full system access, equipment setup, OS scheduling, reports, trash recovery, and ground operations |
+| **Terminal Operator** | `[operator@portflow.com]` | `Password123!` | Full system access, equipment setup, OS scheduling, reports, trash recovery, and ground operations |
 
 *(A one-click demo login button is also provided directly on the Login page).*
 

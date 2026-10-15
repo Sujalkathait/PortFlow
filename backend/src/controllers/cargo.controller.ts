@@ -10,7 +10,6 @@ const getRecordId = (value: string | string[]): number | null => {
     return Number.isInteger(id) && id > 0 ? id : null;
 };
 
-/** GET /api/cargo */
 export const getCargos = async (_req: Request, res: Response): Promise<void> => {
     try {
         const Cargos = await cargoService.getCargos();
@@ -21,7 +20,6 @@ export const getCargos = async (_req: Request, res: Response): Promise<void> => 
     }
 };
 
-/** POST /api/cargo */
 export const createCargo = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const { cargo_number, size_type, weight_tons, cargo_type, current_location, ship_name } = req.body;
@@ -45,7 +43,6 @@ export const createCargo = async (req: AuthenticatedRequest, res: Response): Pro
     }
 };
 
-/** PUT /api/cargo/:id */
 export const updateCargo = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const id = getRecordId(req.params.id);
@@ -78,7 +75,6 @@ export const updateCargo = async (req: AuthenticatedRequest, res: Response): Pro
     }
 };
 
-/** DELETE /api/cargo/:id — soft delete */
 export const deleteCargo = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const id = getRecordId(req.params.id);

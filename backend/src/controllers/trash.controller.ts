@@ -2,7 +2,6 @@ import { Response } from 'express';
 import { trashService } from '../services/trash.service';
 import { AuthenticatedRequest } from '../middleware/auth';
 
-/** GET /api/trash — get all soft-deleted records (role-filtered for operators) */
 export const getTrash = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         let items = await trashService.getTrash();
@@ -22,7 +21,6 @@ export const getTrash = async (req: AuthenticatedRequest, res: Response): Promis
     }
 };
 
-/** POST /api/trash/restore/:collection/:id — restore soft-deleted item */
 export const restoreItem = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const collection = String(req.params.collection);
@@ -45,7 +43,6 @@ export const restoreItem = async (req: AuthenticatedRequest, res: Response): Pro
     }
 };
 
-/** DELETE /api/trash/:collection/:id — permanently delete an item */
 export const permanentDeleteItem = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const collection = String(req.params.collection);
@@ -67,7 +64,6 @@ export const permanentDeleteItem = async (req: AuthenticatedRequest, res: Respon
     }
 };
 
-/** DELETE /api/trash/empty — purge all trashed records */
 export const emptyTrash = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const result = await trashService.emptyAllTrash();

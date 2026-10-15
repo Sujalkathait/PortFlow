@@ -10,7 +10,6 @@ const getRecordId = (value: string | string[]): number | null => {
     return Number.isInteger(id) && id > 0 ? id : null;
 };
 
-/** GET /api/ships */
 export const getShips = async (_req: Request, res: Response): Promise<void> => {
     try {
         const ships = await shipsService.getShips();
@@ -21,7 +20,6 @@ export const getShips = async (_req: Request, res: Response): Promise<void> => {
     }
 };
 
-/** GET /api/ships/:id */
 export const getShipById = async (req: Request, res: Response): Promise<void> => {
     try {
         const id = getRecordId(req.params.id);
@@ -41,7 +39,6 @@ export const getShipById = async (req: Request, res: Response): Promise<void> =>
     }
 };
 
-/** POST /api/ships */
 export const createShip = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const { imo_number, name, vessel_type, capacity_teu, berth_id } = req.body;
@@ -64,7 +61,6 @@ export const createShip = async (req: AuthenticatedRequest, res: Response): Prom
     }
 };
 
-/** PUT /api/ships/:id */
 export const updateShip = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const id = getRecordId(req.params.id);
@@ -102,7 +98,6 @@ export const updateShip = async (req: AuthenticatedRequest, res: Response): Prom
     }
 };
 
-/** DELETE /api/ships/:id — soft delete */
 export const deleteShip = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const id = getRecordId(req.params.id);

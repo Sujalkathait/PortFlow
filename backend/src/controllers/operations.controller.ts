@@ -13,7 +13,6 @@ const getRecordId = (value: string | string[]): number | null => {
     return Number.isInteger(id) && id > 0 ? id : null;
 };
 
-/** GET /api/operations — list all active operations */
 export const getOperations = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         let ops = await operationsService.getOperations();
@@ -26,7 +25,6 @@ export const getOperations = async (req: AuthenticatedRequest, res: Response): P
     }
 };
 
-/** GET /api/operations/:id — get single operation */
 export const getOperationById = async (req: Request, res: Response): Promise<void> => {
     try {
         const id = getRecordId(req.params.id);
@@ -46,7 +44,6 @@ export const getOperationById = async (req: Request, res: Response): Promise<voi
     }
 };
 
-/** POST /api/operations — create new operation */
 export const startOperation = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const { operationType, shipName, craneId, berthId, priority, burstDuration } = req.body;
@@ -70,7 +67,6 @@ export const startOperation = async (req: AuthenticatedRequest, res: Response): 
     }
 };
 
-/** PUT /api/operations/:id — update operation */
 export const updateOperation = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const id = getRecordId(req.params.id);
@@ -99,7 +95,6 @@ export const updateOperation = async (req: AuthenticatedRequest, res: Response):
     }
 };
 
-/** DELETE /api/operations/:id — soft-delete operation */
 export const deleteOperation = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const id = getRecordId(req.params.id);
@@ -119,7 +114,6 @@ export const deleteOperation = async (req: AuthenticatedRequest, res: Response):
     }
 };
 
-/** POST /api/operations/dispatch — dispatch next FCFS process */
 export const dispatchNext = async (_req: Request, res: Response): Promise<void> => {
     try {
         const result = await operationsService.dispatchNext();
@@ -142,9 +136,9 @@ export const dispatchNext = async (_req: Request, res: Response): Promise<void> 
     }
 };
 
-/** GET /api/os/state — OS engine telemetry */
 export const getOSState = async (_req: Request, res: Response): Promise<void> => {
     try {
+        await operationsService.syncQueuedOperations();
         const state = PortSystem.getInstance().getSystemState();
         const metrics = await operationsService.getMetrics();
         res.status(200).json({ ...state, metrics });
@@ -154,7 +148,6 @@ export const getOSState = async (_req: Request, res: Response): Promise<void> =>
     }
 };
 
-/** PUT /api/os/algorithm — set OS scheduling algorithm */
 export const setOSAlgorithm = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const { algorithm } = req.body;
@@ -171,7 +164,6 @@ export const setOSAlgorithm = async (req: AuthenticatedRequest, res: Response): 
     }
 };
 
-/** GET /api/analytics — dashboard analytics from real data */
 export const getAnalytics = async (_req: Request, res: Response): Promise<void> => {
     try {
         const metrics = await operationsService.getMetrics();

@@ -12,7 +12,7 @@ interface DashboardPageProps {
   role?: string;
 }
 
-// Custom Crane SVG icon matching the purple badge in the reference mockup
+// Custom Crane SVG icon
 function CraneIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -26,7 +26,7 @@ function CraneIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-// Custom Shipping Container SVG icon matching the green badge in the reference mockup
+// Custom Shipping Container SVG icon
 function ContainerIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -91,7 +91,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
     void loadData();
   }, [loadData]);
 
-  // Pure live counts strictly calculated from actual database records — NO hardcoded numbers!
+  // Live counts
   const shipsCount = ships.length;
   const activeOpsCount = operations.filter(o => o.status === 'Running' || o.status === 'In progress').length;
   const totalOpsCount = operations.length;
@@ -113,7 +113,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
     ? `${Math.round((availableEqCount / totalEqCount) * 100)}%`
     : '0%';
 
-  // Pure dynamic activities built strictly from database records — NO mock/fake strings!
+  // Dynamic activities
   const recentActivities = useMemo(() => {
     const list: any[] = [];
 
@@ -190,7 +190,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
 
   return (
     <div className="flex flex-col space-y-6 w-full max-w-[1440px] mx-auto pb-10">
-      {/* ─── Top Header: Title & Good Progress Banner ─── */}
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -207,7 +207,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
 
       </div>
 
-      {/* ─── Row 1: 4 Key Metric Cards (White Cards) with strictly real data ─── */}
+      {/* Row 1: Key Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* 1. Total Ships */}
         <div
@@ -319,7 +319,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
         </div>
       </div>
 
-      {/* ─── Row 2: 4 Performance & Insights Cards (Tinted Cards) with strictly real data ─── */}
+      {/* Row 2: Performance & Insights Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Card 5: Best Result */}
         <div className="bg-[#f0fdf4] dark:bg-emerald-950/20 border border-[#dcfce7] dark:border-emerald-900/50 rounded-2xl p-5 shadow-xs">

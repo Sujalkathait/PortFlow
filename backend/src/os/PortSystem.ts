@@ -48,6 +48,10 @@ export class PortSystem {
         }
     }
 
+    public hasProcess(processId: string): boolean {
+        return this.processes.has(processId);
+    }
+
     public addProcess(process: Process) {
         this.processes.set(process.id, process);
         this.scheduler.addProcess(process);

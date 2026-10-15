@@ -39,7 +39,7 @@ function DashboardLayout({ children }: { role?: Role; children: React.ReactNode 
         localStorage.setItem('portflow-theme', dark ? 'dark' : 'light');
     }, [dark]);
 
-    // Live clock string matching Image: "Mon, Sep 29, 2025  21:42"
+    // Clock update
     const [nowString, setNowString] = useState('');
     useEffect(() => {
         const updateTime = () => {
@@ -59,7 +59,7 @@ function DashboardLayout({ children }: { role?: Role; children: React.ReactNode 
         return () => clearInterval(t);
     }, []);
 
-    // Determine current breadcrumb name
+    // Breadcrumb text
     const pathPart = location.pathname.split('/').filter(Boolean)[1] || 'dashboard';
     const pageName = pathPart.charAt(0).toUpperCase() + pathPart.slice(1).replace('-', ' ');
 
@@ -80,13 +80,13 @@ function DashboardLayout({ children }: { role?: Role; children: React.ReactNode 
                         <CommandMenu />
                         <ThemeToggle dark={dark} onToggle={() => setDark(value => !value)} />
 
-                        {/* Live Date & Time pill from mockup */}
+                        {/* Clock widget */}
                         <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs">
                             <Calendar className="h-3.5 w-3.5 text-slate-400" />
                             <span>{nowString}</span>
                         </div>
 
-                        {/* Operator Profile dropdown button */}
+                        {/* Profile dropdown */}
                         <button
                             type="button"
                             onClick={() => navigate('/operator/profile')}
@@ -127,11 +127,10 @@ function App() {
                     <Route path="/" element={<Navigate to="/login" replace />} />
                     <Route path="/login" element={<Login />} />
 
-                    {/* Admin Legacy Redirection */}
-                    <Route path="/admin" element={<Navigate to="/operator" replace />} />
+                    {/* Legacy redirects */}
                     <Route path="/admin/*" element={<Navigate to="/operator" replace />} />
 
-                    {/* Terminal Operator Protected Routes */}
+                    {/* Protected Routes */}
                     <Route path="/operator" element={
                         <ProtectedRoute>
                             <DashboardLayout>
@@ -204,8 +203,7 @@ function App() {
                     } />
                     <Route path="/operator/reports" element={<Navigate to="/operator/dashboard" replace />} />
 
-                    {/* Direct URL Aliases */}
-                    <Route path="/dashboard" element={<Navigate to="/operator/dashboard" replace />} />
+                    {/* Aliases */}
                     <Route path="/operations" element={<Navigate to="/operator/operations" replace />} />
                     <Route path="/ships" element={<Navigate to="/operator/ships" replace />} />
                     <Route path="/cargos" element={<Navigate to="/operator/Cargos" replace />} />
@@ -215,8 +213,7 @@ function App() {
                     <Route path="/report-issue" element={<Navigate to="/operator/report-issue" replace />} />
                     <Route path="/profile" element={<Navigate to="/operator/profile" replace />} />
 
-                    {/* Fallback Catch-All */}
-                    <Route path="*" element={<Navigate to="/login" replace />} />
+                    {/* 404 Fallback */}
                 </Routes>
               </Suspense>
             </BrowserRouter>

@@ -1,13 +1,6 @@
--- =============================================================================
--- PortFlow Marine Terminal Operating System (TOS) - Database Schema
--- Target: PostgreSQL 14+ / Supabase | Companion: Prisma (schema.prisma)
--- =============================================================================
-
--- SECTION 1: EXTENSIONS & UTILITIES
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- SECTION 2: AUTOMATIC TIMESTAMP TRIGGER
--- Automatically updates updated_at whenever a row is modified in PostgreSQL.
+
 CREATE OR REPLACE FUNCTION update_timestamp_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -16,9 +9,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- SECTION 3: USERS TABLE
--- Stores authenticated port operators and system administrators.
--- Passwords are never stored in plain text; only 60-character bcrypt hashes are kept.
+-- Users
 CREATE TABLE IF NOT EXISTS public.users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -38,9 +29,7 @@ BEFORE UPDATE ON public.users
 FOR EACH ROW
 EXECUTE FUNCTION update_timestamp_column();
 
--- SECTION 4: SHIPS TABLE
--- Marine vessels arriving, docking, and departing the terminal.
--- Identified internationally by IMO (International Maritime Organization) standard numbers.
+-- Ships
 CREATE TABLE IF NOT EXISTS public.ships (
     id SERIAL PRIMARY KEY,
     imo_number VARCHAR(100) UNIQUE NOT NULL CHECK (char_length(imo_number) >= 3),
@@ -55,9 +44,7 @@ CREATE TABLE IF NOT EXISTS public.ships (
     deleted_by VARCHAR(255) DEFAULT NULL
 );
 
--- SECTION 5: EQUIPMENT TABLE
--- Shared hardware resources (Berths, STS Gantry Cranes, Yard Trucks).
--- Governed by operating system synchronization primitives (Mutexes and Semaphores).
+-- Equipment
 CREATE TABLE IF NOT EXISTS public.equipment (
     id SERIAL PRIMARY KEY,
     equipment_id VARCHAR(50) UNIQUE NOT NULL CHECK (char_length(equipment_id) >= 2),
@@ -71,9 +58,7 @@ CREATE TABLE IF NOT EXISTS public.equipment (
     deleted_by VARCHAR(255) DEFAULT NULL
 );
 
--- SECTION 6: CARGO TABLE
--- Freight manifests, ISO shipping containers, and container tracking.
--- Parity type DOUBLE PRECISION matches IEEE 754 float in Prisma / TypeScript.
+-- Cargo
 CREATE TABLE IF NOT EXISTS public.cargo (
     id SERIAL PRIMARY KEY,
     cargo_number VARCHAR(100) UNIQUE NOT NULL CHECK (char_length(cargo_number) >= 3),
@@ -89,9 +74,7 @@ CREATE TABLE IF NOT EXISTS public.cargo (
     deleted_by VARCHAR(255) DEFAULT NULL
 );
 
--- SECTION 7: OPERATIONS TABLE
--- Represents the core process queue executed by the OS Scheduler.
--- Algorithms applied: FCFS, SJF, Round Robin (Quantum), Priority.
+-- Operations
 CREATE TABLE IF NOT EXISTS public.operations (
     id SERIAL PRIMARY KEY,
     process_id VARCHAR(50) UNIQUE DEFAULT NULL,
@@ -114,9 +97,7 @@ CREATE TABLE IF NOT EXISTS public.operations (
     )
 );
 
--- SECTION 8: BACKWARD-COMPATIBILITY RELATIONAL VIEWS
--- Abstract legacy aliases (containers -> cargo, resources -> equipment)
--- without altering underlying normalized storage.
+-- Legacy views
 CREATE OR REPLACE VIEW public.containers AS
 SELECT 
     id,
@@ -147,8 +128,7 @@ SELECT
     deleted_by
 FROM public.equipment;
 
--- SECTION 9: PERFORMANCE B-TREE INDEXES
--- Index optimization: speeds up frequent WHERE, ORDER BY, and JOIN operations.
+-- Indexes
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
 CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON public.users(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_users_created_at ON public.users(created_at DESC);
@@ -178,8 +158,7 @@ CREATE INDEX IF NOT EXISTS idx_operations_priority ON public.operations(priority
 CREATE INDEX IF NOT EXISTS idx_operations_deleted_at ON public.operations(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_operations_created_at ON public.operations(created_at DESC);
 
--- SECTION 10: IDEMPOTENT CONSTRAINTS & DEFAULTS FOR EXISTING DATABASES
--- Safely applies schema updates even if tables were previously created without them.
+-- Constraints & Defaults
 ALTER TABLE public.users ALTER COLUMN role SET DEFAULT 'Operator';
 ALTER TABLE public.users ALTER COLUMN updated_at SET DEFAULT NOW();
 ALTER TABLE public.ships ALTER COLUMN created_by SET DEFAULT 'system';
@@ -206,8 +185,7 @@ DO $$ BEGIN
     END IF;
 END $$;
 
--- SECTION 11: ROW LEVEL SECURITY (RLS) & ACCESS PERMISSIONS
--- Ensures Supabase security compliance while allowing seamless REST API & Prisma queries.
+-- RLS
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ships ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.equipment ENABLE ROW LEVEL SECURITY;
@@ -233,9 +211,7 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated, servi
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
 GRANT ALL ON ALL ROUTINES IN SCHEMA public TO postgres, anon, authenticated, service_role;
 
--- SECTION 12: INITIAL SEED DATA (IDEMPOTENT)
--- Seeds the default evaluation credentials specified in project documentation:
--- Terminal Operator | operator@portflow.com | Password123!
+-- Seed default operator
 INSERT INTO public.users (email, password_hash, full_name, role)
 VALUES (
     'operator@portflow.com',
@@ -245,15 +221,3 @@ VALUES (
 )
 ON CONFLICT (email) DO NOTHING;
 
--- Seeds default physical berths and cranes required by OS Simulation Kernel:
-INSERT INTO public.equipment (equipment_id, name, type, status, created_by)
-VALUES 
-    ('EQ-BERTH-1', 'Berth 1', 'Berth', 'Available', 'system'),
-    ('EQ-BERTH-2', 'Berth 2', 'Berth', 'Available', 'system'),
-    ('EQ-CRANE-A', 'Crane A', 'Crane', 'Available', 'system'),
-    ('EQ-CRANE-B', 'Crane B', 'Crane', 'Available', 'system')
-ON CONFLICT (equipment_id) DO NOTHING;
-
--- =============================================================================
--- End of Schema Definition
--- =============================================================================

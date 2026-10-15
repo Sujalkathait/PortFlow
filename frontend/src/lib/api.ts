@@ -62,7 +62,7 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-    // ─── Authentication ───
+    
     auth: {
         register: (body: { email: string; password: string; fullName: string; role?: 'Operator' | string }) =>
             request<{ success: boolean; message: string; token: string; user: any }>('/auth/register', {
@@ -96,7 +96,7 @@ export const api = {
             }),
     },
 
-    // ─── Operations CRUD ───
+    
     operations: {
         list: () => request<any[]>('/operations'),
         get: (id: number) => request<any>(`/operations/${id}`),
@@ -120,7 +120,7 @@ export const api = {
             }),
     },
 
-    // ─── Ships CRUD ───
+    
     ships: {
         list: () => request<any[]>('/ships'),
         get: (id: number) => request<any>(`/ships/${id}`),
@@ -140,7 +140,7 @@ export const api = {
             }),
     },
 
-    // ─── Cargos CRUD ───
+    
     Cargos: {
         list: () => request<any[]>('/Cargos'),
         create: (body: any) =>
@@ -159,7 +159,7 @@ export const api = {
             }),
     },
 
-    // ─── Equipments CRUD ───
+    
     Equipments: {
         list: () => request<any[]>('/Equipments'),
         create: (body: any) =>
@@ -178,17 +178,17 @@ export const api = {
             }),
     },
 
-    // ─── Scheduling ───
+    
     os: {
         state: () => request<any>('/os/state'),
     },
 
-    // ─── Analytics ───
+    
     analytics: {
         get: () => request<any>('/analytics'),
     },
 
-    // ─── Trash Bin & Recovery ───
+    
     trash: {
         list: () => request<any[]>('/trash'),
         restore: (collection: string, id: number) =>

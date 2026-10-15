@@ -36,7 +36,7 @@ export function AppSidebar(_props: { role?: string } = {}) {
 
   const activePage = getActivePage();
 
-  // Navigation items matching exact business logic (no emojis)
+  // Navigation items
   const items = [
     { page: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { page: 'ships', label: 'Ships', icon: Ship },
@@ -93,7 +93,7 @@ export function AppSidebar(_props: { role?: string } = {}) {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-slate-100 dark:border-slate-800 p-3 flex flex-col gap-2">
-        {/* System Online Status (Exact match from mockup) */}
+        {/* System Online Status */}
         <div className="px-2 py-1 flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
         </div>

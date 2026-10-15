@@ -250,11 +250,9 @@ export function Login() {
 
   return (
     <div className="portflow-page-root">
-      {/* ─── Top Navigation Bar ─── */}
-      <header className="portflow-navbar">
+            <header className="portflow-navbar">
         <div className="navbar-container">
-          {/* Logo Brand: Anchor icon in water waves + PortFlow text */}
-          <div
+                    <div
             className="navbar-brand"
             onClick={() => switchMode('none')}
             role="button"
@@ -263,17 +261,12 @@ export function Login() {
           >
             <div className="navbar-logo-icon" aria-hidden="true">
               <svg viewBox="0 0 40 40" fill="none" className="logo-svg">
-                {/* Anchor Top Ring */}
-                <circle cx="20" cy="10" r="3.2" stroke="#0070f3" strokeWidth="2.4" />
-                {/* Central Shank */}
-                <path d="M20 13.5v16" stroke="#0070f3" strokeWidth="2.4" strokeLinecap="round" />
-                {/* Cross Stock */}
-                <path d="M12 18h16" stroke="#0070f3" strokeWidth="2.4" strokeLinecap="round" />
-                {/* Curved Flukes */}
-                <path d="M10 24c2 4 5.5 5.5 10 5.5s8-1.5 10-5.5" stroke="#0070f3" strokeWidth="2.4" strokeLinecap="round" />
+                                <circle cx="20" cy="10" r="3.2" stroke="#0070f3" strokeWidth="2.4" />
+                                <path d="M20 13.5v16" stroke="#0070f3" strokeWidth="2.4" strokeLinecap="round" />
+                                <path d="M12 18h16" stroke="#0070f3" strokeWidth="2.4" strokeLinecap="round" />
+                                <path d="M10 24c2 4 5.5 5.5 10 5.5s8-1.5 10-5.5" stroke="#0070f3" strokeWidth="2.4" strokeLinecap="round" />
                 <path d="M8 23.5l-2-2m28 2l2-2" stroke="#0070f3" strokeWidth="2.2" strokeLinecap="round" />
-                {/* Water Waves */}
-                <path d="M6 33.5c4-1.5 8-1.5 14 0 6 1.5 10 1.5 14 0" stroke="#0070f3" strokeWidth="2.2" strokeLinecap="round" />
+                                <path d="M6 33.5c4-1.5 8-1.5 14 0 6 1.5 10 1.5 14 0" stroke="#0070f3" strokeWidth="2.2" strokeLinecap="round" />
                 <path d="M9 37c3.5-1 7-1 11 0 4 1 7.5 1 11 0" stroke="#0070f3" strokeWidth="1.8" strokeLinecap="round" />
               </svg>
             </div>
@@ -283,8 +276,7 @@ export function Login() {
             </span>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="navbar-center-nav" aria-label="Main Navigation">
+                    <nav className="navbar-center-nav" aria-label="Main Navigation">
             <button
               type="button"
               className="navbar-link"
@@ -301,8 +293,7 @@ export function Login() {
             </button>
           </nav>
 
-          {/* Action Buttons: Log in + Sign up */}
-          <div className="navbar-actions">
+                    <div className="navbar-actions">
             <button
               type="button"
               className={`navbar-login-btn ${mode === 'login' ? 'active' : ''}`}
@@ -321,28 +312,22 @@ export function Login() {
         </div>
       </header>
 
-      {/* ─── Hero Section with Port Background & Clean Right-Aligned Login Card ─── */}
-      <main className="portflow-hero-viewport">
-        {/* Scenery Background Image */}
-        <div
+            <main className="portflow-hero-viewport">
+                <div
           className="hero-bg-scenery"
           style={{ backgroundImage: `url('/image/port_sunset_bg.jpg')` }}
           aria-hidden="true"
         />
 
-        {/* Soft atmospheric gradient blend for optimal photo vibrancy */}
-        <div className="hero-bg-overlay" aria-hidden="true" />
+                <div className="hero-bg-overlay" aria-hidden="true" />
 
         <div className="hero-main-container">
-          {/* Left area is clean & open to display the port, cranes, ship and sunset scenery without clutter */}
-          <div className="hero-scenery-space" aria-hidden="true" />
+                    <div className="hero-scenery-space" aria-hidden="true" />
 
-          {/* Right Area: Clean White Floating Login Card */}
-          {mode !== 'none' && (
+                    {mode !== 'none' && (
             <div className="hero-auth-column">
             <div className="auth-card-clean" role="region" aria-labelledby="auth-card-title">
-              {/* Card Header */}
-              <div className="auth-card-header" style={{ position: 'relative' }}>
+                            <div className="auth-card-header" style={{ position: 'relative' }}>
                 <button
                   type="button"
                   onClick={() => switchMode('none')}
@@ -361,8 +346,7 @@ export function Login() {
                 </p>
               </div>
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} noValidate className="auth-form-clean">
+                            <form onSubmit={handleSubmit} noValidate className="auth-form-clean">
                 {mode === 'signup' && (
                   <div className="form-field-group">
                     <label htmlFor="auth-fullname" className="form-field-label">
@@ -438,8 +422,7 @@ export function Login() {
                   </div>
                 </div>
 
-                {/* Options Row: Remember me + Forgot password (login mode only) */}
-                {mode === 'login' && (
+                                {mode === 'login' && (
                   <div className="form-options-row">
                     <label className="form-checkbox-label">
                       <input
@@ -461,8 +444,7 @@ export function Login() {
                   </div>
                 )}
 
-                {/* Error / Success Feedback Alerts */}
-                {error && (
+                                {error && (
                   <div className="form-alert error" role="alert">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{error}</span>
@@ -476,8 +458,7 @@ export function Login() {
                   </div>
                 )}
 
-                {/* Submit Button (Sign in / Create account) */}
-                <button
+                                <button
                   type="submit"
                   className="form-submit-btn"
                   disabled={busy}
@@ -495,8 +476,7 @@ export function Login() {
                 </button>
               </form>
 
-              {/* Footer Switch Link */}
-              <div className="auth-card-footer">
+                            <div className="auth-card-footer">
                 {mode === 'login' ? (
                   <p>
                     Don't have an account?{' '}
@@ -527,8 +507,7 @@ export function Login() {
         </div>
       </main>
 
-      {/* ─── Informational Modals (Features, About, Forgot Password) ─── */}
-      {activeModal && (
+            {activeModal && (
         <div className="info-modal-backdrop" onClick={() => setActiveModal(null)}>
           <div
             className="info-modal-sheet"
@@ -536,8 +515,7 @@ export function Login() {
             role="dialog"
             aria-modal="true"
           >
-            {/* Close Button */}
-            <button
+                        <button
               type="button"
               className="sheet-close-btn"
               onClick={() => setActiveModal(null)}
@@ -546,8 +524,7 @@ export function Login() {
               <X className="w-5 h-5" />
             </button>
 
-            {/* Features Modal */}
-            {activeModal === 'features' && (
+                        {activeModal === 'features' && (
               <div className="sheet-content">
                 <div className="sheet-header">
                   <div className="sheet-icon-wrap">
@@ -598,8 +575,7 @@ export function Login() {
             )}
 
 
-            {/* About Modal */}
-            {activeModal === 'about' && (
+                        {activeModal === 'about' && (
               <div className="sheet-content">
                 <div className="sheet-header">
                   <div className="sheet-icon-wrap">
@@ -636,8 +612,7 @@ export function Login() {
               </div>
             )}
 
-            {/* Forgot Password Modal (3-Step OTP Wizard) */}
-            {activeModal === 'forgot' && (
+                        {activeModal === 'forgot' && (
               <div className="sheet-content forgot-wizard-content">
                 <div className="sheet-header">
                   <div className="sheet-icon-wrap">
@@ -651,8 +626,7 @@ export function Login() {
                   </p>
                 </div>
 
-                {/* Step Progress Tracker */}
-                <div className="wizard-progress-bar">
+                                <div className="wizard-progress-bar">
                   <div className="wizard-steps-header">
                     <span className={`wizard-step-pill ${forgotStep >= 1 ? 'active' : ''}`}>1. Account</span>
                     <span className="wizard-step-divider">→</span>
@@ -670,8 +644,7 @@ export function Login() {
                   </div>
                 </div>
 
-                {/* Notifications Alert */}
-                {forgotError && (
+                                {forgotError && (
                   <div className="form-alert error" role="alert" style={{ marginBottom: '1.25rem' }}>
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{forgotError}</span>
@@ -684,8 +657,7 @@ export function Login() {
                   </div>
                 )}
 
-                {/* ─── Step 1: Enter Email / Username ─── */}
-                {forgotStep === 1 && (
+                                {forgotStep === 1 && (
                   <form onSubmit={handleSendOTP} className="forgot-wizard-form">
                     <div className="form-field-group">
                       <label htmlFor="forgot-email-input" className="form-field-label">
@@ -734,8 +706,7 @@ export function Login() {
                   </form>
                 )}
 
-                {/* ─── Step 2: Enter 6-Digit OTP (30s Expiry) ─── */}
-                {forgotStep === 2 && (
+                                {forgotStep === 2 && (
                   <form onSubmit={handleVerifyOTP} className="forgot-wizard-form">
                     <div className="otp-verification-card">
                       <div className="otp-header-info">
@@ -762,8 +733,7 @@ export function Login() {
                         />
                       </div>
 
-                      {/* 30-Second Countdown Timer Badge */}
-                      <div className="otp-timer-container">
+                                            <div className="otp-timer-container">
                         {otpTimer > 0 ? (
                           <div className="otp-countdown-pill active">
                             <Timer className="w-4 h-4 animate-spin text-emerald-600" />
@@ -813,8 +783,7 @@ export function Login() {
                   </form>
                 )}
 
-                {/* ─── Step 3: Set New Password ─── */}
-                {forgotStep === 3 && (
+                                {forgotStep === 3 && (
                   <form onSubmit={handleResetPassword} className="forgot-wizard-form">
                     <div className="form-field-group">
                       <label htmlFor="forgot-new-password" className="form-field-label">
