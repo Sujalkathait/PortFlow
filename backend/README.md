@@ -1,85 +1,98 @@
 # ⚓ PortFlow Backend — Dual REST & GraphQL Engine
 
-The backend for **PortFlow** is an enterprise-grade service built with **Node.js, Express, TypeScript, and Prisma ORM**, backed by a **Supabase PostgreSQL** database. It runs a custom in-memory **Operating System (OS) Concurrency & Simulation Engine** alongside dual REST and GraphQL APIs.
+**A High-Performance Node.js & TypeScript Backend Service with Custom OS Simulator & PostgreSQL 3NF Database**
+
+---
+
+## 🌊 Overview (Simple English)
+
+The **PortFlow Backend** coordinates all real-time port activity. It powers the web portal by providing two powerful APIs:
+1. **REST API (`/api/*`)**: Fast, lightweight endpoints for user login, container mutations, and triggering the OS CPU scheduler.
+2. **Apollo GraphQL API (`/graphql`)**: A flexible graph engine for querying nested relationships (Vessels $\rightarrow$ Berths $\rightarrow$ Cargo $\rightarrow$ Bills) in a single request without roundtrips.
+
+It also runs an **In-Memory OS Simulator** that treats port equipment like computer hardware:
+- **Cranes** are protected by **Mutex Locks** (1 Crane = 1 Job at a time).
+- **Berths** are managed by **Counting Semaphores** (Limits docked ships to available parking slots).
+- **Jobs** are scheduled by a **CPU Scheduler** using **FCFS, SJF, Priority, and Round Robin** algorithms.
 
 ---
 
 ## 🏗️ Architecture & Layered LLD
 
-The backend strictly follows a decoupled, layered architecture:
+The backend uses a clean, decoupled 5-tier architecture:
 
 ```
 src/
-├── config/             # Database connection, Prisma singleton, and initial seeding
-├── controllers/        # HTTP Request & Response handlers (status codes, JSON serialization)
-├── graphql/            # Apollo Server setup, schema definitions, and GraphQL resolvers
-├── interfaces/         # Repository, Service, and Entity contracts (DIP / SOLID)
-├── middleware/         # JWT authentication, RBAC, helmet headers, and rate limiters
-├── models/             # Domain entities and Data Transfer Objects (DTOs)
-├── os/                 # Custom OS Simulation Kernel (Processes, Schedulers, Locks, Deadlock)
-├── repositories/       # Data Access Layer (Prisma ORM queries)
-├── routes/             # Express API route endpoints
-├── services/           # Domain business logic & OS kernel synchronization
-└── index.ts            # Application bootstrap and server lifecycle
+├── config/             # DB connection pool (Prisma singleton) & initial seeding
+├── controllers/        # HTTP handlers: parses requests, calls services, sends JSON
+├── graphql/            # Apollo Server setup, GraphQL type definitions & resolvers
+├── interfaces/         # TypeScript interface contracts for repositories & services
+├── middleware/         # Security headers (Helmet), JWT authentication, rate limiting
+├── models/             # Domain data shapes and Data Transfer Objects (DTOs)
+├── os/                 # OS Simulator Kernel (Processes, Schedulers, Mutex, Semaphores)
+│   └── __tests__/      # Jest automated unit tests for OS algorithms
+├── repositories/       # Fast database query layer using Prisma ORM
+├── routes/             # Express REST router definitions (/api/*)
+├── services/           # Business logic & bridge to OS simulator
+└── index.ts            # Server entrypoint (initializes REST, GraphQL, & Database)
 ```
 
-### Data Flow
+### Simple Request Flow:
 ```
-Client Request -> Express Router / Apollo GraphQL -> Auth Middleware (JWT/RBAC) 
-  -> Controller / Resolver -> Domain Service <-> OS Simulation Kernel
-  -> Repository Pattern -> Prisma ORM -> PostgreSQL (Supabase)
+Client Request ──► Express Router / GraphQL ──► Auth Middleware (JWT)
+  ──► Controller / Resolver ──► Domain Service ◄──► OS Simulation Kernel
+  ──► Repository Layer ──► Prisma ORM ──► PostgreSQL (Supabase)
 ```
 
 ---
 
-## 🔌 API Endpoints & Interfaces
+## 🔌 API Endpoints Reference
 
-### 1. Dual Engine Entry Points
-* **Health Check:** `GET /health` (Returns DB connectivity, service status, and timestamp)
-* **API Manifest:** `GET /` (Engine metadata and documentation links)
-* **Apollo GraphQL Endpoint:** `POST /graphql` (Interactive GraphQL Sandbox enabled in development)
+### 1. Main Entry Points
+* **Health Probe:** `GET /health` (Checks database connection and server uptime)
+* **REST API Base:** `http://localhost:10000/api`
+* **Apollo GraphQL:** `http://localhost:10000/graphql` (Interactive query playground in development)
 
-### 2. REST API Routes (`/api`)
-| Route | Method | Access | Description |
+### 2. REST Endpoints (`/api`)
+| Route | Method | Access | What It Does |
 | :--- | :--- | :--- | :--- |
-| `/api/auth/register` | `POST` | Public | Registers a new user account |
-| `/api/auth/login` | `POST` | Public | Authenticates credentials and returns signed JWT |
-| `/api/auth/me` | `GET` | Authenticated | Fetches profile of the currently logged-in user |
-| `/api/auth/forgot-password` | `POST` | Public | Generates OTP for password recovery |
-| `/api/auth/verify-otp` | `POST` | Public | Validates 6-digit password reset OTP |
-| `/api/auth/reset-password` | `POST` | Public | Updates user password after OTP verification |
-| `/api/operations` | `GET, POST` | Authenticated | Lists all port operations or creates a new job |
-| `/api/operations/:id` | `GET, PUT, PATCH, DELETE` | Authenticated | Inspects, modifies, or soft-deletes a specific operation |
-| `/api/operations/dispatch` | `POST` | Authenticated | Triggers the OS scheduler to dispatch the next ready job |
-| `/api/os/state` | `GET` | Authenticated | Inspects active scheduler queue, locks, and deadlock state |
-| `/api/os/algorithm` | `PUT` | Authenticated | Dynamically switches CPU scheduling algorithm (`FCFS`, `SJF`, `Priority`, `RoundRobin`) |
-| `/api/ships` | `GET, POST` | Authenticated | Manages arriving vessels and berths |
-| `/api/cargos` | `GET, POST` | Authenticated | Manages shipping containers and yard inventory |
-| `/api/equipments` | `GET, POST` | Authenticated | Manages cranes and berths |
-| `/api/system/logs` | `GET` | Authenticated | Fetches real-time system audit logs |
-| `/api/system/analytics` | `GET` | Authenticated | Fetches database metrics and turnaround analytics |
-| `/api/trash` | `GET, POST, DELETE` | Authenticated | Inspects, restores, or permanently purges soft-deleted items |
+| `/api/auth/register` | `POST` | Public | Create a new operator account |
+| `/api/auth/login` | `POST` | Public | Sign in and receive a secure JWT token |
+| `/api/auth/me` | `GET` | Authenticated | Get current operator profile |
+| `/api/auth/forgot-password` | `POST` | Public | Request a 6-digit OTP for password reset |
+| `/api/auth/verify-otp` | `POST` | Public | Verify OTP code (valid for 30 seconds) |
+| `/api/auth/reset-password` | `POST` | Public | Set new password after OTP verification |
+| `/api/operations` | `GET, POST` | Authenticated | List all port operations or create a new job |
+| `/api/operations/:id` | `GET, PUT, DELETE` | Authenticated | View, modify, or move an operation to trash |
+| `/api/operations/dispatch` | `POST` | Authenticated | Tell the OS scheduler to execute the next ready job |
+| `/api/os/state` | `GET` | Authenticated | View live ready queue, crane lock states, and deadlocks |
+| `/api/os/algorithm` | `PUT` | Authenticated | Switch scheduling algorithm (`FCFS`, `SJF`, `Priority`, `RoundRobin`) |
+| `/api/ships` | `GET, POST` | Authenticated | Manage incoming marine vessels and berth parking |
+| `/api/cargos` | `GET, POST` | Authenticated | Manage shipping containers and yard inventory |
+| `/api/equipments` | `GET, POST` | Authenticated | Manage cranes and berth equipment status |
+| `/api/system/logs` | `GET` | Authenticated | View live kernel and system audit logs |
+| `/api/system/reports` | `GET` | Authenticated | Database analytics and SQL JOIN benchmarks |
+| `/api/trash` | `GET, POST, DELETE` | Authenticated | View trash bin, restore items, or empty permanently |
 
 ---
 
-## ⚙️ The OS Simulation Kernel
+## ⚙️ The OS Simulation Engine
 
-Located in `src/os/`, the engine models real-world maritime operations as operating system processes:
+Located in `src/os/`, this engine brings operating system concepts to life:
 
-* **Process Control Block (PCB) (`Process.ts`):** Models each task with PID, burst time, arrival time, priority, and state (`NEW`, `READY`, `RUNNING`, `WAITING`, `TERMINATED`).
-* **Pluggable CPU Schedulers (`Scheduler.ts`):**
-  * `FCFSStrategy`: First-Come, First-Served based on arrival timestamps.
-  * `SJFStrategy`: Shortest Job First to minimize average wait time.
-  * `PriorityStrategy`: Schedules operations with highest priority weights first.
-  * `RoundRobinStrategy`: Time-sliced scheduling with configurable quantum.
-* **Synchronization & Mutual Exclusion:**
-  * **Mutex (`Mutex.ts`):** Enforces exclusive 1:1 access for Cranes to prevent collisions.
-  * **Counting Semaphore (`Semaphore.ts`):** Controls multi-slot parking capacity for Berths.
-* **Deadlock Detection (`DeadlockDetector.ts`):** Runs Depth-First Search (DFS) cycle detection over the active Wait-For Graph (WFG).
+1. **Process (`Process.ts`):** Models an operation with PID, arrival time, burst duration, priority, and state (`READY`, `RUNNING`, `TERMINATED`).
+2. **CPU Schedulers (`Scheduler.ts`):**
+   - **FCFS (First-Come, First-Served):** Ships serviced in order of arrival.
+   - **SJF (Shortest Job First):** Shortest container discharge scheduled first to minimize average wait time.
+   - **Priority:** High-priority cargo (e.g. cold storage medicine, hazardous goods) dispatched first.
+   - **Round Robin:** Fair time-sharing using a configurable time quantum (e.g. 1500ms).
+3. **Mutual Exclusion (`Mutex.ts`):** Ensures a physical crane cannot be claimed by two operations at the same time.
+4. **Counting Semaphore (`Semaphore.ts`):** Manages available docking berths as a shared counter pool.
+5. **Deadlock Detection (`DeadlockDetector.ts`):** Runs Depth-First Search (DFS) on the Wait-For Graph (WFG) to catch circular waiting conditions.
 
 ---
 
-## 🚀 Setup & Installation
+## 🚀 Setup & Local Execution
 
 ### 1. Install Dependencies
 ```bash
@@ -87,63 +100,35 @@ npm install
 ```
 
 ### 2. Configure Environment (`.env`)
-Create a `.env` file in the `backend/` directory:
+Create a `.env` file in `backend/` (see [`.env.example`](./.env.example)):
 ```env
 PORT=10000
-DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres"
-JWT_SECRET="your-32-character-secret-key-goes-here"
+DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[REF].supabase.co:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres:[PASSWORD]@db.[REF].supabase.co:5432/postgres"
+JWT_SECRET="your-secure-jwt-secret-key-32-chars-minimum"
 CORS_ORIGIN="http://localhost:5173"
 NODE_ENV="development"
 ```
 
-### 3. Generate Prisma Client & Migrate
+### 3. Generate Prisma Client & Run Migrations
 ```bash
 npx prisma generate
 npx prisma db push
 ```
 
-### 4. Start Development Server
-```bash
-npm run dev
-```
-*Server starts on `http://localhost:10000`.*
+### 4. Start the Server
+* **Development (Hot Reload):** `npm run dev`
+* **Production Build:** `npm run build`
+* **Production Start:** `npm start` (Runs compiled code in `dist/index.js`)
 
 ---
 
-## 🧪 Testing & Load Testing Suite
+## 🧪 Automated Testing
 
-The backend includes a comprehensive testing setup covering unit tests, OS algorithm correctness, and high-concurrency load testing.
-
-### Run Unit Tests
 ```bash
-# Run all Jest test suites
+# Run Jest unit tests for OS Schedulers and PortSystem
 npm test
 
-# Run tests in watch mode
-npm run test:watch
-
-# Generate test coverage report
+# Run tests with code coverage analysis
 npm run test:coverage
 ```
-
-### Run Concurrency & User Load Testing
-To check how many concurrent users and requests your server can handle:
-
-1. **Run the Automated Load Tester:**
-   ```bash
-   npm run test:load
-   ```
-2. **Custom Load & Duration:**
-   ```bash
-   node scripts/load-test.js --concurrency 100 --duration 20 --url http://localhost:10000/health
-   ```
-3. **Bypassing Rate Limiting for Stress Tests:**
-   The backend includes built-in bypass flags so load tests originating from a single IP are not blocked:
-   ```bash
-   # Set DISABLE_RATE_LIMIT=true or LOAD_TEST=true in .env or run with:
-   node scripts/load-test.js --concurrency 250 --duration 30
-   ```
-4. **Key Metrics Evaluated:**
-   * **Throughput (req/sec):** Target sustained request capacity.
-   * **Latency Distribution:** p50 (median), p95, and p99 response times.
-   * **Error Rate:** Verifies 0% failed requests under high concurrent load.

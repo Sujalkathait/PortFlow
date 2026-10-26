@@ -3,13 +3,13 @@
 
 # ⚓ PortFlow — Smart Maritime Port Management System
 
-**An Intelligent Full-Stack Maritime Operations Suite with Custom OS & DBMS Simulation Engines**
+**A Complete Full-Stack Port Operations Platform with Built-in OS Scheduling & Relational DBMS Engines**
 
 [![Frontend](https://img.shields.io/badge/Frontend-React_19_%7C_Vite_%7C_TypeScript-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Backend](https://img.shields.io/badge/Backend-Node.js_%7C_Express_%7C_TypeScript-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Database](https://img.shields.io/badge/Database-Supabase_%7C_PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![Database](https://img.shields.io/badge/Database-PostgreSQL_15_%7C_Supabase-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![ORM](https://img.shields.io/badge/ORM-Prisma-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
-[![Architecture](https://img.shields.io/badge/Architecture-LLD_Clean_Architecture-8A2BE2)](#-architecture--data-flow)
+[![APIs](https://img.shields.io/badge/APIs-REST_%26_Apollo_GraphQL-FF4154?logo=graphql&logoColor=white)](https://graphql.org/)
 [![License](https://img.shields.io/badge/License-ISC-blue.svg)](#-license)
 
 </div>
@@ -18,616 +18,579 @@
 
 ## 📑 Table of Contents
 
-- [🌊 Overview](#-overview)
-- [🏛️ System Architecture & LLD Design](#️-system-architecture--lld-design)
-- [🧠 Operating System (OS) Concepts](#-operating-system-os-concepts)
-- [💾 Database (DBMS) Concepts](#-database-dbms-concepts)
-- [✨ User Roles & Core Features](#-user-roles--core-features)
-- [📂 Repository Structure](#-repository-structure)
-- [🚀 Quick Start & Installation](#-quick-start--installation)
-- [🧪 Testing & Load Testing](#-testing--load-testing)
-- [🔑 Test Credentials](#-test-credentials)
-- [📈 Project Milestones & Roadmap](#-project-milestones--roadmap)
-- [📚 Detailed Sub-Guides](#-detailed-sub-guides)
+- [🌊 What is PortFlow?](#-what-is-portflow)
+- [🏛️ System Architecture](#️-system-architecture)
+- [📊 Class Diagram (How the Code Works)](#-class-diagram-how-the-code-works)
+- [🗄️ Entity Relationship (ER) Diagram (Database Design)](#️-entity-relationship-er-diagram-database-design)
+- [🧠 Operating System (OS) Concepts in Plain English](#-operating-system-os-concepts-in-plain-english)
+- [💾 Database (DBMS) Concepts in Plain English](#-database-dbms-concepts-in-plain-english)
+- [✨ Key Features of PortFlow](#-key-features-of-portflow)
+- [📂 Project Folder Structure](#-project-folder-structure)
+- [🚀 Quick Start (Run Locally)](#-quick-start-run-locally)
+- [🧪 Testing & Verification](#-testing--verification)
+- [🔑 Demo Login Credentials](#-demo-login-credentials)
+- [☁️ Cloud Deployment Guide](#️-cloud-deployment-guide)
 - [📄 License](#-license)
 
 ---
 
-## 🌊 Overview
+## 🌊 What is PortFlow?
 
-Modern commercial ports operate 24/7, coordinating massive container ships, heavy cargo inventory, and limited physical infrastructure (berths and cranes). **PortFlow** bridges maritime logistics with fundamental computer science principles:
+Modern commercial shipping ports handle thousands of container vessels, cranes, trucks, and cargo boxes every day. If resources are managed poorly, ships wait for days (causing millions of dollars in demurrage fees) and cranes sit idle.
 
-1. **Custom OS Simulation Kernel**: Treats port jobs as operating system **processes**, manages scarce crane access through **Mutex locks**, models berth parking capacity using counting **Semaphores**, and dynamically schedules waiting jobs via selectable algorithms (**FCFS, SJF, Priority**).
-2. **Robust Database Layer**: Powered by PostgreSQL and Prisma ORM, utilizing 3NF relational normalization, foreign-key constraints, soft-delete audit trails, and transactional integrity.
-3. **Enterprise Low-Level Design (LLD)**: Built with clean separation of responsibilities on both backend (Controllers $\rightarrow$ Services $\rightarrow$ Repositories $\rightarrow$ Models/Interfaces) and frontend (Smart Containers $\rightarrow$ ViewModels/Custom Hooks $\rightarrow$ Presentational Components).
-4. **Interactive Operations Terminal**: A modern React 19 web suite featuring a unified **Terminal Operator Ground Portal**.
+**PortFlow** solves this problem by combining **Maritime Logistics** with core **Computer Science principles**:
+
+1. **Physical Port Management**: Track ships arriving at sea, berths for parking, cranes for lifting, reefer/dry warehouses, logistics trucks, gate passes, customs checks, and automatic billing.
+2. **OS Scheduling Simulator**: Treats port operations like CPU processes. Cranes are locked using **Mutexes**, berths are managed using **Counting Semaphores**, and unloading tasks are scheduled using **FCFS, SJF, Priority, and Round Robin** algorithms with automatic **Deadlock Detection**.
+3. **Dual API Architecture**: Fast transactional endpoints via **REST API** (`/api/*`) and composite relational data fetching via **Apollo GraphQL** (`/graphql`).
+4. **High-Performance Relational Database**: Built on **PostgreSQL 15 (Supabase)** with 12 normalized tables in 3NF, B-Tree indexes, soft-deletes, and in-memory TTL caching.
 
 ---
 
-## 🏛️ System Architecture & LLD Design
+## 🏛️ System Architecture
 
-PortFlow utilizes a multi-tiered, loosely coupled architecture adhering to SOLID principles and classical software design patterns:
+PortFlow uses a **Modular Monolith Architecture** within a monorepo. The React frontend and the Express backend are completely decoupled and talk through typed REST and GraphQL APIs.
 
 ```mermaid
-flowchart TD
-    subgraph Client["Frontend SPA (React 19 + TypeScript + Vite)"]
-        UI[View / Page Container]
-        Hook[Custom Hook / ViewModel]
-        Presentational[Presentational / Dumb Components]
-        FeatService[Feature Domain Service]
-        APIFacade[HTTP API Client Facade]
-
-        UI --> Hook
-        Hook --> Presentational
-        Hook --> FeatService
-        FeatService --> APIFacade
+graph TB
+    subgraph CLIENT["1. Client Layer (Frontend)"]
+        UI["React 19 + Vite Web Application"]
+        P1["Dashboard Overview"]
+        P2["Operations & Dispatch"]
+        P3["Vessels & Berthing"]
+        P4["Cargo & Warehouses"]
+        P5["Equipment & Cranes"]
+        P6["CPU Scheduling & OS State"]
+        P7["System Logs & Analytics"]
+        P8["Trash Bin & 1-Click Restore"]
     end
 
-    APIFacade -->|JSON / REST with JWT| Router
-
-    subgraph Server["Backend Server (Node.js + Express + TypeScript)"]
-        Router[Express Router /api]
-        AuthMid[Auth Middleware JWT & RBAC]
-        Controller[HTTP Controller Layer]
-        Service[Domain Service Layer]
-
-        Router --> AuthMid --> Controller
-        Controller --> Service
-
-        subgraph OS_Kernel["Custom OS Concurrency Engine"]
-            Service --> ProcessMgr[Process Factory & PCB]
-            ProcessMgr --> Scheduler[CPU Scheduler FCFS / SJF / Priority]
-            Scheduler --> MutexLocks[Mutex Locks - Cranes]
-            Scheduler --> Semaphores[Semaphores - Berths]
-            MutexLocks & Semaphores --> Deadlock[Deadlock Detector WFG]
-        end
-
-        subgraph Data_Layer["Data Access Layer"]
-            Service --> Repo[Repository Layer]
-            Repo --> PrismaORM[Prisma Client ORM]
-        end
+    subgraph GATEWAY["2. Backend Server (Node.js + Express 5)"]
+        AUTH_CHECK["Security Middleware (JWT Auth + Helmet + Rate Limit)"]
+        REST_API["REST API Router (/api/*)"]
+        GRAPHQL_API["Apollo GraphQL Server (/graphql)"]
     end
 
-    subgraph Storage["Database (Supabase / PostgreSQL)"]
-        PrismaORM --> PostgresDB[(PostgreSQL Database)]
-        PostgresDB --> Tables[Users / Ships / Equipment / Cargo / Operations]
+    subgraph SERVICES["3. Business Logic (Service Layer)"]
+        AUTH_SVC["Auth Service (Login, Register, OTP Reset)"]
+        OPS_SVC["Operations Service (Job Lifecycle)"]
+        SHIP_SVC["Ships Service (Vessels & Berthing)"]
+        EQUIP_SVC["Equipment Service (Cranes & Berths)"]
+        TRASH_SVC["Trash Service (Soft-Delete & Restore)"]
     end
+
+    subgraph OS_SIM["4. OS Simulation Engine (In-Memory Kernel)"]
+        PORT_SYS["PortSystem (Singleton Coordinator)"]
+        SCHEDULER["CPU Scheduler (FCFS / SJF / Priority / Round Robin)"]
+        MUTEX["Mutex Locks (1 Crane = 1 Job at a time)"]
+        SEMAPHORE["Counting Semaphore (Available Berths Pool)"]
+        DEADLOCK["Deadlock Detector (Wait-For Graph Cycle Finder)"]
+    end
+
+    subgraph DATABASE["5. Database Layer (PostgreSQL / Supabase via Prisma)"]
+        PRISMA["Prisma ORM (Data Access Layer)"]
+        DB[(PostgreSQL 15 - 12 Tables in 3NF)]
+    end
+
+    UI --> AUTH_CHECK
+    AUTH_CHECK --> REST_API
+    AUTH_CHECK --> GRAPHQL_API
+    REST_API --> SERVICES
+    GRAPHQL_API --> SERVICES
+    OPS_SVC <--> PORT_SYS
+    PORT_SYS --> SCHEDULER
+    PORT_SYS --> MUTEX
+    PORT_SYS --> SEMAPHORE
+    PORT_SYS --> DEADLOCK
+    SERVICES --> PRISMA
+    PRISMA --> DB
 ```
 
-### Design Patterns Used
-- **Repository Pattern**: Decouples business rules from database queries ([`backend/src/repositories/`](./backend/src/repositories)).
-- **Service Layer Pattern**: Encapsulates business logic, metric calculations, and OS kernel synchronization ([`backend/src/services/`](./backend/src/services)).
-- **Strategy Pattern**: Swappable scheduling algorithms (`FCFSStrategy`, `SJFStrategy`, `PriorityStrategy`) via `SchedulingStrategy` interface ([`backend/src/os/Scheduler.ts`](./backend/src/os/Scheduler.ts)).
-- **Singleton Pattern**: Guarantees single instances of the OS Simulator ([`PortSystem.getInstance()`](./backend/src/os/PortSystem.ts)) and DB connection pool ([`prisma.ts`](./backend/src/config/prisma.ts)).
-- **Dependency Injection (DI)**: Inversion of control via TypeScript interfaces ([`backend/src/interfaces/`](./backend/src/interfaces)).
-- **Container / Presentational Pattern**: Smart containers orchestrate state, while dumb components handle pure UI rendering ([`frontend/src/features/operations/`](./frontend/src/features/operations)).
-- **Custom Hook / ViewModel Pattern**: React hooks (`useOperations.ts`) manage local state, caching, and async API dispatch.
+### Simple Explanation of the Layers:
+1. **Frontend**: An interactive web app where port operators view live metrics, assign cranes, and trigger jobs.
+2. **API Layer**: Secure doorway with JWT verification and rate limiting. Requests go to either REST routes or Apollo GraphQL.
+3. **Service Layer**: Business rules for creating containers, updating berths, calculating tariffs, and validating inputs.
+4. **OS Simulator**: In-memory engine that simulates a computer operating system using real cranes and ships as computing resources.
+5. **Database Layer**: Centralized 12-table PostgreSQL database ensuring ACID safety and permanent storage.
 
 ---
 
-## 🧠 Operating System (OS) Concepts
+## 📊 Class Diagram (How the Code Works)
 
-| OS Concept | Maritime Analogy | Implementation in PortFlow | Code Location |
-| :--- | :--- | :--- | :--- |
-| **Process & PCB** | Ship loading / unloading job | Each task is an isolated `Process` with PID, burst time, priority, and state (`READY`, `RUNNING`, `TERMINATED`). | [`backend/src/os/Process.ts`](./backend/src/os/Process.ts) |
-| **CPU Scheduling** | Crane work sequencing | Jobs in the ready queue are scheduled using **FCFS**, **SJF**, or **Priority** algorithms. | [`backend/src/os/Scheduler.ts`](./backend/src/os/Scheduler.ts) |
-| **Ready Queue** | Waiting line for equipment | Queue where operations wait until cranes and berths are allocated. | [`backend/src/os/Scheduler.ts`](./backend/src/os/Scheduler.ts) |
-| **Mutex Lock** | Exclusive Crane access | Only **one** job can operate a specific crane simultaneously to avoid collisions. | [`backend/src/os/Mutex.ts`](./backend/src/os/Mutex.ts) |
-| **Counting Semaphore** | Berth capacity slots | Limits simultaneous docking to the available parking berths. | [`backend/src/os/Semaphore.ts`](./backend/src/os/Semaphore.ts) |
-| **Deadlock Detection** | Circular wait detection | Continuously checks Wait-For Graphs (WFG) to detect circular waits. | [`backend/src/os/DeadlockDetector.ts`](./backend/src/os/DeadlockDetector.ts) |
-| **Telemetry & Metrics**| CPU utilization metrics | Tracks exact Waiting Time ($W_t$) and Turnaround Time ($T_t$) per process. | [`backend/src/services/operations.service.ts`](./backend/src/services/operations.service.ts) |
+This diagram shows the main TypeScript classes that run inside the PortFlow backend engine:
 
----
-
-## 💾 Database (DBMS) Concepts — 10 Topics Implemented
-
-PortFlow implements **10 core DBMS concepts** across its **12-table 3NF relational schema** (PostgreSQL via Supabase + Prisma ORM). Every concept maps directly to real code in [`prisma/schema.prisma`](./backend/prisma/schema.prisma) and the [`repositories/`](./backend/src/repositories) layer.
-
-| # | DBMS Topic | Implementation | Code Location |
-| :---: | :--- | :--- | :--- |
-| 1 | **Primary Keys (PK)** | Surrogate `id SERIAL` + domain `UNIQUE` keys on all 12 tables | `schema.prisma` — every model |
-| 2 | **Foreign Keys (FK) & Referential Integrity** | `ON DELETE SetNull / Cascade` across all 12 relationships | `schema.prisma` — `@relation` fields |
-| 3 | **3NF Normalization** | 1NF→2NF→3NF verified across all tables; no transitive dependencies | `schema.prisma` design |
-| 4 | **B-Tree Indexing** | `@@index` on every high-frequency filter column | `schema.prisma` — `@@index` blocks |
-| 5 | **ACID Transactions** | `prisma.$transaction()` wrapping multi-step PCB creation | `operations.repository.ts` |
-| 6 | **Soft-Delete & Audit Recovery** | `deleted_at TIMESTAMPTZ` pattern across all 10 mutable tables | All repository `WHERE deleted_at IS NULL` |
-| 7 | **Aggregate Analytics** | Parallel `COUNT`, live JOIN time benchmark across 12 tables | `system.controller.ts` |
-| 8 | **Relational JOIN Queries** | 5-table `INNER/LEFT JOIN` for operational reports | `system.controller.ts` — `$queryRaw` |
-| 9 | **Password Hashing (bcrypt)** | One-way `bcrypt.hash(pwd, 12)` before any DB write | `auth.controller.ts` |
-| 10 | **Audit Logging** | All mutations persisted to `system_logs` table with FK to user | `system.controller.ts` |
-
----
-
-### 1. 🔑 Primary Keys (PK) — Identity & Uniqueness
-
-Every table uses a surrogate `id SERIAL` primary key plus a domain-specific `UNIQUE` business key:
-
-```prisma
-model Operation {
-  id         Int    @id @default(autoincrement())  // Surrogate PK
-  process_id String @unique                        // Domain UK — OS Kernel PCB ID
-}
-model Ship {
-  id         Int    @id @default(autoincrement())
-  imo_number String @unique                        // Domain UK — International Maritime ID
-}
-```
-
-### 2. 🔗 Foreign Keys (FK) & Referential Integrity
-
-All 12 tables are linked with typed FKs and explicit `ON DELETE` behaviors:
-
-```prisma
-model Operation {
-  ship_id            Int?   // FK → ships(id)
-  cargo_id           Int?   // FK → cargo(id)
-  crane_equipment_id Int?   // FK → equipment(id) — Mutex Lock
-  berth_equipment_id Int?   // FK → equipment(id) — Semaphore
-  created_by_user_id Int?   // FK → users(id)
-
-  vessel         Ship?      @relation(fields: [ship_id],            references: [id], onDelete: SetNull)
-  container      Cargo?     @relation(fields: [cargo_id],           references: [id], onDelete: SetNull)
-  assigned_crane Equipment? @relation(fields: [crane_equipment_id], references: [id], onDelete: SetNull)
-  assigned_berth Equipment? @relation(fields: [berth_equipment_id], references: [id], onDelete: SetNull)
-  initiator      User?      @relation(fields: [created_by_user_id], references: [id], onDelete: SetNull)
-}
-```
-
-* `ON DELETE SetNull` — Preserves child row with NULL FK when parent is deleted.
-* `ON DELETE Cascade` — Deleting a `truck` also deletes its `gate_passes`.
-
-### 3. 📐 Normalization (1NF → 2NF → 3NF)
-
-| Normal Form | Rule | How PortFlow Complies |
-| :--- | :--- | :--- |
-| **1NF** | Atomic values, no repeating groups | Each cell holds one value. Every row has a unique `id PK`. |
-| **2NF** | No partial dependencies | Single-column PKs on all tables guarantee 2NF automatically. |
-| **3NF** | No transitive dependencies | Vessel data stays in `ships`, equipment specs in `equipment`, fees in `bills`. `operations` holds FK references only. |
-
-### 4. 🌲 B-Tree Indexing — $O(\log N)$ Performance
-
-```prisma
-// operations table — all scheduler-critical columns indexed
-@@index([ship_id])              // JOIN from ships → operations
-@@index([cargo_id])             // JOIN from cargo → operations
-@@index([crane_equipment_id])   // Mutex ownership lookup
-@@index([berth_equipment_id])   // Semaphore state lookup
-@@index([status])               // Queued / Running / Completed filter
-@@index([deleted_at])           // Active-record soft-delete filter
-@@index([created_at(sort: Desc)])  // Dashboard chronological order
-@@index([process_id])           // OS Kernel PCB direct lookup
-```
-
-Indexed lookup = $O(\log N)$ vs $O(N)$ sequential scan.
-
-### 5. 🔄 ACID Transactions — Atomic State Consistency
-
-```typescript
-// operations.repository.ts — create + assign process_id atomically
-const op = await prisma.$transaction(async (tx) => {
-    const res = await tx.operation.create({ data: { ... } });
-    return await tx.operation.update({
-        where: { id: res.id },
-        data:  { process_id: `op-${res.id}` }   // Depends on insert result
-    });
-});
-```
-
-**ACID:** Both steps succeed or both rollback. `process_id` is never NULL after creation.
-
-### 6. 🗑️ Soft-Delete & Two-Phase Audit Recovery
-
-```sql
--- Phase 1: Soft delete — stamp timestamp, data survives
-UPDATE operations SET deleted_at = NOW(), deleted_by = 'operator@portflow.com' WHERE id = 42;
-
--- All active queries filter this automatically
-SELECT * FROM operations WHERE deleted_at IS NULL;
-
--- Phase 2: Hard purge (from Trash Bin UI)
-DELETE FROM operations WHERE deleted_at IS NOT NULL AND id = 42;
-```
-
-Powers the Trash Bin 1-click restore across all 10 soft-deletable collections.
-
-### 7. 📊 Aggregate Analytics — COUNT, AVG, SUM
-
-```typescript
-// system.controller.ts — parallel COUNT aggregates (all 12 tables)
-const [userCount, opCount, shipCount, cargoCount, equipCount] = await Promise.all([
-    prisma.user.count({ where: { deleted_at: null } }),
-    prisma.operation.count({ where: { deleted_at: null } }),
-    prisma.ship.count({ where: { deleted_at: null } }),
-    prisma.cargo.count({ where: { deleted_at: null } }),
-    prisma.equipment.count({ where: { deleted_at: null } })
-]);
-// JOIN latency also benchmarked and returned to the dashboard UI
-```
-
-### 8. 🔗 Relational JOIN Queries
-
-```sql
--- 5-Table JOIN used live in /api/system/analytics
-SELECT ops.process_id, ops.operation_type, s.name AS vessel,
-       c.cargo_number, crane.name AS crane, berth.name AS berth, u.full_name
-FROM   operations ops
-INNER JOIN ships     s     ON ops.ship_id            = s.id
-LEFT  JOIN cargo     c     ON ops.cargo_id           = c.id
-LEFT  JOIN equipment crane ON ops.crane_equipment_id = crane.id
-LEFT  JOIN equipment berth ON ops.berth_equipment_id = berth.id
-LEFT  JOIN users     u     ON ops.created_by_user_id = u.id
-WHERE ops.deleted_at IS NULL
-ORDER BY ops.priority DESC, ops.created_at ASC;
-```
-
-### 9. 🔐 Password Hashing — bcrypt Cryptographic Security
-
-```typescript
-// auth.controller.ts
-const password_hash = await bcrypt.hash(password, 12);  // Salt rounds=12, ~100ms CPU
-await prisma.user.create({ data: { email, password_hash, full_name } });
-
-const isValid = await bcrypt.compare(plainPassword, storedHash); // Timing-safe
-```
-
-`@unique` on `email` prevents duplicate accounts at the DB engine level.
-
-### 10. 📋 Audit Logging — system_logs Table
-
-```typescript
-// system.controller.ts — auto-log on incident report
-await prisma.systemLog.create({
-    data: {
-        level:       'WARN',                // INFO | WARN | ERROR
-        source:      'IssueTracker',        // Module that triggered the event
-        message:     `Ticket ${ticketNumber} logged: "${title}"`,
-        action:      'REPORT_ISSUE',        // Machine-readable event type
-        entity_type: 'ISSUE',
-        user_id:     req.user?.id           // FK → users(id) — audit trail
+```mermaid
+classDiagram
+    class Process {
+        +string id
+        +number arrivalTime
+        +number burstTime
+        +number remainingTime
+        +number priority
+        +string status
+        +string[] requiredEquipments
+        +string[] heldEquipments
+        +start() void
+        +finish() void
     }
-});
+
+    class Scheduler {
+        -Process[] readyQueue
+        -SchedulingStrategy strategy
+        +setStrategy(strategy) void
+        +addProcess(process) void
+        +getNextProcess() Process
+        +removeProcess(id) void
+        +getReadyQueue() Process[]
+    }
+
+    class SchedulingStrategy {
+        <<interface>>
+        +schedule(readyQueue) Process
+        +getName() string
+    }
+
+    class FCFSStrategy {
+        +schedule(readyQueue) Process
+        +getName() string
+    }
+
+    class SJFStrategy {
+        +schedule(readyQueue) Process
+        +getName() string
+    }
+
+    class PriorityStrategy {
+        +schedule(readyQueue) Process
+        +getName() string
+    }
+
+    class RoundRobinStrategy {
+        -number quantumMs
+        +schedule(readyQueue) Process
+        +getQuantum() number
+    }
+
+    class Mutex {
+        -boolean locked
+        -Process owner
+        +lock(process) Promise
+        +unlock(process) void
+        +isBusy() boolean
+        +getOwner() Process
+    }
+
+    class Semaphore {
+        -number availableSlots
+        -number maxCapacity
+        +acquire() Promise
+        +release() void
+        +getAvailable() number
+    }
+
+    class DeadlockDetector {
+        +detectDeadlock(processes, mutexes) boolean
+        +findCycleDFS(waitGraph) string[]
+    }
+
+    class PortSystem {
+        <<Singleton>>
+        -static PortSystem instance
+        -Scheduler scheduler
+        -Map~string, Mutex~ craneLocks
+        -Semaphore berthSemaphore
+        -DeadlockDetector detector
+        +static getInstance() PortSystem
+        +submitOperation(op) void
+        +dispatchNext() Process
+        +getSystemState() Object
+    }
+
+    SchedulingStrategy <|.. FCFSStrategy : implements
+    SchedulingStrategy <|.. SJFStrategy : implements
+    SchedulingStrategy <|.. PriorityStrategy : implements
+    SchedulingStrategy <|.. RoundRobinStrategy : implements
+
+    Scheduler --> SchedulingStrategy : uses
+    PortSystem --> Scheduler : owns
+    PortSystem --> Mutex : manages cranes
+    PortSystem --> Semaphore : manages berths
+    PortSystem --> DeadlockDetector : monitors
+    Process --> Mutex : holds/waits
 ```
 
-**Log Sources:** `Scheduler` (dispatch/switch events), `DeadlockDetector` (WFG alerts), `IssueTracker` (equipment fault tickets), `Auth` (login/logout).
+### Simple Explanation of the Classes:
+- **`Process` (The Work Item):** Represents an operation (e.g. Unload 50 containers from Vessel A). It tracks when it arrived, how long it takes (`burstTime`), and its priority.
+- **`Scheduler` (The Brain):** Manages the waiting line (`readyQueue`). It picks which job runs next according to the active algorithm.
+- **`SchedulingStrategy` (Design Pattern):** Allows switching algorithms at runtime without restarting the server:
+  - `FCFSStrategy`: First-Come, First-Served.
+  - `SJFStrategy`: Shortest Job First (minimizes average wait time).
+  - `PriorityStrategy`: Emergency / high-priority cargo runs first.
+  - `RoundRobinStrategy`: Time-shared allocation with fixed time quantum.
+- **`Mutex` (Exclusive Crane Lock):** Only **one** process can use a specific crane at a time. Other jobs must wait in line.
+- **`Semaphore` (Berth Parking Pool):** A counting counter that limits how many ships can dock simultaneously (e.g. 5 berths = max 5 ships docked).
+- **`DeadlockDetector` (Safety Watchdog):** Scans the Wait-For Graph (WFG) using Depth-First Search (DFS) to catch circular waiting locks before they freeze port operations.
+- **`PortSystem` (Singleton):** The master coordinator combining all schedulers, locks, and detectors into one shared system.
 
-### Detailed Entity Relationship (ER) Diagram & Schema Breakdown
-To maintain a streamlined, high-performance database, PortFlow deliberately uses a minimalist **5-table architecture** to handle the core requirements without unnecessary joins or database bloat. 
+---
 
-Almost every piece of port data ties back to the central `operations` table, which bridges the gap between physical objects (Ships, Equipment) and digital execution (OS Kernel).
+## 🗄️ Entity Relationship (ER) Diagram (Database Design)
+
+PortFlow is designed in strict **Third Normal Form (3NF)** with 12 relational tables. There is zero redundant data, and all tables are linked through foreign keys:
 
 ```mermaid
 erDiagram
-    users ||--o{ operations : "initiates (created_by)"
-    ships ||--o{ cargo : "carries (ship_name)"
-    ships ||--o{ operations : "involved in (ship_name)"
-    equipment ||--o{ operations : "allocated to (crane_id, berth_id)"
-    
-    users {
-        Int id PK
-        String email UK
-        String password_hash
-        String full_name
-        String role
-        DateTime created_at
-        DateTime updated_at
-        DateTime deleted_at "nullable"
-        String deleted_by "nullable"
+    USERS ||--o{ OPERATIONS : "initiates (created_by_user_id)"
+    USERS ||--o{ GATE_PASSES : "issues (issued_by_id)"
+    USERS ||--o{ CUSTOMS_INSPECTIONS : "inspects (inspector_id)"
+    USERS ||--o{ ISSUES : "reports (reported_by_id)"
+    USERS ||--o{ SYSTEM_LOGS : "triggers (user_id)"
+
+    EQUIPMENT ||--o{ SHIPS : "parks at berth (berth_equipment_id)"
+    EQUIPMENT ||--o{ OPERATIONS : "crane allocated (crane_equipment_id)"
+    EQUIPMENT ||--o{ OPERATIONS : "berth allocated (berth_equipment_id)"
+    EQUIPMENT ||--o{ ISSUES : "has issue (equipment_id)"
+
+    SHIPS ||--o{ CARGO : "carries (ship_id)"
+    SHIPS ||--o{ OPERATIONS : "serviced in (ship_id)"
+    SHIPS ||--o{ BILLS : "billed to (ship_id)"
+
+    WAREHOUSES ||--o{ CARGO : "stored inside (warehouse_id)"
+
+    CARGO ||--o{ OPERATIONS : "moved in (cargo_id)"
+    CARGO ||--o{ TRUCKS : "loaded onto (assigned_cargo_id)"
+    CARGO ||--o{ GATE_PASSES : "cleared for (cargo_id)"
+    CARGO ||--o{ CUSTOMS_INSPECTIONS : "inspected for (cargo_id)"
+    CARGO ||--o{ BILLS : "storage billed (cargo_id)"
+
+    TRUCKS ||--o{ GATE_PASSES : "admitted via (truck_id)"
+
+    OPERATIONS ||--o{ BILLS : "invoiced for (operation_id)"
+
+    USERS {
+        int id PK
+        string email UK
+        string password_hash
+        string full_name
+        string role
+        datetime created_at
+        datetime deleted_at
     }
-    
-    ships {
-        Int id PK
-        String imo_number UK
-        String name
-        String vessel_type
-        Int capacity_teu
-        String status
-        String berth_id "nullable"
-        String created_by
-        DateTime created_at
-        DateTime deleted_at "nullable"
-        String deleted_by "nullable"
+
+    EQUIPMENT {
+        int id PK
+        string equipment_id UK
+        string name
+        string type "Berth or Crane"
+        string status "Available or Occupied"
+        float capacity_metric
+        datetime deleted_at
     }
-    
-    cargo {
-        Int id PK
-        String cargo_number UK
-        String size_type
-        Float weight_tons
-        String cargo_type
-        String current_location
-        String ship_name FK
-        String status
-        String created_by
-        DateTime created_at
-        DateTime deleted_at "nullable"
-        String deleted_by "nullable"
+
+    SHIPS {
+        int id PK
+        string imo_number UK
+        string name
+        string vessel_type
+        int capacity_teu
+        string status "Docked or Arriving"
+        int berth_equipment_id FK
+        datetime deleted_at
     }
-    
-    equipment {
-        Int id PK
-        String equipment_id UK
-        String name
-        String type
-        String status
-        String assigned_to "nullable"
-        String created_by
-        DateTime created_at
-        DateTime deleted_at "nullable"
-        String deleted_by "nullable"
+
+    WAREHOUSES {
+        int id PK
+        string code UK
+        string name
+        string zone_type "Reefer or Dry"
+        int capacity_teu
+        int current_occupancy_teu
+        float temperature_celsius
+        datetime deleted_at
     }
-    
-    operations {
-        Int id PK
-        String process_id UK "nullable"
-        String operation_type
-        String ship_name FK
-        String crane_id FK
-        String berth_id FK
-        Int priority
-        String status
-        DateTime start_time "nullable"
-        DateTime end_time "nullable"
-        Int waiting_time_ms "nullable"
-        Int turnaround_time_ms "nullable"
-        String created_by
-        DateTime created_at
-        DateTime deleted_at "nullable"
-        String deleted_by "nullable"
+
+    CARGO {
+        int id PK
+        string cargo_number UK
+        string size_type "20ft or 40ft"
+        float weight_tons
+        string cargo_type
+        string current_location
+        int ship_id FK
+        int warehouse_id FK
+        string status "On Ship or In Yard"
+        datetime deleted_at
+    }
+
+    OPERATIONS {
+        int id PK
+        string process_id UK
+        string operation_type
+        int ship_id FK
+        int cargo_id FK
+        int crane_equipment_id FK
+        int berth_equipment_id FK
+        int created_by_user_id FK
+        int priority
+        string status "Queued or Running"
+        datetime deleted_at
+    }
+
+    TRUCKS {
+        int id PK
+        string license_plate UK
+        string driver_name
+        string transport_company
+        string status
+        int assigned_cargo_id FK
+        datetime deleted_at
+    }
+
+    GATE_PASSES {
+        int id PK
+        string pass_number UK
+        int truck_id FK
+        int cargo_id FK
+        int issued_by_id FK
+        string gate_lane
+        string status
+        datetime check_in_time
+    }
+
+    CUSTOMS_INSPECTIONS {
+        int id PK
+        string inspection_number UK
+        int cargo_id FK
+        int inspector_id FK
+        string inspection_type
+        string status "Cleared or Hold"
+        bigint duty_amount_cents
+    }
+
+    BILLS {
+        int id PK
+        string invoice_number UK
+        int ship_id FK
+        int cargo_id FK
+        int operation_id FK
+        float total_amount
+        string currency
+        string payment_status
+    }
+
+    ISSUES {
+        int id PK
+        string ticket_number UK
+        string title
+        string severity
+        string status
+        int reported_by_id FK
+        int equipment_id FK
+    }
+
+    SYSTEM_LOGS {
+        int id PK
+        datetime timestamp
+        string level
+        string source
+        string message
+        int user_id FK
     }
 ```
 
-#### The Minimalist Table Philosophy
-By distilling the database into these **5 Core Entities**, we achieve high-speed ACID transactions while perfectly supporting the OS Simulator:
-
-1. **`users` Table (Authentication):** 
-   - Stores authenticated terminal operator credentials.
-   - Manages secure JWT authentication for accessing port operations and scheduler.
-
-2. **`ships` Table (The Primary Client):**
-   - Represents the physical vessels arriving at the port.
-   - Tracks the `imo_number` (International Maritime Organization identifier).
-   - *Relationship:* A single ship can carry multiple `cargo` items and spawn multiple `operations`.
-
-3. **`cargo` Table (The Workload):**
-   - Represents the individual shipping containers.
-   - Tied directly to a ship via `ship_name` and tracks its journey through the port via `current_location`.
-
-4. **`equipment` Table (The OS Resources):**
-   - This table maps directly to the OS Simulator's **Mutexes** and **Semaphores**.
-   - `type` differentiates between a `Crane` (Mutex, 1:1 lock) and a `Berth` (Semaphore, pooled resource).
-   - `assigned_to` holds the `process_id` of the operation currently locking it, bridging the DB and the Node.js OS memory.
-
-5. **`operations` Table (The OS Process Control Block):**
-   - The heart of PortFlow. Every row here acts as a **Process Control Block (PCB)** for the OS Simulator.
-   - Tracks the lifecycle of a job (`READY`, `RUNNING`, `WAITING`, `COMPLETED`).
-   - Stores telemetry data (`waiting_time_ms`, `turnaround_time_ms`) generated by the OS Scheduler (FCFS/SJF).
-   - Connects the Ship (client), the Crane (mutex), and the Berth (semaphore) into a single transactional row.
+### Table Relationships in Plain English:
+1. **`users` $\rightarrow$ Everything**: Tracks which operator created an operation, issued a gate pass, approved customs, reported a crane issue, or triggered an audit log.
+2. **`equipment` $\rightarrow$ `ships` & `operations`**: Equipment represents both physical Berths (parking) and Cranes (lifting). A Ship docks at a Berth equipment; an Operation reserves a Crane equipment via Mutex.
+3. **`ships` $\rightarrow$ `cargo` & `operations`**: A Ship carries multiple Cargo containers (1-to-Many). When operations are scheduled, they reference the specific Ship being serviced.
+4. **`warehouses` $\rightarrow$ `cargo`**: Cold storage reefer containers and general dry containers are stored in specific warehouse zones.
+5. **`trucks` $\rightarrow$ `cargo` & `gate_passes`**: Logistics trucks pick up containers from the yard. Each truck check-in generates an automated Gate Pass.
+6. **`cargo` $\rightarrow$ `customs_inspections`**: Every container undergoes X-ray or physical inspection before customs duty is calculated and cleared.
+7. **`operations` $\rightarrow$ `bills`**: Once a ship discharge is completed, an automated tariff bill is generated calculating docking fees, crane hours, and warehouse storage costs.
 
 ---
 
-## ✨ User Roles & Core Features
+## 🧠 Operating System (OS) Concepts in Plain English
 
-PortFlow utilizes a unified **Terminal Operator** role, which has comprehensive access to oversee and execute all port operations:
-
-| Module | Terminal Operator Capabilities |
-| :--- | :--- |
-| **Primary Role** | Manages the whole port system and daily terminal operations |
-| **Dashboard** | Views all port activities, resource statuses, and metrics |
-| **Operations** | Creates, assigns, updates, and manages all operations and processes |
-| **Ships** | Manages ships, schedules, and operational assignments |
-| **Cargo** | Manages and monitors all cargo and yard activities |
-| **Berths** | Assigns and manages berths, views status |
-| **Cranes** | Assigns and manages cranes, reports problems |
-| **Scheduling** | Uses and monitors the automatic OS scheduler |
-| **Scheduling Algorithm** | Configures the active algorithm (FCFS / SJF / Priority) and observes process queuing |
-| **Process Execution** | Monitors and executes port processes in real-time |
-| **Resource & Locks** | Monitors resource allocation and Mutex/Semaphore locks |
-| **Deadlock / Banker's Algorithm** | Monitors deadlock state, warnings, and system health |
-| **Analytics** | Views complete port analytics and telemetry |
-| **Trash / Recovery Bin** | Full 1-click restore across all collections & permanent purge / empty trash |
-| **My Profile & Account** | Simple profile overview & self-service account management |
-| **System Logs & Reports** | Streamlined for focused terminal operations |
+| OS Concept | Port Real-World Analogy | How PortFlow Implements It |
+| :--- | :--- | :--- |
+| **Process & PCB** | Ship loading or unloading job | Each task is an isolated `Process` object with an ID (`pid`), burst time, arrival time, and execution state (`READY`, `RUNNING`, `TERMINATED`). |
+| **CPU Scheduling** | Crane work sequencing | Schedulers pick the next operation from the ready queue using **FCFS, SJF, Priority, or Round Robin**. |
+| **Ready Queue** | Waiting line for equipment | Queue where operations wait until their crane and berth are both free. |
+| **Mutex Lock** | Exclusive Crane access | Only **one** operation can use a crane at a time to prevent collisions. |
+| **Counting Semaphore** | Berth parking slots | A counter limiting how many ships can be docked simultaneously based on physical port space. |
+| **Deadlock Avoidance** | Traffic gridlock detection | A Wait-For Graph (WFG) scans for circular wait conditions (e.g., Ship A has Crane 1 waiting for Berth 1; Ship B has Berth 1 waiting for Crane 1). |
 
 ---
 
-## 📂 Repository Structure
+## 💾 Database (DBMS) Concepts in Plain English
 
-```text
+| DBMS Concept | Why It Matters | Implementation in PortFlow |
+| :--- | :--- | :--- |
+| **3NF Normalization** | Eliminates duplicate data and update anomalies | 12 tables divided cleanly with zero data duplication. |
+| **Primary & Foreign Keys** | Keeps database relationships clean and valid | Surrogate `id SERIAL` + domain unique IDs (`imo_number`, `cargo_number`) with explicit `ON DELETE CASCADE / SET NULL`. |
+| **B-Tree Indexing** | Makes searching millions of rows fast ($O(\log N)$) | B-Tree indexes on `status`, `deleted_at`, foreign keys, and unique codes. |
+| **ACID Transactions** | Guarantees all-or-nothing operations | Atomic operations ensure that completing a discharge updates cargo status, frees the crane, and creates an invoice together. |
+| **Soft-Delete Pattern** | Prevents accidental data loss | Rows are stamped with `deleted_at: timestamp`. Deleted items go to the Trash Bin and can be restored in 1 click. |
+| **Query Optimization** | Keeps server response time under 10ms | Point-updates using unique primary keys, selective field projection (`select`), and in-memory TTL caching. |
+
+---
+
+## ✨ Key Features of PortFlow
+
+1. **Operations Management**: Create, dispatch, and track ship discharge and loading operations in real time.
+2. **Dynamic Algorithm Switching**: Toggle between **FCFS, SJF, Priority, and Round Robin** scheduling live from the UI without restarting the server.
+3. **Interactive Relational Analytics**: View foreign key SQL JOIN query benchmarks and table statistics directly on the Reports page.
+4. **Live GraphQL Playground**: Test nested GraphQL queries against the `/graphql` Apollo endpoint directly from the browser.
+5. **Trash & Recovery Bin**: 1-click restore or permanent purge for accidentally deleted ships, cargo, equipment, or operations.
+6. **Dual API Protocols**: REST endpoints for simple actions; Apollo GraphQL for deep relational graph queries.
+
+---
+
+## 📂 Project Folder Structure
+
+```
 portflow/
-├── README.md                      # Primary project documentation (you are here)
-├── LLD_ARCHITECTURE.md            # Comprehensive Low-Level Design specification
-├── LICENSE                        # ISC open-source license
-├── load-test.k6.js                # Grafana k6 user concurrency & stress testing script
-├── package.json                   # Root workspace orchestration scripts
-├── folder/                        # Project milestone specifications & diagrams
-│   ├── PHASE_1.md                 # Phase 1: 10% Foundation Milestone
-│   ├── PHASE_2.md                 # Phase 2: 40% Core Working Implementation
-│   ├── PHASE_3.md                 # Phase 3: 50% Advanced Deployment Roadmap
-│   ├── FUTURE_PHASES.md           # Future Phases: Postponed Advanced Features
-│   └── DIAGRAMS.md                # Architectural, OS, and ER diagram specifications
-├── backend/                       # Node.js + Express + TypeScript Backend
-│   ├── README.md                  # Comprehensive backend guide & architecture walkthrough
-│   ├── package.json               # Backend dependencies, Jest, and load test scripts
-│   ├── scripts/
-│   │   └── load-test.js           # Automated high-concurrency throughput and latency tester
-│   ├── prisma/                    # Prisma ORM schema & migrations
-│   │   └── schema.prisma          # Database schema definitions
-│   ├── supabase/                  # PostgreSQL migrations
-│   │   └── schema.sql             # SQL DDL script
-│   └── src/                       # TypeScript source code
-│       ├── index.ts               # Server bootstrap & dual engine router
-│       ├── config/                # Database & Prisma connection singletons
-│       ├── controllers/           # HTTP Request & Response handlers
-│       ├── graphql/               # Apollo Server GraphQL schema & resolvers
-│       ├── interfaces/            # Repository and Service contracts (DIP)
-│       ├── middleware/            # JWT authentication, RBAC, and rate limiting
-│       ├── models/                # Domain entities and Data Transfer Objects (DTOs)
-│       ├── os/                    # Custom OS Simulation Kernel (Mutex, Semaphore, Schedulers)
-│       │   └── __tests__/         # OS kernel and CPU scheduling unit tests
-│       ├── repositories/          # Data Access Layer (Prisma queries)
-│       ├── routes/                # Express API route endpoints
-│       └── services/              # Business logic & OS synchronization services
-└── frontend/                      # React 19 + TypeScript + Vite SPA
-    ├── README.md                  # Comprehensive frontend guide & UI component walkthrough
-    ├── package.json               # Frontend dependencies and scripts
-    ├── vite.config.ts             # Vite bundler configuration
-    ├── public/image/              # Branding assets, logos, and favicon
-    └── src/                       # React source code
-        ├── App.tsx                # Client-side router and dashboard layout
-        ├── main.tsx               # React application entrypoint
-        ├── auth/                  # Session provider and protected route guards
-        ├── components/ui/         # Atomic design system primitives (Radix UI / Tailwind)
-        ├── features/operations/   # Feature-based vertical slice (Table, Modals, Hooks, Service)
-        ├── lib/                   # API client facade and utilities
-        └── pages/                 # Full-page views (Dashboard, Ships, Cargo, Scheduling, Trash, etc.)
+├── backend/                    # Node.js + Express + TypeScript API Server
+│   ├── prisma/                 # Prisma ORM schema & migrations
+│   ├── src/
+│   │   ├── config/             # DB connection pool (Prisma singleton)
+│   │   ├── controllers/        # Request handlers & JSON responses
+│   │   ├── graphql/            # Apollo GraphQL schemas & resolvers
+│   │   ├── interfaces/         # TypeScript contracts & DIP abstractions
+│   │   ├── middleware/         # JWT auth, RBAC, helmet, rate-limiters
+│   │   ├── models/             # Domain entities & DTOs
+│   │   ├── os/                 # OS Simulator Kernel (Schedulers, Mutex, Semaphores)
+│   │   │   └── __tests__/      # Jest unit tests for OS algorithms
+│   │   ├── repositories/       # Fast Prisma database query layer
+│   │   ├── routes/             # REST API route definitions (/api/*)
+│   │   ├── services/           # Domain business rules
+│   │   └── index.ts            # Application entrypoint & HTTP server
+│   ├── scripts/                # Database alignment & seeding scripts
+│   └── package.json
+│
+├── frontend/                   # React 19 + Vite + Tailwind CSS Single Page App
+│   ├── src/
+│   │   ├── auth/               # Auth provider & protected route guards
+│   │   ├── components/         # Reusable UI widgets, navigation & sidebar
+│   │   ├── lib/                # API client facade (REST & GraphQL)
+│   │   ├── pages/              # Full-page view containers (Dashboard, Ships, Cargo, etc.)
+│   │   ├── App.tsx             # Client-side router & layout
+│   │   └── main.tsx            # React application entrypoint
+│   └── package.json
+│
+├── folder/                     # System design diagrams (Mermaid & Draw.io XML)
+├── load-test.k6.js             # Grafana k6 performance & stress load test
+├── render.yaml                 # Render cloud deployment blueprint
+├── package.json                # Root orchestration scripts
+└── README.md                   # You are here!
 ```
 
 ---
 
-## 🚀 Quick Start & Installation
+## 🚀 Quick Start (Run Locally)
 
 ### Prerequisites
-- **Node.js**: v18.0.0 or higher
-- **npm**: v9.0.0 or higher
-- **Git**
+* [Node.js](https://nodejs.org/) v18+ installed
+* [Git](https://git-scm.com/) installed
+* A free [Supabase](https://supabase.com/) PostgreSQL database (or local PostgreSQL)
 
-### One-Command Full-Stack Start (Root)
-Install all dependencies and launch both backend (`http://localhost:10000`) and frontend (`http://localhost:5173`) concurrently:
+### 1. Clone the Repository
 ```bash
-# 1. Install root dependencies
-npm install
-
-# 2. Run both Backend & Frontend concurrently
-npm run dev
+git clone https://github.com/Sujalkathait/PortFlow.git
+cd PortFlow
 ```
 
-### Alternatively: Run Individually
+### 2. Install Dependencies
+```bash
+# Install root, backend, and frontend dependencies in one command
+npm install
+npm install --prefix backend
+npm install --prefix frontend
+```
 
-#### 1. Backend Setup
+### 3. Configure Environment Variables
+Create a `.env` file inside the `backend/` folder (use [`backend/.env.example`](./backend/.env.example) as reference):
+```env
+PORT=10000
+DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[REF].supabase.co:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres:[PASSWORD]@db.[REF].supabase.co:5432/postgres"
+JWT_SECRET="your-super-secure-jwt-secret-key-min-32-chars"
+CORS_ORIGIN="http://localhost:5173"
+NODE_ENV="development"
+```
+
+### 4. Run Database Setup
 ```bash
 cd backend
-npm install
 npx prisma generate
-npm run dev
+npx prisma db push
+cd ..
 ```
-*The backend API server will start on `http://localhost:10000`.*
 
-#### 2. Frontend Setup
+### 5. Start Both Backend & Frontend
+From the root folder:
 ```bash
-cd frontend
-npm install
 npm run dev
 ```
-*The React SPA will start on `http://localhost:5173`.*
+* **Frontend UI:** Open [http://localhost:5173](http://localhost:5173) in your browser.
+* **REST API:** [http://localhost:10000/api](http://localhost:10000/api)
+* **GraphQL Sandbox:** [http://localhost:10000/graphql](http://localhost:10000/graphql)
+* **Health Check:** [http://localhost:10000/health](http://localhost:10000/health)
 
 ---
 
-## 🧪 Testing & Load Testing
+## 🧪 Testing & Verification
 
-PortFlow includes a testing framework covering unit tests for the OS kernel, CPU scheduling strategies, code linting, and high-concurrency user load testing.
+PortFlow includes comprehensive unit tests and load testing scripts:
 
-### 1. Run Unit Tests
-Test the core OS simulation kernel, Deadlock Detector, and CPU Schedulers (FCFS, SJF, Priority, Round Robin):
 ```bash
-# Run from repository root:
+# Run all OS Scheduler & PortSystem unit tests
 npm test
 
-# Or run with test coverage report:
+# Run tests with code coverage report
 npm run test:coverage
-```
 
-### 2. High-Concurrency User Load Testing
-To benchmark how many concurrent users your PortFlow deployment can handle (up to **3,000 simultaneous connections**):
-
-```bash
-# Quick test: 50 concurrent users, 10 seconds (default)
-npm run test:load
-
-# Medium test: 500 concurrent users for 20 seconds
-node backend/scripts/load-test.js --concurrency 500 --duration 20
-
-# High-load test: 1000 concurrent users for 30 seconds
-node backend/scripts/load-test.js --concurrency 1000 --duration 30
-
-# Max-stress test: 3000 concurrent users for 60 seconds
-node backend/scripts/load-test.js --concurrency 3000 --duration 60 --url http://localhost:10000/health
-```
-
-> [!WARNING]
-> 3000-user load testing requires setting `DISABLE_RATE_LIMIT=true` in `backend/.env` or it will be capped by the rate limiter at a single IP. Production rate limits exist for security.
-
-**Key Metrics Output:**
-* **Total Completed Requests & Error Rate:** Verifies 0% failed requests.
-* **Throughput (Requests/sec):** Maximum sustained request throughput.
-* **Latency Percentiles:** p50 (median), p95, and p99 response times.
-* **Capacity Verdict:** Automatic verdict — Excellent / Good / Bottleneck Reached.
-
-### 3. Grafana k6 Stress Testing — 3000 Virtual Users
-Simulate realistic user ramp-up ($50 \to 500 \to 3000$ Virtual Users) hitting health, REST, and GraphQL endpoints:
-```bash
+# Run Grafana k6 stress test (simulates 50 to 3,000 concurrent users)
 k6 run load-test.k6.js
 
-# Override target URL for deployed instances:
-k6 run -e TARGET_URL=https://your-backend.onrender.com load-test.k6.js
-```
-
-### 4. Static Analysis & Linting
-```bash
+# Run frontend code quality linter
 npm run lint
 ```
 
 ---
 
-## 🔑 Test Credentials
+## 🔑 Demo Login Credentials
 
-PortFlow comes pre-seeded with a developer account for instant evaluation:
+For quick evaluation, pre-seeded operator credentials are ready to use:
 
-| Role | Email Address | Password | Permissions |
-| :--- | :--- | :--- | :--- |
-| **Terminal Operator** | `[operator@portflow.com]` | `Password123!` | Full system access, equipment setup, OS scheduling, reports, trash recovery, and ground operations |
+* **Email:** `operator@portflow.com`
+* **Password:** `Password123!`
+* **Role:** Terminal Operator
 
-*(A one-click demo login button is also provided directly on the Login page).*
-
----
-
-## 📈 Project Milestones & Roadmap
-
-- [x] **Phase 1: Project Foundation (10%)** — Architectural mapping, entity-relationship modeling, and OS simulation design.
-- [x] **Phase 2: Core Working Implementation (40%)** — Working Terminal Operator panel, OS scheduling algorithms, Mutex locks, Semaphores, Prisma ORM, and CRUD REST APIs.
-- [x] **LLD Architectural Refactoring** — Full decoupling with Domain Models, DTOs, Repository Interfaces, Service Layer, and Feature-based folder structure.
-- [x] **Phase 3: Enterprise Architecture, Schema & Analytics (✅ COMPLETED)** — Full 12-table 3NF relational model, dual REST + GraphQL API gateway, observability stack, and production cloud deployment.
-
-### 🏆 Phase 3 Deliverables (Completed)
-
-| Deliverable | Status | Details |
-| :--- | :---: | :--- |
-| **Full 12-Table Relational Schema** | ✅ Done | `users`, `equipment`, `ships`, `warehouses`, `cargo`, `operations`, `trucks`, `gate_passes`, `customs_inspections`, `bills`, `issues`, `system_logs` |
-| **Complete PK & FK Constraints** | ✅ Done | Strict referential integrity with `ON DELETE CASCADE` / `SET NULL` across all 12 entity relationships |
-| **3NF Database Normalization** | ✅ Done | All tables verified for 1NF → 2NF → 3NF: no partial or transitive functional dependencies |
-| **Dual API: REST + GraphQL** | ✅ Done | Express REST (`/api/*`) for mutations & auth; Apollo GraphQL (`/graphql`) for nested relational graph queries |
-| **Composite Dashboard Analytics** | ✅ Done | Real-time KPI telemetry via `query { portDashboardOverview { ... } }` aggregating all 12 tables |
-| **System Audit Log Streaming** | ✅ Done | `system_logs` table with live mutation trail: captures user, action, source, and timestamp |
-| **Incident & Equipment Reporting** | ✅ Done | `issues` ticketing system linked to equipment breakdowns with severity and resolution tracking |
-| **Customs Clearance Workflow** | ✅ Done | `customs_inspections` with X-Ray/Quarantine, duty amount tracking, and clearance status |
-| **Gate Pass & Truck Drayage** | ✅ Done | `trucks` and `gate_passes` for land-side container movement with lane, pass-type, and check-in time |
-| **Automated Tariff Invoicing** | ✅ Done | `bills` table auto-calculating docking, crane, and storage fees from burst time and berth duration |
-| **Soft-Delete Trash Recovery** | ✅ Done | Unified Recycle Bin with 1-click restore and permanent purge across all collections |
-| **Production Cloud Hosting** | ✅ Done | Backend on Render, Frontend on Vercel, Database on Supabase (PostgreSQL) |
-
-- [ ] **Phase 4: Advanced Logistics (Future)** — Real-time WebSocket telemetry, preemptive scheduling, and AI-assisted deadlock recovery.
+*(You can also click the **"Quick Demo Login"** button on the login screen to sign in instantly with one click.)*
 
 ---
 
-## 📚 Detailed Sub-Guides
+## ☁️ Cloud Deployment Guide
 
-For in-depth explanations and developer cheat-sheets, explore our dedicated guides:
-- 📖 **[Backend Guide](./backend/README.md)**: Deep dive into the backend directory, routes, controllers, services, repositories, and OS simulation kernel.
-- 🎨 **[Frontend Guide](./frontend/README.md)**: Breakdown of React components, custom hooks, feature-based modularity, and Tailwind styling.
-- 🏛️ **[LLD Architecture Guide](./LLD_ARCHITECTURE.md)**: Low-Level Design specification covering SOLID principles, design patterns, and feature-based vs flat-based directory trade-offs.
-- 🔮 **[Future Phases Guide](./folder/FUTURE_PHASES.md)**: Roadmap for postponed advanced features like Preemptive Scheduling and active RAG Deadlock Recovery.
+PortFlow is pre-configured for free cloud deployment on **Render** (Backend) and **Vercel** (Frontend):
+
+### Deploy Backend (Render)
+1. Go to [Render Dashboard](https://dashboard.render.com/) $\rightarrow$ Click **New +** $\rightarrow$ **Blueprint**.
+2. Select your `PortFlow` repository.
+3. Render reads [`render.yaml`](./render.yaml) automatically.
+4. Fill in your `DATABASE_URL`, `DIRECT_URL`, and `JWT_SECRET`.
+5. Click **Apply**.
+
+### Deploy Frontend (Vercel)
+1. Go to [Vercel Dashboard](https://vercel.com/) $\rightarrow$ Click **Add New** $\rightarrow$ **Project**.
+2. Import `PortFlow` and set the **Root Directory** to `frontend`.
+3. Add Environment Variable:
+   - `VITE_API_URL`: `https://your-backend.onrender.com/api`
+4. Click **Deploy**. Vercel will build with Vite and apply [`frontend/vercel.json`](./frontend/vercel.json) automatic SPA rewrites.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the [ISC License](LICENSE).
+This project is licensed under the **ISC License** — see the [LICENSE](./LICENSE) file for details.

@@ -1,53 +1,65 @@
-# ⚓ PortFlow Frontend — Modern Terminal Operations Portal
+# ⚓ PortFlow Frontend — Terminal Operations Portal
 
-The frontend for **PortFlow** is an enterprise-grade Single Page Application (SPA) built with **React 19, TypeScript, Vite, and Tailwind CSS**. It provides an interactive ground operations portal for Terminal Operators to manage marine traffic, supervise container logistics, control OS process scheduling, and inspect real-time port telemetry.
+**A Modern, Responsive Single Page Application (SPA) Built with React 19, TypeScript, Vite, & Tailwind CSS**
+
+---
+
+## 🌊 Overview (Simple English)
+
+The **PortFlow Frontend** is the command center used by Terminal Operators to oversee all port activity. It connects to the PortFlow backend to display live vessel positions, crane statuses, container manifests, and CPU scheduling queues.
 
 ---
 
 ## 🛠️ Technology Stack
 
-* **Core Framework:** [React 19](https://react.dev/) & [TypeScript](https://www.typescriptlang.org/)
-* **Build Tooling:** [Vite](https://vitejs.dev/)
-* **Styling & Design System:** [Tailwind CSS](https://tailwindcss.com/), Radix UI Primitives, `clsx`, and `class-variance-authority`
-* **Data Grids:** [TanStack Table v8](https://tanstack.com/table/v8) for high-performance sorting, filtering, and pagination
-* **Icons:** [Lucide React](https://lucide.dev/)
-* **Code Quality & Linting:** [Oxlint](https://oxc.rs/docs/guide/usage/linter.html)
+* **UI Framework:** [React 19](https://react.dev/) & [TypeScript](https://www.typescriptlang.org/)
+* **Build Tooling:** [Vite](https://vitejs.dev/) (Instant Hot Module Replacement & production bundling)
+* **Styling & Theme:** [Tailwind CSS v3](https://tailwindcss.com/) with dark mode support
+* **UI Components:** [Radix UI Primitives](https://www.radix-ui.com/) & Lucide React Icons
+* **Data Grids:** [TanStack Table v8](https://tanstack.com/table/v8) for high-performance sorting and pagination
+* **Code Linter:** [Oxlint](https://oxc.rs/) for sub-second static analysis
 
 ---
 
-## 🏗️ Architecture & Folder Structure
+## 📱 Page Overview & Features
 
-The frontend is structured using feature-based modularity combined with clean presentational component separation:
+| Page | Path | What You Can Do Here |
+| :--- | :--- | :--- |
+| **Dashboard** | `/operator/dashboard` | View high-level port KPIs: active operations, docked vessels, available equipment, and quick navigation. |
+| **Operations** | `/operator/operations` | View all active loading/unloading jobs, schedule a new operation, and trigger the CPU dispatch button. |
+| **Ships & Berths** | `/operator/ships` | Register arriving vessels, assign docking berths, and change vessel statuses (Arriving, Docked, Departed). |
+| **Cargo Containers** | `/operator/cargos` | Track container manifests (20ft / 40ft), tare weight, warehouse assignments, and clearance statuses. |
+| **Equipment & Cranes** | `/operator/equipments` | Manage STS Gantry Cranes and Berths. Toggle statuses between Available, Busy, and Maintenance. |
+| **OS CPU Scheduler** | `/operator/scheduling` | Visual inspection of the OS ready queue. Toggle scheduling algorithms (**FCFS, SJF, Priority, Round Robin**) live in real-time. |
+| **Analytics & Reports** | `/operator/reports` | Dual REST vs. GraphQL architecture comparison, live GraphQL interactive playground, and SQL JOIN benchmarks. |
+| **System Logs** | `/operator/logs` | Real-time audit trail and kernel event logging (OS scheduler, deadlock detection, and auth events). |
+| **Trash Bin** | `/operator/trash` | Safe Recycle Bin: View all soft-deleted records and restore them in 1-click or permanently delete them. |
+| **Operator Profile** | `/operator/profile` | View operator account information, active session role, and security settings. |
+
+---
+
+## 🏗️ Folder Structure
 
 ```
 src/
-├── auth/                    # Session state provider, auth context, and protected route guards
+├── auth/               # AuthContext provider, session storage, and ProtectedRoute guards
 ├── components/
-│   └── ui/                  # Reusable atomic design primitives (Button, Card, Dialog, Table, Tabs)
+│   ├── ui/             # Atomic UI primitives (Buttons, Cards, Dialogs, Dropdowns, Tables)
+│   ├── app-sidebar.tsx # Collapsible navigation sidebar
+│   └── command-menu.tsx# Quick command launcher (Ctrl + K)
 ├── features/
-│   └── operations/          # Operations feature slice (Custom Hook, Modals, Services)
+│   └── operations/     # Operations domain slice (Custom hooks, modals, forms)
 ├── lib/
-│   ├── api.ts               # HTTP client facade with automatic JWT injection & error handling
-│   └── utils.ts             # Tailwind class merging (cn) and formatting helpers
-├── pages/                   # Full-page view containers
-│   ├── CargoPage.tsx        # Container inventory, TEU weights, and yard location management
-│   ├── DashboardPage.tsx    # High-level KPIs, berth occupancy, crane status, and alerts
-│   ├── EquipmentPage.tsx    # Crane & Berth allocation, maintenance tracking, and lock states
-│   ├── Login.tsx            # Operator authentication, demo 1-click login, OTP password reset
-│   ├── LogsPage.tsx         # Real-time system audit logs and event telemetry
-│   ├── OperationsPage.tsx   # Active port operations table, new job creation, and dispatch
-│   ├── ProfilePage.tsx      # Operator profile details, session management, and account actions
-│   ├── ReportIssuePage.tsx  # Ground equipment issue ticketing
-│   ├── ReportsPage.tsx      # Turnaround analytics and aggregate operational metrics
-│   ├── SchedulingPage.tsx   # OS Ready Queue visualizer & real-time scheduling algorithm switcher
-│   └── TrashPage.tsx        # Recycle bin with 1-click restore across all deleted records
-├── App.tsx                  # Client-side router, layout navigation, and navigation state
-└── main.tsx                 # Application entrypoint
+│   ├── api.ts          # Unified HTTP client supporting both REST and GraphQL queries
+│   └── utils.ts        # Tailwind class merging utility (cn)
+├── pages/              # Full page view components
+├── App.tsx             # Client-side router, layout shell, and navigation title mapping
+└── main.tsx            # React application mount entrypoint
 ```
 
 ---
 
-## 🚀 Setup & Installation
+## 🚀 Setup & Local Execution
 
 ### 1. Install Dependencies
 ```bash
@@ -55,33 +67,34 @@ npm install
 ```
 
 ### 2. Configure Environment (`.env`)
-Create a `.env` file in the `frontend/` directory (matching `frontend/.env.example`):
+Create a `.env` file in the `frontend/` folder:
 ```env
-# Set to your backend API URL (defaults to http://localhost:10000/api in development)
-VITE_API_BASE_URL=http://localhost:10000/api
+# URL pointing to your running backend API server
+VITE_API_URL=http://localhost:10000/api
 ```
+*(The frontend automatically supports both `VITE_API_URL` and `VITE_API_BASE_URL`.)*
 
 ### 3. Start Development Server
 ```bash
 npm run dev
 ```
-*The React SPA will launch on `http://localhost:5173`.*
+Open your browser at **`http://localhost:5173`**.
 
 ---
 
-## 📜 Available Scripts
+## 📜 Available NPM Scripts
 
-| Command | Action |
-| :--- | :--- |
-| `npm run dev` | Starts Vite local development server with Hot Module Replacement (HMR). |
-| `npm run build` | Runs TypeScript type checking (`tsc -b`) and generates production bundle via Vite. |
-| `npm run lint` | Runs lightning-fast static code analysis across all `.tsx` and `.ts` files using Oxlint. |
-| `npm run preview` | Serves the production build locally for pre-deployment verification. |
+* `npm run dev` — Starts the local Vite development server with hot-reloading.
+* `npm run build` — Compiles TypeScript (`tsc -b`) and builds the optimized production bundle in `dist/`.
+* `npm run lint` — Runs Oxlint across all TypeScript files.
+* `npm run preview` — Locally previews the compiled production build.
 
 ---
 
-## 👥 Authentication & Roles
+## ☁️ Deployment on Vercel
 
-* **Role:** **Terminal Operator**
-* **Capabilities:** Full operational privileges across vessels, berths, cranes, cargo containers, process dispatching, scheduling algorithm switching (FCFS / SJF / Priority / Round Robin), and soft-delete recovery via the unified Trash Bin.
-* **Demo Credentials:** A one-click login button is available on the Login screen (`operator@portflow.com` / `Password123!`).
+The frontend is ready for immediate deployment on **Vercel**:
+1. Connect your GitHub repository to Vercel.
+2. Set **Root Directory** to `frontend`.
+3. Add environment variable `VITE_API_URL` pointing to your deployed Render backend (e.g., `https://portflow-backend.onrender.com/api`).
+4. Click **Deploy**. Vercel will build with Vite and apply [`vercel.json`](./vercel.json) to handle Single Page Application (SPA) routing automatically.
