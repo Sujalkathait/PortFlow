@@ -1,9 +1,17 @@
 import { GraphQLContext } from './context';
 import { operationsService } from '../services/operations.service';
 
+let cachedOverview: any = null;
+let lastOverviewFetchTime = 0;
+const OVERVIEW_CACHE_TTL_MS = 5000;
+
 export const resolvers = {
     Query: {
         portDashboardOverview: async (_: any, __: any, { prisma }: GraphQLContext) => {
+            const now = Date.now();
+            if (cachedOverview && (now - lastOverviewFetchTime < OVERVIEW_CACHE_TTL_MS)) {
+                return cachedOverview;
+            }
             const [
                 userCount,
                 opCount,
@@ -55,7 +63,7 @@ export const resolvers = {
                 recentLogs = [];
             }
 
-            return {
+            const result = {
                 tableStats: {
                     users: userCount,
                     operations: opCount,
@@ -76,6 +84,9 @@ export const resolvers = {
                     timestamp: l.timestamp.toISOString()
                 }))
             };
+            cachedOverview = result;
+            lastOverviewFetchTime = Date.now();
+            return result;
         },
 
         ships: async (_: any, { status }: { status?: string }, { prisma }: GraphQLContext) => {

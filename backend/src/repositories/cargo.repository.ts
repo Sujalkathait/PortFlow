@@ -12,26 +12,48 @@ function normalize(row: any): CargoRecord {
 }
 
 export class CargoRepository implements ICargoRepository {
-    async findActive(): Promise<CargoRecord[]> {
+    async findActive(limit = 500, offset = 0): Promise<CargoRecord[]> {
         const rows = await prisma.cargo.findMany({
             where: { deleted_at: null },
-            orderBy: { created_at: 'desc' }
+            orderBy: { created_at: 'desc' },
+            take: limit,
+            skip: offset
         });
         return rows.map(normalize);
     }
 
     async findById(id: number): Promise<CargoRecord | null> {
-        const row = await prisma.cargo.findFirst({
-            where: { id, deleted_at: null }
+        // Fast O(1) Primary Key Index Lookup
+        const row = await prisma.cargo.findUnique({
+            where: { id }
         });
-        return row ? normalize(row) : null;
+        if (!row || row.deleted_at !== null) return null;
+        return normalize(row);
     }
 
     async findByCargoNumber(cargoNumber: string): Promise<CargoRecord | null> {
-        const row = await prisma.cargo.findFirst({
-            where: { cargo_number: cargoNumber, deleted_at: null }
+        // Fast O(1) Unique Index Lookup
+        const row = await prisma.cargo.findUnique({
+            where: { cargo_number: cargoNumber }
         });
-        return row ? normalize(row) : null;
+        if (!row || row.deleted_at !== null) return null;
+        return normalize(row);
+    }
+
+    async createMany(items: CreateCargoDTO[]): Promise<{ count: number }> {
+        // High-throughput batch multi-row insertion
+        return await prisma.cargo.createMany({
+            data: items.map(data => ({
+                cargo_number: data.cargo_number,
+                size_type: data.size_type || '20ft',
+                weight_tons: data.weight_tons ?? 0,
+                cargo_type: data.cargo_type || 'General',
+                current_location: data.current_location || 'Yard',
+                ship_name: data.ship_name || '',
+                created_by: data.created_by,
+            })),
+            skipDuplicates: true
+        });
     }
 
     async create(data: CreateCargoDTO): Promise<CargoRecord> {

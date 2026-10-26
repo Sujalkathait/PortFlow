@@ -12,26 +12,46 @@ function normalize(row: any): EquipmentRecord {
 }
 
 export class EquipmentRepository implements IEquipmentRepository {
-    async findActive(): Promise<EquipmentRecord[]> {
+    async findActive(limit = 500, offset = 0): Promise<EquipmentRecord[]> {
         const rows = await prisma.equipment.findMany({
             where: { deleted_at: null },
-            orderBy: { created_at: 'desc' }
+            orderBy: { created_at: 'desc' },
+            take: limit,
+            skip: offset
         });
         return rows.map(normalize);
     }
 
     async findById(id: number): Promise<EquipmentRecord | null> {
-        const row = await prisma.equipment.findFirst({
-            where: { id, deleted_at: null }
+        // Fast O(1) Primary Key Index Lookup
+        const row = await prisma.equipment.findUnique({
+            where: { id }
         });
-        return row ? normalize(row) : null;
+        if (!row || row.deleted_at !== null) return null;
+        return normalize(row);
     }
 
     async findByEquipmentId(equipmentId: string): Promise<EquipmentRecord | null> {
-        const row = await prisma.equipment.findFirst({
-            where: { equipment_id: equipmentId, deleted_at: null }
+        // Fast O(1) Unique Index Lookup
+        const row = await prisma.equipment.findUnique({
+            where: { equipment_id: equipmentId }
         });
-        return row ? normalize(row) : null;
+        if (!row || row.deleted_at !== null) return null;
+        return normalize(row);
+    }
+
+    async createMany(items: CreateEquipmentDTO[]): Promise<{ count: number }> {
+        // High-throughput batch multi-row insertion
+        return await prisma.equipment.createMany({
+            data: items.map(data => ({
+                equipment_id: data.equipment_id || `EQ-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                name: data.name,
+                type: data.type || 'Berth',
+                status: data.status || 'Available',
+                created_by: data.created_by,
+            })),
+            skipDuplicates: true
+        });
     }
 
     async create(data: CreateEquipmentDTO): Promise<EquipmentRecord> {

@@ -70,8 +70,18 @@ export const getAuditLogs = async (_req: Request, res: Response): Promise<void> 
     }
 };
 
+// In-memory query cache (5-second TTL) to protect DB against heavy polling & traffic spikes
+let cachedAnalytics: any = null;
+let lastAnalyticsFetchTime = 0;
+const ANALYTICS_CACHE_TTL_MS = 5000;
+
 export const getDatabaseAnalytics = async (_req: Request, res: Response): Promise<void> => {
     try {
+        const now = Date.now();
+        if (cachedAnalytics && (now - lastAnalyticsFetchTime < ANALYTICS_CACHE_TTL_MS)) {
+            res.status(200).json(cachedAnalytics);
+            return;
+        }
         const [
             userCount,
             opCount,
@@ -156,6 +166,8 @@ export const getDatabaseAnalytics = async (_req: Request, res: Response): Promis
             dbStatus: 'Healthy',
             version: 'PostgreSQL 15 (3NF Normalized, 12 Relational Tables)'
         };
+        cachedAnalytics = stats;
+        lastAnalyticsFetchTime = Date.now();
         res.status(200).json(stats);
     } catch (error: any) {
         res.status(500).json({ success: false, message: 'Failed to retrieve database analytics.' });

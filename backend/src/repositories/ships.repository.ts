@@ -14,26 +14,48 @@ function normalize(row: any): ShipRecord {
 }
 
 export class ShipsRepository implements IShipsRepository {
-    async findActive(): Promise<ShipRecord[]> {
+    async findActive(limit = 500, offset = 0): Promise<ShipRecord[]> {
         const res = await prisma.ship.findMany({
             where: { deleted_at: null },
-            orderBy: { created_at: 'desc' }
+            orderBy: { created_at: 'desc' },
+            take: limit,
+            skip: offset
         });
         return res.map(normalize);
     }
 
     async findById(id: number): Promise<ShipRecord | null> {
-        const res = await prisma.ship.findFirst({
-            where: { id, deleted_at: null }
+        // Fast O(1) Primary Key Index Lookup
+        const res = await prisma.ship.findUnique({
+            where: { id }
         });
-        return res ? normalize(res) : null;
+        if (!res || res.deleted_at !== null) return null;
+        return normalize(res);
     }
 
     async findByImo(imo: string): Promise<ShipRecord | null> {
-        const res = await prisma.ship.findFirst({
-            where: { imo_number: imo, deleted_at: null }
+        // Fast O(1) Unique Index Lookup
+        const res = await prisma.ship.findUnique({
+            where: { imo_number: imo }
         });
-        return res ? normalize(res) : null;
+        if (!res || res.deleted_at !== null) return null;
+        return normalize(res);
+    }
+
+    async createMany(items: CreateShipDTO[]): Promise<{ count: number }> {
+        // High-throughput batch multi-row insertion
+        return await prisma.ship.createMany({
+            data: items.map(data => ({
+                imo_number: data.imo_number || `IMO-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                name: data.name,
+                vessel_type: data.vessel_type || 'General Cargo',
+                capacity_teu: Number(data.capacity_teu) || 0,
+                status: 'Arriving',
+                berth_id: data.berth_id || null,
+                created_by: data.created_by
+            })),
+            skipDuplicates: true
+        });
     }
 
     async create(data: CreateShipDTO): Promise<ShipRecord> {

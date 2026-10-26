@@ -11,11 +11,32 @@ export { TrashedRecord };
 export class TrashRepository implements ITrashRepository {
     async getTrash(): Promise<TrashedRecord[]> {
         try {
+            // Optimized: Selective field projection + B-Tree index scan + take limit
             const [ops, ships, Cargos, Equipments] = await Promise.all([
-                prisma.operation.findMany({ where: { deleted_at: { not: null } } }),
-                prisma.ship.findMany({ where: { deleted_at: { not: null } } }),
-                prisma.cargo.findMany({ where: { deleted_at: { not: null } } }),
-                prisma.equipment.findMany({ where: { deleted_at: { not: null } } }),
+                prisma.operation.findMany({
+                    where: { deleted_at: { not: null } },
+                    select: { id: true, operation_type: true, ship_name: true, status: true, created_by: true, created_at: true, deleted_at: true, deleted_by: true },
+                    orderBy: { deleted_at: 'desc' },
+                    take: 100
+                }),
+                prisma.ship.findMany({
+                    where: { deleted_at: { not: null } },
+                    select: { id: true, name: true, imo_number: true, status: true, created_by: true, created_at: true, deleted_at: true, deleted_by: true },
+                    orderBy: { deleted_at: 'desc' },
+                    take: 100
+                }),
+                prisma.cargo.findMany({
+                    where: { deleted_at: { not: null } },
+                    select: { id: true, cargo_number: true, ship_name: true, status: true, created_by: true, created_at: true, deleted_at: true, deleted_by: true },
+                    orderBy: { deleted_at: 'desc' },
+                    take: 100
+                }),
+                prisma.equipment.findMany({
+                    where: { deleted_at: { not: null } },
+                    select: { id: true, name: true, type: true, status: true, created_by: true, created_at: true, deleted_at: true, deleted_by: true },
+                    orderBy: { deleted_at: 'desc' },
+                    take: 100
+                }),
             ]);
 
             const all: TrashedRecord[] = [

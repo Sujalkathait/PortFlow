@@ -22,49 +22,51 @@ function normalize(row: any): OperationRecord {
 }
 
 export class OperationsRepository implements IOperationsRepository {
-    async findActive(): Promise<OperationRecord[]> {
+    async findActive(limit = 500, offset = 0): Promise<OperationRecord[]> {
         const res = await prisma.operation.findMany({
             where: { deleted_at: null },
-            orderBy: { created_at: 'desc' }
+            orderBy: { created_at: 'desc' },
+            take: limit,
+            skip: offset
         });
         return res.map(normalize);
     }
 
     async findById(id: number): Promise<OperationRecord | null> {
-        const res = await prisma.operation.findFirst({
-            where: { id, deleted_at: null }
+        // Fast O(1) Primary Key Index Lookup
+        const res = await prisma.operation.findUnique({
+            where: { id }
         });
-        return res ? normalize(res) : null;
+        if (!res || res.deleted_at !== null) return null;
+        return normalize(res);
     }
 
     async findByProcessId(processId: string): Promise<OperationRecord | null> {
-        const res = await prisma.operation.findFirst({
-            where: { process_id: processId, deleted_at: null }
+        // Fast O(1) Unique Index Lookup
+        const res = await prisma.operation.findUnique({
+            where: { process_id: processId }
         });
-        return res ? normalize(res) : null;
+        if (!res || res.deleted_at !== null) return null;
+        return normalize(res);
     }
 
     async create(data: CreateOperationDTO): Promise<OperationRecord> {
         try {
-            const updated = await prisma.$transaction(async (tx) => {
-                const res = await tx.operation.create({
-                    data: {
-                        operation_type: data.operationType,
-                        ship_name: data.shipName,
-                        crane_id: data.craneId || 'None',
-                        berth_id: data.berthId || 'Berth 1',
-                        priority: data.priority || 1,
-                        status: 'Queued',
-                        created_by: data.created_by
-                    }
-                });
-                const processId = `op-${res.id}`;
-                return await tx.operation.update({
-                    where: { id: res.id },
-                    data: { process_id: processId }
-                });
+            // Optimized single-shot insert (eliminates transaction lock & 2-step write overhead)
+            const generatedProcessId = `op-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
+            const res = await prisma.operation.create({
+                data: {
+                    process_id: generatedProcessId,
+                    operation_type: data.operationType,
+                    ship_name: data.shipName,
+                    crane_id: data.craneId || 'None',
+                    berth_id: data.berthId || 'Berth 1',
+                    priority: data.priority || 1,
+                    status: 'Queued',
+                    created_by: data.created_by
+                }
             });
-            return normalize(updated);
+            return normalize(res);
         } catch (err: any) {
             console.error('[OperationsRepository] DB create error:', err.message);
             throw err;
