@@ -1,0 +1,607 @@
+<mxfile host="app.diagrams.net" modified="2026-10-24T15:00:00.000Z" agent="PortFlow" version="24.0.0" type="device">
+  <!-- ===================================================================== -->
+  <!-- DIAGRAM 1: ARCHITECTURE DIAGRAM                                       -->
+  <!-- ===================================================================== -->
+  <diagram id="arch-diag" name="1. Architecture Diagram">
+    <mxGraphModel dx="1422" dy="850" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" background="#f8fafc" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="PortFlow Enterprise Dual REST &amp; GraphQL System Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Tier 1: Client Layer -->
+        <mxCell id="client-box" value="Client Tier: React 19 Single Page Application (SPA)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#3b82f6;fontStyle=1;fontSize=14;fontColor=#1e3a8a;rounded=1;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="1240" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" value="Terminal Operator &amp; Admin UI&#xa;(Vite + React 19 + Tailwind CSS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#60a5fa;fontSize=12;fontColor=#1e293b;shadow=1;" vertex="1" parent="client-box">
+          <mxGeometry x="30" y="45" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" value="Operations &amp; Vessel Hub&#xa;(Real-time PCB State Monitor)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#60a5fa;fontSize=12;fontColor=#1e293b;shadow=1;" vertex="1" parent="client-box">
+          <mxGeometry x="280" y="45" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" value="OS Simulator Visualizer&#xa;(Gantt Chart, WFG Deadlock Graph)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#60a5fa;fontSize=12;fontColor=#1e293b;shadow=1;" vertex="1" parent="client-box">
+          <mxGeometry x="530" y="45" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="Analytics &amp; Reports UI&#xa;(Relational Telemetry &amp; Logs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#60a5fa;fontSize=12;fontColor=#1e293b;shadow=1;" vertex="1" parent="client-box">
+          <mxGeometry x="790" y="45" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" value="Dual API Client&#xa;(REST Client + Apollo GraphQL Client)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#2563eb;fontSize=12;fontStyle=1;fontColor=#1e3a8a;shadow=1;" vertex="1" parent="client-box">
+          <mxGeometry x="1020" y="45" width="190" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Tier 2: API Gateway Layer -->
+        <mxCell id="api-box" value="API Gateway Tier: Express 5 Dual-Protocol Engine" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f3ff;strokeColor=#8b5cf6;fontStyle=1;fontSize=14;fontColor=#4c1d95;rounded=1;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="280" width="1240" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="sec1" value="Security Middleware&#xa;Helmet, CORS, Rate Limiters,&#xa;JWT Bearer Authentication" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#a78bfa;fontSize=12;fontColor=#2e1065;" vertex="1" parent="api-box">
+          <mxGeometry x="30" y="50" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="rest-route" value="REST API Router (/api/*)&#xa;• /auth (Login, Register, 30s OTP)&#xa;• /operations (CRUD &amp; Dispatch)&#xa;• /ships, /cargos, /equipments&#xa;• /system (Logs, Reports, Issues)&#xa;• /trash (Soft-Delete Reclaim)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#8b5cf6;fontSize=11;fontColor=#1e293b;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="api-box">
+          <mxGeometry x="270" y="40" width="450" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="gql-route" value="GraphQL Apollo Server (/graphql)&#xa;• Schema SDL &amp; Resolvers&#xa;• Query: portDashboardOverview, ships, cargo&#xa;• Nested Graph Traversals (Zero N+1)&#xa;• Mutation: createOperation, reportIssue&#xa;• JWT Auth Context Injection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#8b5cf6;fontSize=11;fontColor=#1e293b;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="api-box">
+          <mxGeometry x="760" y="40" width="450" height="105" as="geometry" />
+        </mxCell>
+
+        <!-- Tier 3: Core Domain & OS Simulator Kernel -->
+        <mxCell id="core-box" value="Core Processing Tier: OS Simulator Kernel &amp; Service Layer" style="swimlane;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#10b981;fontStyle=1;fontSize=14;fontColor=#064e3b;rounded=1;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="500" width="1240" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="os-sub" value="Operating System Kernel (In-Memory Simulation)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#d1fae5;strokeColor=#059669;fontStyle=1;fontSize=12;fontColor=#064e3b;rounded=1;" vertex="1" parent="core-box">
+          <mxGeometry x="30" y="40" width="700" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="os1" value="CPU Scheduler&#xa;• FCFS Algorithm&#xa;• SJF (Shortest Job First)&#xa;• Priority Scheduling&#xa;• Ready Queue Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#10b981;fontSize=11;fontColor=#064e3b;align=left;spacingLeft=8;" vertex="1" parent="os-sub">
+          <mxGeometry x="15" y="35" width="210" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="os2" value="Resource Allocators&#xa;• Mutex Locks (Quay Cranes)&#xa;• Counting Semaphores (Berths)&#xa;• Promise-based Wait Queues" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#10b981;fontSize=11;fontColor=#064e3b;align=left;spacingLeft=8;" vertex="1" parent="os-sub">
+          <mxGeometry x="240" y="35" width="215" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="os3" value="Deadlock Detector&#xa;• Wait-For Graph (WFG)&#xa;• Cycle Detection via DFS&#xa;• Resource Allocation Matrix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#10b981;fontSize=11;fontColor=#064e3b;align=left;spacingLeft=8;" vertex="1" parent="os-sub">
+          <mxGeometry x="470" y="35" width="215" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="srv-sub" value="Business Services &amp; Repositories" style="swimlane;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#10b981;fontStyle=1;fontSize=12;fontColor=#064e3b;rounded=1;" vertex="1" parent="core-box">
+          <mxGeometry x="760" y="40" width="450" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="srv1" value="OperationsService&#xa;ShipsService&#xa;CargoService&#xa;EquipmentService&#xa;AuthService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#34d399;fontSize=11;fontColor=#064e3b;align=center;" vertex="1" parent="srv-sub">
+          <mxGeometry x="20" y="40" width="190" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="srv2" value="Prisma ORM Client Layer&#xa;• Type-safe Queries&#xa;• 2-Phase Soft-Delete Logic&#xa;• Connection Pooling&#xa;• Transaction Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#34d399;fontSize=11;fontColor=#064e3b;align=left;spacingLeft=8;" vertex="1" parent="srv-sub">
+          <mxGeometry x="230" y="40" width="200" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Tier 4: Database Layer -->
+        <mxCell id="db-box" value="Database Tier: PostgreSQL 15 Relational Database (3NF Supabase Engine)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#f59e0b;fontStyle=1;fontSize=14;fontColor=#78350f;rounded=1;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="760" width="1240" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="t1" value="Core Fleet &amp; Operations&#xa;• users (Auth &amp; RBAC)&#xa;• ships (IMO &amp; TEU)&#xa;• equipment (Berths/Cranes)&#xa;• operations (PCB Logs)&#xa;• cargo (Containers)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#f59e0b;fontSize=11;fontColor=#1e293b;align=left;spacingLeft=8;" vertex="1" parent="db-box">
+          <mxGeometry x="40" y="40" width="250" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="t2" value="Land Logistics &amp; Yard&#xa;• warehouses (CFS &amp; Reefer)&#xa;• trucks (Drayage Fleet)&#xa;• gate_passes (Perimeter Gate)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#f59e0b;fontSize=11;fontColor=#1e293b;align=left;spacingLeft=8;" vertex="1" parent="db-box">
+          <mxGeometry x="340" y="40" width="250" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="t3" value="Customs, Tariff &amp; Support&#xa;• customs_inspections (Holds)&#xa;• bills (Tariff Invoicing)&#xa;• issues (Hardware Incident Tickets)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#f59e0b;fontSize=11;fontColor=#1e293b;align=left;spacingLeft=8;" vertex="1" parent="db-box">
+          <mxGeometry x="640" y="40" width="260" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="t4" value="Audit &amp; Observability&#xa;• system_logs (Runtime Trail)&#xa;• PL/pgSQL Triggers (updated_at)&#xa;• Performance B-Tree Indexes&#xa;• Row Level Security (RLS)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#ffffff;strokeColor=#f59e0b;fontSize=11;fontColor=#1e293b;align=left;spacingLeft=8;" vertex="1" parent="db-box">
+          <mxGeometry x="940" y="40" width="260" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- Connectors -->
+        <mxCell id="flow1" value="HTTP REST / JSON (JWT)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2563eb;strokeWidth=2;fontSize=11;fontColor=#1e3a8a;" edge="1" parent="1" source="c5" target="rest-route">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1150" y="250" />
+              <mxPoint x="500" y="250" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow2" value="GraphQL Query / Mutation" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#8b5cf6;strokeWidth=2;fontSize=11;fontColor=#4c1d95;" edge="1" parent="1" source="c5" target="gql-route">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1180" y="260" />
+              <mxPoint x="980" y="260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow3" value="Dispatch &amp; Algorithm Control" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#059669;strokeWidth=2;fontSize=11;fontColor=#064e3b;" edge="1" parent="1" source="rest-route" target="os-sub">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow4" value="CRUD &amp; Graph Resolution" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#059669;strokeWidth=2;fontSize=11;fontColor=#064e3b;" edge="1" parent="1" source="gql-route" target="srv-sub">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow5" value="SQL Transactions &amp; Telemetry" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d97706;strokeWidth=2;fontSize=11;fontColor=#78350f;" edge="1" parent="1" source="srv-sub" target="db-box">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ===================================================================== -->
+  <!-- DIAGRAM 2: CLASS DIAGRAM                                              -->
+  <!-- ===================================================================== -->
+  <diagram id="class-diag" name="2. Class Diagram">
+    <mxGraphModel dx="1422" dy="850" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" background="#f8fafc" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="c-title" value="PortFlow OS Kernel &amp; Service Layer - Object-Oriented Class Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="750" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Process Class -->
+        <mxCell id="cls-process" value="Process (PCB)&#xa;---------------------------------------&#xa;+ id: string&#xa;+ burstTime: number&#xa;+ remainingTime: number&#xa;+ priority: number&#xa;+ status: ProcessStatus&#xa;+ requiredResources: string[]&#xa;+ startTime: number | null&#xa;+ completionTime: number | null&#xa;+ waitingTime: number&#xa;+ turnaroundTime: number&#xa;---------------------------------------&#xa;+ updateStatus(newStatus: ProcessStatus): void&#xa;+ executeSlice(time: number): boolean&#xa;+ calculateTelemetry(currentTime: number): void" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#eff6ff;strokeColor=#3b82f6;fontColor=#1e3a8a;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="100" width="260" height="230" as="geometry" />
+        </mxCell>
+
+        <!-- Scheduler Class -->
+        <mxCell id="cls-scheduler" value="Scheduler&#xa;---------------------------------------&#xa;- algorithm: 'FCFS' | 'SJF' | 'Priority'&#xa;- readyQueue: Process[]&#xa;- executedProcesses: Process[]&#xa;---------------------------------------&#xa;+ setAlgorithm(algo: string): void&#xa;+ addProcess(proc: Process): void&#xa;+ removeProcess(id: string): boolean&#xa;+ getNextProcess(): Process | null&#xa;+ getQueue(): Process[]&#xa;+ calculateAverages(): MetricsDTO" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#eff6ff;strokeColor=#3b82f6;fontColor=#1e3a8a;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="370" y="100" width="250" height="230" as="geometry" />
+        </mxCell>
+
+        <!-- Mutex Class -->
+        <mxCell id="cls-mutex" value="Mutex (Quay Crane Lock)&#xa;---------------------------------------&#xa;- name: string&#xa;- locked: boolean&#xa;- ownerProcessId: string | null&#xa;- waitQueue: string[]&#xa;---------------------------------------&#xa;+ acquire(processId: string): Promise&lt;boolean&gt;&#xa;+ release(processId: string): boolean&#xa;+ isLocked(): boolean&#xa;+ getOwner(): string | null&#xa;+ getWaiting(): string[]" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#ecfdf5;strokeColor=#10b981;fontColor=#064e3b;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="670" y="100" width="250" height="230" as="geometry" />
+        </mxCell>
+
+        <!-- Semaphore Class -->
+        <mxCell id="cls-semaphore" value="Semaphore (Berth Pool)&#xa;---------------------------------------&#xa;- name: string&#xa;- capacity: number&#xa;- availablePermits: number&#xa;- waitQueue: string[]&#xa;---------------------------------------&#xa;+ acquire(processId: string): Promise&lt;boolean&gt;&#xa;+ release(processId: string): boolean&#xa;+ getAvailable(): number&#xa;+ getCapacity(): number&#xa;+ getWaiting(): string[]" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#ecfdf5;strokeColor=#10b981;fontColor=#064e3b;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="970" y="100" width="250" height="230" as="geometry" />
+        </mxCell>
+
+        <!-- DeadlockDetector Class -->
+        <mxCell id="cls-wfg" value="DeadlockDetector (WFG)&#xa;---------------------------------------&#xa;- adjacencyList: Map&lt;string, string[]&gt;&#xa;- deadlockCycles: string[][]&#xa;---------------------------------------&#xa;+ buildGraph(allocations, requests): void&#xa;+ detectCycleDFS(): boolean&#xa;+ getDeadlockedProcesses(): string[]&#xa;+ resetGraph(): void" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#fef2f2;strokeColor=#ef4444;fontColor=#7f1d1d;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="100" width="260" height="230" as="geometry" />
+        </mxCell>
+
+        <!-- PortSystem (Singleton Kernel) -->
+        <mxCell id="cls-portsystem" value="&lt;&lt;Singleton&gt;&gt;&#xa;PortSystem&#xa;----------------------------------------------------------------------------------------------------------------&#xa;- static instance: PortSystem&#xa;- scheduler: Scheduler&#xa;- cranes: Map&lt;string, Mutex&gt;&#xa;- berths: Map&lt;string, Semaphore&gt;&#xa;- deadlockDetector: DeadlockDetector&#xa;----------------------------------------------------------------------------------------------------------------&#xa;+ static getInstance(): PortSystem&#xa;+ registerCrane(name: string): void&#xa;+ registerBerths(name: string, capacity: number): void&#xa;+ addProcess(proc: Process): void&#xa;+ executeNextProcess(): Promise&lt;Process | null&gt;&#xa;+ getSystemState(): OSStateDTO" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#f8fafc;strokeColor=#475569;fontColor=#0f172a;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="370" y="400" width="550" height="220" as="geometry" />
+        </mxCell>
+
+        <!-- OperationsService -->
+        <mxCell id="cls-service" value="OperationsService&#xa;---------------------------------------&#xa;- repo: IOperationsRepository&#xa;- portSystem: PortSystem&#xa;---------------------------------------&#xa;+ getOperations(filter): Promise&lt;OperationRecord[]&gt;&#xa;+ getOperationById(id): Promise&lt;OperationRecord&gt;&#xa;+ submitOperation(dto): Promise&lt;OperationRecord&gt;&#xa;+ updateOperation(id, dto): Promise&lt;OperationRecord&gt;&#xa;+ deleteOperation(id, by): Promise&lt;OperationRecord&gt;&#xa;+ dispatchNext(): Promise&lt;DispatchResult&gt;&#xa;+ getMetrics(): Promise&lt;OperationMetricsDTO&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#f5f3ff;strokeColor=#8b5cf6;fontColor=#4c1d95;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="680" width="310" height="240" as="geometry" />
+        </mxCell>
+
+        <!-- OperationsRepository -->
+        <mxCell id="cls-repo" value="OperationsRepository&#xa;---------------------------------------&#xa;- prisma: PrismaClient&#xa;---------------------------------------&#xa;+ findActive(): Promise&lt;OperationRecord[]&gt;&#xa;+ findById(id): Promise&lt;OperationRecord | null&gt;&#xa;+ findByProcessId(pid): Promise&lt;OperationRecord&gt;&#xa;+ create(data): Promise&lt;OperationRecord&gt;&#xa;+ update(id, data): Promise&lt;OperationRecord&gt;&#xa;+ softDelete(id, by): Promise&lt;OperationRecord&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#fffbeb;strokeColor=#f59e0b;fontColor=#78350f;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="470" y="680" width="290" height="240" as="geometry" />
+        </mxCell>
+
+        <!-- GraphQL Resolvers -->
+        <mxCell id="cls-gql" value="GraphQL Resolvers Module&#xa;---------------------------------------&#xa;+ Query.portDashboardOverview()&#xa;+ Query.ships(status)&#xa;+ Query.cargo(status, shipId)&#xa;+ Query.operations(status, priority)&#xa;+ Mutation.createOperation(args)&#xa;+ Mutation.reportIssue(args)&#xa;+ Mutation.dispatchOperation()&#xa;+ Ship.assignedBerth() / cargoManifests()&#xa;+ Operation.vessel() / container() / assignedCrane()" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#fdf2f8;strokeColor=#ec4899;fontColor=#831843;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="840" y="680" width="330" height="240" as="geometry" />
+        </mxCell>
+
+        <!-- Relationships -->
+        <mxCell id="rel1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;strokeColor=#3b82f6;strokeWidth=2;" edge="1" parent="1" source="cls-scheduler" target="cls-process">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeColor=#475569;strokeWidth=2;" edge="1" parent="1" source="cls-portsystem" target="cls-scheduler">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.75;exitY=0;entryX=0.5;entryY=1;strokeColor=#10b981;strokeWidth=2;" edge="1" parent="1" source="cls-portsystem" target="cls-mutex">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;strokeColor=#10b981;strokeWidth=2;" edge="1" parent="1" source="cls-portsystem" target="cls-semaphore">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.25;entryX=0.5;entryY=1;strokeColor=#ef4444;strokeWidth=2;" edge="1" parent="1" source="cls-portsystem" target="cls-wfg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.2;entryY=1;strokeColor=#8b5cf6;strokeWidth=2;" edge="1" parent="1" source="cls-service" target="cls-portsystem">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#8b5cf6;strokeWidth=2;" edge="1" parent="1" source="cls-service" target="cls-repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;strokeColor=#ec4899;strokeWidth=2;" edge="1" parent="1" source="cls-gql" target="cls-repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ===================================================================== -->
+  <!-- DIAGRAM 3: ENTITY-RELATIONSHIP (ER) DIAGRAM                           -->
+  <!-- ===================================================================== -->
+  <diagram id="er-diag" name="3. Entity-Relationship (ER) Diagram">
+    <mxGraphModel dx="1422" dy="850" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" background="#f8fafc" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="er-title" value="PortFlow Enterprise Phase 3 Relational Database Schema (3NF)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="750" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: users -->
+        <mxCell id="e-users" value="users&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;* email: VARCHAR(255) [UK]&#xa;* password_hash: VARCHAR(255)&#xa;* full_name: VARCHAR(120)&#xa;* role: VARCHAR(50)&#xa;* created_at: TIMESTAMPTZ&#xa;  deleted_at: TIMESTAMPTZ&#xa;  deleted_by: VARCHAR(255)" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#eff6ff;strokeColor=#3b82f6;fontColor=#1e3a8a;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="50" y="90" width="220" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: equipment -->
+        <mxCell id="e-equipment" value="equipment&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;* equipment_id: VARCHAR(50) [UK]&#xa;* name: VARCHAR(120)&#xa;* type: VARCHAR(50)&#xa;* status: VARCHAR(50)&#xa;  capacity_metric: FLOAT&#xa;  assigned_to: VARCHAR(100)&#xa;  deleted_at: TIMESTAMPTZ" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#ecfdf5;strokeColor=#10b981;fontColor=#064e3b;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="350" y="90" width="230" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: ships -->
+        <mxCell id="e-ships" value="ships&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;* imo_number: VARCHAR(100) [UK]&#xa;* name: VARCHAR(120)&#xa;* vessel_type: VARCHAR(100)&#xa;* capacity_teu: INT&#xa;* status: VARCHAR(50)&#xa;&lt;i&gt;# berth_equipment_id: INT [FK]&lt;/i&gt;&#xa;  deleted_at: TIMESTAMPTZ" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#ecfdf5;strokeColor=#10b981;fontColor=#064e3b;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="90" width="230" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: warehouses -->
+        <mxCell id="e-warehouses" value="warehouses&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;* code: VARCHAR(50) [UK]&#xa;* name: VARCHAR(120)&#xa;* zone_type: VARCHAR(50)&#xa;* capacity_teu: INT&#xa;* current_occupancy_teu: INT&#xa;  temperature_celsius: FLOAT&#xa;  status: VARCHAR(50)" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#fffbeb;strokeColor=#f59e0b;fontColor=#78350f;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="960" y="90" width="230" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: cargo -->
+        <mxCell id="e-cargo" value="cargo&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;* cargo_number: VARCHAR(100) [UK]&#xa;* size_type: VARCHAR(50)&#xa;* weight_tons: FLOAT&#xa;* cargo_type: VARCHAR(100)&#xa;* status: VARCHAR(50)&#xa;&lt;i&gt;# ship_id: INT [FK]&lt;/i&gt;&#xa;&lt;i&gt;# warehouse_id: INT [FK]&lt;/i&gt;&#xa;  deleted_at: TIMESTAMPTZ" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#ecfdf5;strokeColor=#10b981;fontColor=#064e3b;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="370" width="230" height="190" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: operations -->
+        <mxCell id="e-operations" value="operations (OS Processes)&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;* process_id: VARCHAR(50) [UK]&#xa;* operation_type: VARCHAR(100)&#xa;* priority: INT&#xa;* status: VARCHAR(50)&#xa;&lt;i&gt;# ship_id: INT [FK]&lt;/i&gt;&#xa;&lt;i&gt;# cargo_id: INT [FK]&lt;/i&gt;&#xa;&lt;i&gt;# crane_equipment_id: INT [FK]&lt;/i&gt;&#xa;&lt;i&gt;# berth_equipment_id: INT [FK]&lt;/i&gt;&#xa;&lt;i&gt;# created_by_user_id: INT [FK]&lt;/i&gt;&#xa;  waiting_time_ms: INT&#xa;  turnaround_time_ms: INT" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#f5f3ff;strokeColor=#8b5cf6;fontColor=#4c1d95;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="350" y="370" width="240" height="230" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: trucks -->
+        <mxCell id="e-trucks" value="trucks&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;* license_plate: VARCHAR(50) [UK]&#xa;* driver_name: VARCHAR(120)&#xa;* driver_phone: VARCHAR(50)&#xa;* transport_company: VARCHAR(150)&#xa;* status: VARCHAR(50)&#xa;&lt;i&gt;# assigned_cargo_id: INT [FK]&lt;/i&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#fffbeb;strokeColor=#f59e0b;fontColor=#78350f;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="960" y="370" width="230" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: gate_passes -->
+        <mxCell id="e-gate" value="gate_passes&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;* pass_number: VARCHAR(100) [UK]&#xa;&lt;i&gt;# truck_id: INT [FK - Cascade]&lt;/i&gt;&#xa;&lt;i&gt;# cargo_id: INT [FK]&lt;/i&gt;&#xa;&lt;i&gt;# issued_by_id: INT [FK]&lt;/i&gt;&#xa;* gate_lane: VARCHAR(50)&#xa;* status: VARCHAR(50)&#xa;  check_in_time: TIMESTAMPTZ" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#fffbeb;strokeColor=#f59e0b;fontColor=#78350f;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="370" width="230" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: customs_inspections -->
+        <mxCell id="e-customs" value="customs_inspections&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;* inspection_number: VARCHAR(100) [UK]&#xa;&lt;i&gt;# cargo_id: INT [FK - Cascade]&lt;/i&gt;&#xa;&lt;i&gt;# inspector_id: INT [FK]&lt;/i&gt;&#xa;* declaration_number: VARCHAR(100)&#xa;* status: VARCHAR(50)&#xa;* duty_amount_cents: BIGINT&#xa;  findings: TEXT" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#fdf2f8;strokeColor=#ec4899;fontColor=#831843;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="650" width="230" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: bills -->
+        <mxCell id="e-bills" value="bills (Tariff Invoices)&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;* invoice_number: VARCHAR(100) [UK]&#xa;&lt;i&gt;# ship_id: INT [FK]&lt;/i&gt;&#xa;&lt;i&gt;# cargo_id: INT [FK]&lt;/i&gt;&#xa;&lt;i&gt;# operation_id: INT [FK]&lt;/i&gt;&#xa;* customer_name: VARCHAR(150)&#xa;* total_amount: DOUBLE&#xa;* payment_status: VARCHAR(50)" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#f0fdf4;strokeColor=#22c55e;fontColor=#14532d;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="350" y="650" width="240" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: issues -->
+        <mxCell id="e-issues" value="issues (Incident Reports)&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;* ticket_number: VARCHAR(50) [UK]&#xa;&lt;i&gt;# reported_by_id: INT [FK]&lt;/i&gt;&#xa;&lt;i&gt;# equipment_id: INT [FK]&lt;/i&gt;&#xa;* title: VARCHAR(200)&#xa;* severity: VARCHAR(50)&#xa;* status: VARCHAR(50)&#xa;  resolved_at: TIMESTAMPTZ" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#fef2f2;strokeColor=#ef4444;fontColor=#7f1d1d;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="50" y="370" width="220" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- Entity: system_logs -->
+        <mxCell id="e-logs" value="system_logs&#xa;---------------------------------&#xa;&lt;b&gt;+ id: SERIAL [PK]&lt;/b&gt;&#xa;&lt;i&gt;# user_id: INT [FK]&lt;/i&gt;&#xa;* timestamp: TIMESTAMPTZ&#xa;* level: VARCHAR(20)&#xa;* source: VARCHAR(100)&#xa;* message: TEXT&#xa;  action: VARCHAR(100)" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#f8fafc;strokeColor=#64748b;fontColor=#0f172a;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="50" y="650" width="220" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- FK Connections -->
+        <mxCell id="fk1" value="allocates berth (1:N)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#10b981;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-equipment" target="e-ships">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fk2" value="carries (1:N)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#10b981;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-ships" target="e-cargo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fk3" value="stores in (1:N)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=1;entryY=0.25;strokeColor=#f59e0b;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-warehouses" target="e-cargo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fk4" value="operates on (1:N)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;strokeColor=#8b5cf6;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-cargo" target="e-operations">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fk5" value="locks crane/berth" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeColor=#8b5cf6;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-operations" target="e-equipment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fk6" value="invoices (1:N)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#22c55e;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-operations" target="e-bills">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fk7" value="inspects (1:1)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#ec4899;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-cargo" target="e-customs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fk8" value="transports (1:1)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#f59e0b;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-cargo" target="e-trucks">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fk9" value="gate access (1:N)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#f59e0b;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-trucks" target="e-gate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fk10" value="reports fault" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.25;entryY=1;strokeColor=#ef4444;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-issues" target="e-equipment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fk11" value="initiates (1:N)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.25;strokeColor=#3b82f6;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-users" target="e-operations">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fk12" value="audits (1:N)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#64748b;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="e-users" target="e-logs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ===================================================================== -->
+  <!-- DIAGRAM 4: FLOWCHART                                                  -->
+  <!-- ===================================================================== -->
+  <diagram id="flow-diag" name="4. Flowchart (Operation &amp; OS Lifecycle)">
+    <mxGraphModel dx="1422" dy="850" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" background="#f8fafc" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="fl-title" value="PortFlow OS Process Dispatch &amp; Concurrency Control Flowchart" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Start -->
+        <mxCell id="f-start" value="Start: Operator Submits Job&#xa;(Discharge / Load Cargo)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#dbeafe;strokeColor=#2563eb;fontStyle=1;fontSize=12;fontColor=#1e3a8a;" vertex="1" parent="1">
+          <mxGeometry x="600" y="80" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Validate -->
+        <mxCell id="f-val" value="Validate Input &amp; JWT&#xa;(Check Ship, Crane &amp; Berth)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="160" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Persist DB -->
+        <mxCell id="f-db1" value="Persist to PostgreSQL&#xa;status = 'Queued', priority = N" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#fffbeb;strokeColor=#f59e0b;fontSize=12;fontColor=#78350f;" vertex="1" parent="1">
+          <mxGeometry x="615" y="240" width="190" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Create PCB -->
+        <mxCell id="f-pcb" value="Initialize Process Control Block (PCB)&#xa;Add to OS Ready Queue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#3b82f6;fontSize=12;fontColor=#1e3a8a;" vertex="1" parent="1">
+          <mxGeometry x="590" y="340" width="240" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Scheduler Algorithm Decision -->
+        <mxCell id="f-sched" value="CPU Scheduler Selects Next&#xa;(Active Policy: FCFS / SJF / Priority)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#8b5cf6;fontStyle=1;fontSize=12;fontColor=#4c1d95;" vertex="1" parent="1">
+          <mxGeometry x="575" y="420" width="270" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Mutex Check -->
+        <mxCell id="f-mutex" value="Is Assigned Crane Mutex&#xa;Available?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#f59e0b;fontStyle=1;fontSize=12;fontColor=#78350f;" vertex="1" parent="1">
+          <mxGeometry x="590" y="550" width="240" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Mutex Blocked -->
+        <mxCell id="f-wait" value="Process enters WAITING State&#xa;Enqueued in Crane Mutex WaitQueue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#ef4444;fontSize=12;fontColor=#7f1d1d;" vertex="1" parent="1">
+          <mxGeometry x="930" y="570" width="230" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- WFG Check -->
+        <mxCell id="f-wfg" value="Deadlock Detector (WFG)&#xa;Run DFS Cycle Detection" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#ef4444;fontStyle=1;fontSize=11;fontColor=#7f1d1d;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="555" width="220" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="f-dead" value="Deadlock Alert: Circular Wait Found!&#xa;Log Warning to System Logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b91c1c;strokeColor=#7f1d1d;fontColor=#ffffff;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="680" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Lock Mutex -->
+        <mxCell id="f-lock" value="Acquire Crane Mutex Lock&#xa;&amp; Acquire Berth Semaphore Permit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d1fae5;strokeColor=#10b981;fontStyle=1;fontSize=12;fontColor=#064e3b;" vertex="1" parent="1">
+          <mxGeometry x="595" y="680" width="230" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Run PCB -->
+        <mxCell id="f-run" value="Process enters RUNNING State&#xa;Update start_time in PostgreSQL&#xa;Simulate Burst Execution (3-5s)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#059669;fontSize=12;fontColor=#064e3b;" vertex="1" parent="1">
+          <mxGeometry x="595" y="760" width="230" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Release Resources -->
+        <mxCell id="f-rel" value="Execution Complete!&#xa;Release Crane Mutex &amp; Berth Semaphore&#xa;Notify Next Process in WaitQueue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#3b82f6;fontSize=12;fontColor=#1e3a8a;" vertex="1" parent="1">
+          <mxGeometry x="585" y="850" width="250" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Commit Telemetry & Bill -->
+        <mxCell id="f-db2" value="Calculate Wt and Tt Telemetry&#xa;Update status = 'Completed'&#xa;Auto-Generate Tariff Billing Record" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#fffbeb;strokeColor=#f59e0b;fontSize=12;fontColor=#78350f;" vertex="1" parent="1">
+          <mxGeometry x="600" y="940" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- End -->
+        <mxCell id="f-end" value="End: Real-time UI Updated&#xa;(Live WebSockets / Query Refresh)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#dbeafe;strokeColor=#2563eb;fontStyle=1;fontSize=12;fontColor=#1e3a8a;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1040" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Flow Edges -->
+        <mxCell id="fe1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=2;" edge="1" parent="1" source="f-start" target="f-val" />
+        <mxCell id="fe2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=2;" edge="1" parent="1" source="f-val" target="f-db1" />
+        <mxCell id="fe3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=2;" edge="1" parent="1" source="f-db1" target="f-pcb" />
+        <mxCell id="fe4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=2;" edge="1" parent="1" source="f-pcb" target="f-sched" />
+        <mxCell id="fe5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=2;" edge="1" parent="1" source="f-sched" target="f-mutex" />
+        <mxCell id="fe6" value="No (Locked)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#ef4444;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="f-mutex" target="f-wait" />
+        <mxCell id="fe7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#ef4444;strokeWidth=2;" edge="1" parent="1" source="f-wait" target="f-wfg" />
+        <mxCell id="fe8" value="Cycle Detected" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#b91c1c;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="f-wfg" target="f-dead" />
+        <mxCell id="fe9" value="Yes (Free)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#10b981;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="f-mutex" target="f-lock" />
+        <mxCell id="fe10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=2;" edge="1" parent="1" source="f-lock" target="f-run" />
+        <mxCell id="fe11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=2;" edge="1" parent="1" source="f-run" target="f-rel" />
+        <mxCell id="fe12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=2;" edge="1" parent="1" source="f-rel" target="f-db2" />
+        <mxCell id="fe13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeWidth=2;" edge="1" parent="1" source="f-db2" target="f-end" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ===================================================================== -->
+  <!-- DIAGRAM 5: SEQUENCE DIAGRAM                                           -->
+  <!-- ===================================================================== -->
+  <diagram id="seq-diag" name="5. Sequence Diagram">
+    <mxGraphModel dx="1422" dy="850" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" background="#f8fafc" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="seq-title" value="PortFlow End-to-End Sequence Diagram (Operation Creation &amp; OS Dispatch)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="750" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Lifeline 1: Operator UI -->
+        <mxCell id="ll-ui" value="Operator (UI)&#xa;[React 19]" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#eff6ff;strokeColor=#3b82f6;fontStyle=1;fontSize=12;fontColor=#1e3a8a;" vertex="1" parent="1">
+          <mxGeometry x="80" y="90" width="130" height="750" as="geometry" />
+        </mxCell>
+
+        <!-- Lifeline 2: API Gateway -->
+        <mxCell id="ll-api" value="API Gateway&#xa;[Express 5 / REST / GQL]" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#f5f3ff;strokeColor=#8b5cf6;fontStyle=1;fontSize=12;fontColor=#4c1d95;" vertex="1" parent="1">
+          <mxGeometry x="310" y="90" width="160" height="750" as="geometry" />
+        </mxCell>
+
+        <!-- Lifeline 3: OperationsService -->
+        <mxCell id="ll-srv" value="OperationsService&#xa;[Business Logic]" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#ecfdf5;strokeColor=#10b981;fontStyle=1;fontSize=12;fontColor=#064e3b;" vertex="1" parent="1">
+          <mxGeometry x="580" y="90" width="150" height="750" as="geometry" />
+        </mxCell>
+
+        <!-- Lifeline 4: PortSystem (OS Kernel) -->
+        <mxCell id="ll-os" value="PortSystem&#xa;[OS Kernel / Mutex]" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#fef3c7;strokeColor=#f59e0b;fontStyle=1;fontSize=12;fontColor=#78350f;" vertex="1" parent="1">
+          <mxGeometry x="830" y="90" width="150" height="750" as="geometry" />
+        </mxCell>
+
+        <!-- Lifeline 5: Prisma ORM -->
+        <mxCell id="ll-prisma" value="Prisma ORM&#xa;[Data Client]" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#fffbeb;strokeColor=#d97706;fontStyle=1;fontSize=12;fontColor=#78350f;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="90" width="140" height="750" as="geometry" />
+        </mxCell>
+
+        <!-- Lifeline 6: PostgreSQL Database -->
+        <mxCell id="ll-db" value="PostgreSQL 15&#xa;[Supabase DB]" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#f8fafc;strokeColor=#475569;fontStyle=1;fontSize=12;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="1320" y="90" width="140" height="750" as="geometry" />
+        </mxCell>
+
+        <!-- Sequence Messages -->
+        <!-- 1. Submit Operation -->
+        <mxCell id="msg1" value="1: POST /api/operations (shipName, craneId, priority)" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#2563eb;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-ui" target="ll-api">
+          <mxGeometry x="0.05" y="10" relative="1" as="geometry">
+            <mxPoint y="160" as="offset" />
+            <mxPoint x="145" y="160" as="sourcePoint" />
+            <mxPoint x="385" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2. Auth verify & Service call -->
+        <mxCell id="msg2" value="2: submitOperation(dto)" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#8b5cf6;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-api" target="ll-srv">
+          <mxGeometry y="10" relative="1" as="geometry">
+            <mxPoint x="390" y="190" as="sourcePoint" />
+            <mxPoint x="650" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. Persist DB -->
+        <mxCell id="msg3" value="3: prisma.operation.create(data: status='Queued')" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#059669;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-srv" target="ll-prisma">
+          <mxGeometry y="10" relative="1" as="geometry">
+            <mxPoint x="655" y="220" as="sourcePoint" />
+            <mxPoint x="1145" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4. SQL Insert -->
+        <mxCell id="msg4" value="4: INSERT INTO operations (process_id, priority, ...)" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#d97706;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-prisma" target="ll-db">
+          <mxGeometry y="10" relative="1" as="geometry">
+            <mxPoint x="1150" y="250" as="sourcePoint" />
+            <mxPoint x="1385" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. DB Ack -->
+        <mxCell id="msg5" value="5: Record committed (ID=101, process_id='op-101')" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;strokeColor=#475569;fontSize=11;" edge="1" parent="1" source="ll-db" target="ll-prisma">
+          <mxGeometry y="-10" relative="1" as="geometry">
+            <mxPoint x="1385" y="280" as="sourcePoint" />
+            <mxPoint x="1155" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. Enqueue PCB -->
+        <mxCell id="msg6" value="6: addProcess(new Process('op-101', burstTime, reqCrane))" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#059669;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-srv" target="ll-os">
+          <mxGeometry y="10" relative="1" as="geometry">
+            <mxPoint x="655" y="320" as="sourcePoint" />
+            <mxPoint x="900" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7. Return Queued Response -->
+        <mxCell id="msg7" value="7: HTTP 201 Created (Operation OP-101 Queued)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;strokeColor=#2563eb;fontSize=11;" edge="1" parent="1" source="ll-api" target="ll-ui">
+          <mxGeometry y="-10" relative="1" as="geometry">
+            <mxPoint x="385" y="360" as="sourcePoint" />
+            <mxPoint x="145" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 8. Dispatch Next -->
+        <mxCell id="msg8" value="8: POST /api/operations/dispatch (Trigger CPU Scheduler)" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#2563eb;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-ui" target="ll-api">
+          <mxGeometry y="10" relative="1" as="geometry">
+            <mxPoint x="145" y="420" as="sourcePoint" />
+            <mxPoint x="385" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9. Kernel Schedule -->
+        <mxCell id="msg9" value="9: executeNextProcess() [FCFS/SJF selection]" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#f59e0b;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-srv" target="ll-os">
+          <mxGeometry y="10" relative="1" as="geometry">
+            <mxPoint x="655" y="450" as="sourcePoint" />
+            <mxPoint x="900" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 10. Mutex Lock Check -->
+        <mxCell id="msg10" value="10: craneMutex.acquire('op-101') &amp; berthSemaphore.acquire()" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#f59e0b;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-os" target="ll-os">
+          <mxGeometry x="0.1" y="20" relative="1" as="geometry">
+            <mxPoint x="910" y="480" as="sourcePoint" />
+            <mxPoint x="930" y="520" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="960" y="480" />
+              <mxPoint x="960" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 11. Execute Simulation -->
+        <mxCell id="msg11" value="11: Process RUNNING -> Burst Complete -> Release Mutex" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#10b981;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-os" target="ll-srv">
+          <mxGeometry y="10" relative="1" as="geometry">
+            <mxPoint x="900" y="560" as="sourcePoint" />
+            <mxPoint x="655" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 12. Commit Completed Telemetry -->
+        <mxCell id="msg12" value="12: UPDATE operations SET status='Completed', turnaround_time_ms=..." style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#d97706;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-srv" target="ll-db">
+          <mxGeometry y="10" relative="1" as="geometry">
+            <mxPoint x="655" y="600" as="sourcePoint" />
+            <mxPoint x="1385" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 13. Auto-generate Bill -->
+        <mxCell id="msg13" value="13: INSERT INTO bills (invoice_number, docking_fee, crane_usage_fee)" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#d97706;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-srv" target="ll-db">
+          <mxGeometry y="10" relative="1" as="geometry">
+            <mxPoint x="655" y="640" as="sourcePoint" />
+            <mxPoint x="1385" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 14. Dispatch Response -->
+        <mxCell id="msg14" value="14: HTTP 200 OK (dispatched: 101, waitingTime: 120ms, turnaround: 4120ms)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;strokeColor=#2563eb;fontSize=11;" edge="1" parent="1" source="ll-api" target="ll-ui">
+          <mxGeometry y="-10" relative="1" as="geometry">
+            <mxPoint x="385" y="680" as="sourcePoint" />
+            <mxPoint x="145" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 15. GraphQL Nested Query -->
+        <mxCell id="msg15" value="15: POST /graphql { query: portDashboardOverview { ... } }" style="html=1;verticalAlign=bottom;endArrow=block;strokeColor=#8b5cf6;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="ll-ui" target="ll-api">
+          <mxGeometry y="10" relative="1" as="geometry">
+            <mxPoint x="145" y="730" as="sourcePoint" />
+            <mxPoint x="385" y="730" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 16. GraphQL Response -->
+        <mxCell id="msg16" value="16: JSON Response { data: { tableStats, activeOperationsCount } }" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;strokeColor=#8b5cf6;fontSize=11;" edge="1" parent="1" source="ll-api" target="ll-ui">
+          <mxGeometry y="-10" relative="1" as="geometry">
+            <mxPoint x="385" y="770" as="sourcePoint" />
+            <mxPoint x="145" y="770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

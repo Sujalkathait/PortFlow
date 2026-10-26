@@ -999,9 +999,23 @@ npm run dev
 - Process execution is currently stepped on demand via `/api/operations/dispatch` rather than continuous background cron-ticks (sufficient for Phase 2 demonstration).
 - Issue reporting currently logs to server console instead of a dedicated `issues` table.
 
-### ❌ Not Implemented (Scoped for Future Phases)
+### ⏳ Upcoming Phase 3 & 4 Modules (Status: PENDING for All Members)
+
+All features beyond the 40% Phase 2 milestone are strictly kept in **PENDING** status for upcoming evaluation cycles:
+
+| Member | Completed Phase 2 Scope (40% Milestone) | Upcoming Advanced Feature Scope | Phase 3/4 Roadmap Status |
+| :---: | :--- | :--- | :---: |
+| **M1** | Operations Hub & FCFS/SJF CPU Scheduling | Multilevel Feedback Queue (MLFQ) & Priority Aging | ⏳ **PENDING** |
+| **M2** | Vessel Tracking & PCB 5-State Machine | Yard Physical Memory Partitioning & Compaction | ⏳ **PENDING** |
+| **M3** | Cargo Containers & Crane Mutex Locks | Temperature-Controlled CFS Reefer Warehouses | ⏳ **PENDING** |
+| **M4** | Equipment Allocation & Berth Semaphores | Land Logistics Gate Fleet (Trucks) & Security Inspections | ⏳ **PENDING** |
+| **M5** | Deadlock Detection (WFG DFS) & Telemetry Cards | Dijkstra's Banker's Algorithm & Automated Victim Rollback | ⏳ **PENDING** |
+| **M6** | JWT Security, Soft-Delete & 3NF Schema | Automated Tariff Billing Engine & PL/pgSQL Triggers | ⏳ **PENDING** |
+
+### ❌ Not Implemented in Phase 2 (Scoped for Future Phases)
 - Advanced modules: Trucks, Warehouses, Automated Invoicing, Customs clearance.
 - Live telemetry streaming over WebSockets.
+- Multilevel Feedback Queue (MLFQ) & Banker's Algorithm.
 
 ### 🎯 Highest Priority Before Phase 2 Evaluation
 1. Run `npm test` in `backend/` to demonstrate passing unit tests.

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { ScrollText, ShieldCheck, RefreshCw, AlertCircle, Clock, Activity, User } from 'lucide-react';
-import { API_BASE_URL } from '../lib/api';
+import { api } from '../lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,22 +16,13 @@ export function LogsPage() {
         setLoading(true);
         setError('');
         try {
-            const token = localStorage.getItem('portflow_auth_token');
-            const headers = {
-                'Authorization': `Bearer ${token}`
-            };
-            const [sysRes, auditRes] = await Promise.all([
-                fetch(`${API_BASE_URL}/system/logs`, { headers }),
-                fetch(`${API_BASE_URL}/system/audit`, { headers })
+            const [sys, audit] = await Promise.all([
+                api.system.logs(),
+                api.system.audit()
             ]);
             
-            if (!sysRes.ok || !auditRes.ok) throw new Error('Failed to fetch logs');
-            
-            const sys = await sysRes.json();
-            const audit = await auditRes.json();
-            
-            setSystemLogs(sys);
-            setAuditLogs(audit);
+            setSystemLogs(sys || []);
+            setAuditLogs(audit || []);
         } catch (e: any) {
             setError(e.message || 'Failed to load logs');
         } finally {

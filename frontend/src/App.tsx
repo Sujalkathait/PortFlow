@@ -20,6 +20,8 @@ const SchedulingPage = lazy(async () => ({ default: (await import('./pages/Sched
 const TrashPage = lazy(async () => ({ default: (await import('./pages/TrashPage')).TrashPage }));
 const ProfilePage = lazy(async () => ({ default: (await import('./pages/ProfilePage')).ProfilePage }));
 const ReportIssuePage = lazy(async () => ({ default: (await import('./pages/ReportIssuePage')).ReportIssuePage }));
+const LogsPage = lazy(async () => ({ default: (await import('./pages/LogsPage')).LogsPage }));
+const ReportsPage = lazy(async () => ({ default: (await import('./pages/ReportsPage')).ReportsPage }));
 
 function RouteLoading() {
     return <main className="page-loader" aria-live="polite">Loading workspace…</main>;
@@ -59,9 +61,24 @@ function DashboardLayout({ children }: { role?: Role; children: React.ReactNode 
         return () => clearInterval(t);
     }, []);
 
-    // Breadcrumb text
+    // Breadcrumb text mapping
     const pathPart = location.pathname.split('/').filter(Boolean)[1] || 'dashboard';
-    const pageName = pathPart.charAt(0).toUpperCase() + pathPart.slice(1).replace('-', ' ');
+    const titleMap: Record<string, string> = {
+        dashboard: 'Dashboard Overview',
+        operations: 'Operations Management',
+        ships: 'Vessels & Berthing',
+        cargos: 'Containers & Manifests',
+        cargo: 'Containers & Manifests',
+        equipments: 'Equipment & Cranes',
+        equipment: 'Equipment & Cranes',
+        scheduling: 'OS CPU Scheduling',
+        reports: 'Analytics & Reports',
+        logs: 'System & Audit Logs',
+        trash: 'Recycle Bin & Trash',
+        'report-issue': 'Report Incident',
+        profile: 'Operator Profile',
+    };
+    const pageName = titleMap[pathPart.toLowerCase()] || (pathPart.charAt(0).toUpperCase() + pathPart.slice(1).replace('-', ' '));
 
     return (
         <SidebarProvider>
@@ -159,20 +176,26 @@ function App() {
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
-                    <Route path="/operator/Cargos" element={
+                    <Route path="/operator/cargos" element={
                         <ProtectedRoute>
                             <DashboardLayout>
                                 <CargoPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
-                    <Route path="/operator/Equipments" element={
+                    <Route path="/operator/cargo" element={<Navigate to="/operator/cargos" replace />} />
+                    <Route path="/operator/Cargos" element={<Navigate to="/operator/cargos" replace />} />
+
+                    <Route path="/operator/equipments" element={
                         <ProtectedRoute>
                             <DashboardLayout>
                                 <EquipmentPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
+                    <Route path="/operator/equipment" element={<Navigate to="/operator/equipments" replace />} />
+                    <Route path="/operator/Equipments" element={<Navigate to="/operator/equipments" replace />} />
+
                     <Route path="/operator/scheduling" element={
                         <ProtectedRoute>
                             <DashboardLayout>
@@ -201,19 +224,38 @@ function App() {
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
-                    <Route path="/operator/reports" element={<Navigate to="/operator/dashboard" replace />} />
+                    <Route path="/operator/logs" element={
+                        <ProtectedRoute>
+                            <DashboardLayout>
+                                <LogsPage />
+                            </DashboardLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/operator/reports" element={
+                        <ProtectedRoute>
+                            <DashboardLayout>
+                                <ReportsPage />
+                            </DashboardLayout>
+                        </ProtectedRoute>
+                    } />
 
-                    {/* Aliases */}
+                    {/* Root Aliases */}
+                    <Route path="/dashboard" element={<Navigate to="/operator/dashboard" replace />} />
                     <Route path="/operations" element={<Navigate to="/operator/operations" replace />} />
                     <Route path="/ships" element={<Navigate to="/operator/ships" replace />} />
-                    <Route path="/cargos" element={<Navigate to="/operator/Cargos" replace />} />
-                    <Route path="/equipments" element={<Navigate to="/operator/Equipments" replace />} />
+                    <Route path="/cargos" element={<Navigate to="/operator/cargos" replace />} />
+                    <Route path="/cargo" element={<Navigate to="/operator/cargos" replace />} />
+                    <Route path="/equipments" element={<Navigate to="/operator/equipments" replace />} />
+                    <Route path="/equipment" element={<Navigate to="/operator/equipments" replace />} />
                     <Route path="/scheduling" element={<Navigate to="/operator/scheduling" replace />} />
                     <Route path="/trash" element={<Navigate to="/operator/trash" replace />} />
                     <Route path="/report-issue" element={<Navigate to="/operator/report-issue" replace />} />
+                    <Route path="/logs" element={<Navigate to="/operator/logs" replace />} />
+                    <Route path="/reports" element={<Navigate to="/operator/reports" replace />} />
                     <Route path="/profile" element={<Navigate to="/operator/profile" replace />} />
 
-                    {/* 404 Fallback */}
+                    {/* 404 Catch-All Fallback */}
+                    <Route path="*" element={<Navigate to="/operator" replace />} />
                 </Routes>
               </Suspense>
             </BrowserRouter>

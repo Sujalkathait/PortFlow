@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { AlertTriangle, CheckCircle2, AlertCircle, Send } from 'lucide-react';
-import { API_BASE_URL } from '../lib/api';
+import { api } from '../lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -18,18 +18,7 @@ export function ReportIssuePage() {
         setError('');
         setSuccess('');
         try {
-            const token = localStorage.getItem('portflow_auth_token');
-            const res = await fetch(`${API_BASE_URL}/system/report-issue`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ title, description })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || 'Failed to submit issue');
-            
+            const data = await api.system.reportIssue({ title, description });
             setSuccess(data.message);
             setTitle('');
             setDescription('');

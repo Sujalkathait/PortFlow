@@ -1,7 +1,7 @@
 // =============================================================================
-// PortFlow Database Schema - Prisma ORM Definition
+// PortFlow Phase 3 Relational Database Schema - Prisma ORM Definition
 // Database Provider: PostgreSQL (Supabase / Standard PostgreSQL 14+)
-// Architecture: Relational Data Model with Soft-Delete and Performance B-Tree Indexes
+// Architecture: 3NF Relational Model with Soft-Delete, Foreign Keys, B-Tree Indexes
 // =============================================================================
 
 generator client {
@@ -16,7 +16,7 @@ datasource db {
 
 // -----------------------------------------------------------------------------
 // 1. Users Model
-// Represents authenticated operators and administrators.
+// Represents authenticated operators, customs officials, and administrators.
 // Passwords stored as one-way cryptographic bcrypt hashes.
 // -----------------------------------------------------------------------------
 model User {
@@ -30,39 +30,117 @@ model User {
   deleted_at    DateTime? @db.Timestamptz(6)
   deleted_by    String?   @db.VarChar(255)
 
+  // Relationships
+  operations_created  Operation[]          @relation("UserOperations")
+  issues_reported     Issue[]              @relation("UserReportedIssues")
+  inspections_done    CustomsInspection[]  @relation("UserInspections")
+  gate_passes_issued  GatePass[]           @relation("UserGatePasses")
+  system_logs         SystemLog[]          @relation("UserSystemLogs")
+
   @@index([deleted_at])
   @@index([created_at(sort: Desc)])
   @@map("users")
 }
 
 // -----------------------------------------------------------------------------
-// 2. Ships Model
+// 2. Equipment Model
+// Represents physical port resources (Berths, STS Quay Cranes, Yard Gantries).
+// Managed by OS Resource Allocator (Mutex and Counting Semaphores).
+// -----------------------------------------------------------------------------
+model Equipment {
+  id              Int       @id @default(autoincrement())
+  equipment_id    String    @unique @db.VarChar(50)
+  name            String    @db.VarChar(120)
+  type            String    @default("Berth") @db.VarChar(50)
+  status          String    @default("Available") @db.VarChar(50)
+  capacity_metric Float?    @default(0.0) @db.DoublePrecision
+  assigned_to     String?   @db.VarChar(100)
+  created_by      String    @default("system") @db.VarChar(255)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at      DateTime? @db.Timestamptz(6)
+  deleted_by      String?   @db.VarChar(255)
+
+  // Relationships
+  berthed_ships        Ship[]       @relation("BerthAssignedShips")
+  crane_operations     Operation[]  @relation("CraneOperations")
+  berth_operations     Operation[]  @relation("BerthOperations")
+  reported_issues      Issue[]      @relation("EquipmentIssues")
+
+  @@index([type])
+  @@index([status])
+  @@index([deleted_at])
+  @@map("equipment")
+}
+
+// -----------------------------------------------------------------------------
+// 3. Ships Model
 // Represents marine vessels calling at the port terminal.
-// Uses IMO (International Maritime Organization) unique registration identifier.
+// Linked via Foreign Key to assigned Berth Equipment.
 // -----------------------------------------------------------------------------
 model Ship {
-  id           Int       @id @default(autoincrement())
-  imo_number   String    @unique @db.VarChar(100)
-  name         String    @db.VarChar(120)
-  vessel_type  String    @default("General Cargo") @db.VarChar(100)
-  capacity_teu Int       @default(0)
-  status       String    @default("Arriving") @db.VarChar(50)
-  berth_id     String?   @db.VarChar(50)
-  created_by   String    @default("system") @db.VarChar(255)
-  created_at   DateTime  @default(now()) @db.Timestamptz(6)
-  deleted_at   DateTime? @db.Timestamptz(6)
-  deleted_by   String?   @db.VarChar(255)
+  id                 Int       @id @default(autoincrement())
+  imo_number         String    @unique @db.VarChar(100)
+  name               String    @db.VarChar(120)
+  vessel_type        String    @default("General Cargo") @db.VarChar(100)
+  capacity_teu       Int       @default(0)
+  status             String    @default("Arriving") @db.VarChar(50)
+  berth_id           String?   @db.VarChar(50) // Legacy display identifier
+  berth_equipment_id Int?      // Relational Foreign Key to Equipment table
+  eta                DateTime? @db.Timestamptz(6)
+  etd                DateTime? @db.Timestamptz(6)
+  created_by         String    @default("system") @db.VarChar(255)
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at         DateTime? @db.Timestamptz(6)
+  deleted_by         String?   @db.VarChar(255)
+
+  // Foreign Key Relationship
+  assigned_berth     Equipment? @relation("BerthAssignedShips", fields: [berth_equipment_id], references: [id], onDelete: SetNull)
+
+  // Child Relationships
+  cargo_manifests    Cargo[]     @relation("ShipCargo")
+  operations         Operation[] @relation("ShipOperations")
+  bills              Bill[]      @relation("ShipBills")
 
   @@index([status])
+  @@index([berth_equipment_id])
   @@index([deleted_at])
   @@index([created_at(sort: Desc)])
   @@map("ships")
 }
 
 // -----------------------------------------------------------------------------
-// 3. Cargo Model
+// 4. Warehouses Model
+// Represents storage yards, Container Freight Stations (CFS), and Reefer Cold Storage.
+// -----------------------------------------------------------------------------
+model Warehouse {
+  id                     Int       @id @default(autoincrement())
+  code                   String    @unique @db.VarChar(50)
+  name                   String    @db.VarChar(120)
+  zone_type              String    @default("Dry_Storage") @db.VarChar(50)
+  capacity_teu           Int       @default(500)
+  current_occupancy_teu  Int       @default(0)
+  temperature_celsius    Float?    @db.DoublePrecision
+  status                 String    @default("Active") @db.VarChar(50)
+  created_at             DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at             DateTime? @db.Timestamptz(6)
+  deleted_by             String?   @db.VarChar(255)
+
+  // Child Relationships
+  stored_cargo           Cargo[]   @relation("WarehouseCargo")
+
+  @@index([zone_type])
+  @@index([status])
+  @@index([deleted_at])
+  @@map("warehouses")
+}
+
+// -----------------------------------------------------------------------------
+// 5. Cargo Model
 // Represents shipping containers and freight manifests.
-// Tracked across port zones (Yard, Ship, Transit, Gate).
+// Linked to parent Ship and current storage Warehouse via Foreign Keys.
 // -----------------------------------------------------------------------------
 model Cargo {
   id               Int       @id @default(autoincrement())
@@ -72,12 +150,29 @@ model Cargo {
   cargo_type       String    @default("General") @db.VarChar(100)
   current_location String    @default("Yard") @db.VarChar(100)
   ship_name        String    @default("") @db.VarChar(120)
+  ship_id          Int?      // Relational FK to Ships
+  warehouse_id     Int?      // Relational FK to Warehouses
+  hazard_class     String?   @db.VarChar(50)
   status           String    @default("On Ship") @db.VarChar(50)
   created_by       String    @default("system") @db.VarChar(255)
   created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
   deleted_at       DateTime? @db.Timestamptz(6)
   deleted_by       String?   @db.VarChar(255)
 
+  // Foreign Key Relationships
+  vessel           Ship?      @relation("ShipCargo", fields: [ship_id], references: [id], onDelete: SetNull)
+  warehouse        Warehouse? @relation("WarehouseCargo", fields: [warehouse_id], references: [id], onDelete: SetNull)
+
+  // Child Relationships
+  operations       Operation[]          @relation("CargoOperations")
+  inspections      CustomsInspection[]  @relation("CargoInspections")
+  transport_trucks Truck[]              @relation("TruckAssignedCargo")
+  gate_passes      GatePass[]           @relation("CargoGatePasses")
+  bills            Bill[]               @relation("CargoBills")
+
+  @@index([ship_id])
+  @@index([warehouse_id])
   @@index([status])
   @@index([deleted_at])
   @@index([created_at(sort: Desc)])
@@ -85,55 +180,237 @@ model Cargo {
 }
 
 // -----------------------------------------------------------------------------
-// 4. Equipment Model
-// Represents shared port physical resources (Berths, STS Cranes, Yard Trucks).
-// Managed by OS Resource Allocator (Mutex and Counting Semaphores).
-// -----------------------------------------------------------------------------
-model Equipment {
-  id           Int       @id @default(autoincrement())
-  equipment_id String    @unique @db.VarChar(50)
-  name         String    @db.VarChar(120)
-  type         String    @default("Berth") @db.VarChar(50)
-  status       String    @default("Available") @db.VarChar(50)
-  assigned_to  String?   @db.VarChar(100)
-  created_by   String    @default("system") @db.VarChar(255)
-  created_at   DateTime  @default(now()) @db.Timestamptz(6)
-  deleted_at   DateTime? @db.Timestamptz(6)
-  deleted_by   String?   @db.VarChar(255)
-
-  @@index([type])
-  @@index([status])
-  @@index([deleted_at])
-  @@map("equipment")
-}
-
-// -----------------------------------------------------------------------------
-// 5. Operations Model
-// Core OS-level process representation.
-// Each operation maps to a Process Control Block (PCB) scheduled via FCFS, SJF,
-// Round Robin, or Priority algorithms.
+// 6. Operations Model
+// Core OS-level Process Control Block (PCB) representation.
+// Scheduled via FCFS, SJF, or Priority CPU algorithms with Mutex/Semaphore locks.
 // -----------------------------------------------------------------------------
 model Operation {
-  id                 Int       @id @default(autoincrement())
-  process_id         String?   @unique @db.VarChar(50)
-  operation_type     String    @db.VarChar(100)
-  ship_name          String    @db.VarChar(120)
-  crane_id           String    @default("None") @db.VarChar(50)
-  berth_id           String    @default("Berth 1") @db.VarChar(50)
-  priority           Int       @default(1)
-  status             String    @default("Queued") @db.VarChar(50)
-  start_time         DateTime? @db.Timestamptz(6)
-  end_time           DateTime? @db.Timestamptz(6)
-  waiting_time_ms    Int?
-  turnaround_time_ms Int?
-  created_by         String    @default("system") @db.VarChar(255)
-  created_at         DateTime  @default(now()) @db.Timestamptz(6)
-  deleted_at         DateTime? @db.Timestamptz(6)
-  deleted_by         String?   @db.VarChar(255)
+  id                  Int       @id @default(autoincrement())
+  process_id          String?   @unique @db.VarChar(50)
+  operation_type      String    @db.VarChar(100)
+  ship_name           String    @db.VarChar(120)
+  ship_id             Int?      // Relational FK to Ships
+  cargo_id            Int?      // Relational FK to Cargo
+  crane_id            String    @default("None") @db.VarChar(50)
+  crane_equipment_id  Int?      // Relational FK to Equipment (Crane Mutex)
+  berth_id            String    @default("Berth 1") @db.VarChar(50)
+  berth_equipment_id  Int?      // Relational FK to Equipment (Berth Semaphore)
+  created_by_user_id  Int?      // Relational FK to Users
+  priority            Int       @default(1)
+  status              String    @default("Queued") @db.VarChar(50)
+  start_time          DateTime? @db.Timestamptz(6)
+  end_time            DateTime? @db.Timestamptz(6)
+  waiting_time_ms     Int?
+  turnaround_time_ms  Int?
+  created_by          String    @default("system") @db.VarChar(255)
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at          DateTime? @db.Timestamptz(6)
+  deleted_by          String?   @db.VarChar(255)
 
+  // Foreign Key Relationships
+  vessel              Ship?      @relation("ShipOperations", fields: [ship_id], references: [id], onDelete: SetNull)
+  container           Cargo?     @relation("CargoOperations", fields: [cargo_id], references: [id], onDelete: SetNull)
+  assigned_crane      Equipment? @relation("CraneOperations", fields: [crane_equipment_id], references: [id], onDelete: SetNull)
+  assigned_berth      Equipment? @relation("BerthOperations", fields: [berth_equipment_id], references: [id], onDelete: SetNull)
+  initiator           User?      @relation("UserOperations", fields: [created_by_user_id], references: [id], onDelete: SetNull)
+
+  // Child Relationships
+  bills               Bill[]     @relation("OperationBills")
+
+  @@index([ship_id])
+  @@index([cargo_id])
+  @@index([crane_equipment_id])
+  @@index([berth_equipment_id])
+  @@index([created_by_user_id])
   @@index([status])
   @@index([deleted_at])
   @@index([created_at(sort: Desc)])
   @@index([process_id])
   @@map("operations")
+}
+
+// -----------------------------------------------------------------------------
+// 7. Trucks Model
+// Land-based drayage fleet for container transfer between yard and gates.
+// -----------------------------------------------------------------------------
+model Truck {
+  id                 Int       @id @default(autoincrement())
+  license_plate      String    @unique @db.VarChar(50)
+  driver_name        String    @db.VarChar(120)
+  driver_phone       String    @db.VarChar(50)
+  transport_company  String    @db.VarChar(150)
+  status             String    @default("Idle") @db.VarChar(50)
+  max_payload_tons   Float     @default(30.0) @db.DoublePrecision
+  assigned_cargo_id  Int?      // Relational FK to Cargo
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at         DateTime? @db.Timestamptz(6)
+  deleted_by         String?   @db.VarChar(255)
+
+  // Foreign Key Relationship
+  current_cargo      Cargo?    @relation("TruckAssignedCargo", fields: [assigned_cargo_id], references: [id], onDelete: SetNull)
+
+  // Child Relationships
+  gate_passes        GatePass[] @relation("TruckGatePasses")
+
+  @@index([status])
+  @@index([assigned_cargo_id])
+  @@index([deleted_at])
+  @@map("trucks")
+}
+
+// -----------------------------------------------------------------------------
+// 8. Gate Passes Model
+// Land logistics gate access control, check-in/out timestamps, and security lanes.
+// -----------------------------------------------------------------------------
+model GatePass {
+  id              Int       @id @default(autoincrement())
+  pass_number     String    @unique @db.VarChar(100)
+  truck_id        Int       // Relational FK to Trucks
+  cargo_id        Int?      // Relational FK to Cargo
+  issued_by_id    Int?      // Relational FK to Users
+  gate_lane       String    @default("Gate-In-Lane-1") @db.VarChar(50)
+  pass_type       String    @default("Inbound_Delivery") @db.VarChar(50)
+  status          String    @default("Issued") @db.VarChar(50)
+  check_in_time   DateTime? @db.Timestamptz(6)
+  check_out_time  DateTime? @db.Timestamptz(6)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at      DateTime? @db.Timestamptz(6)
+
+  // Foreign Key Relationships
+  truck           Truck     @relation("TruckGatePasses", fields: [truck_id], references: [id], onDelete: Cascade)
+  container       Cargo?    @relation("CargoGatePasses", fields: [cargo_id], references: [id], onDelete: SetNull)
+  issuer          User?     @relation("UserGatePasses", fields: [issued_by_id], references: [id], onDelete: SetNull)
+
+  @@index([truck_id])
+  @@index([cargo_id])
+  @@index([status])
+  @@index([deleted_at])
+  @@map("gate_passes")
+}
+
+// -----------------------------------------------------------------------------
+// 9. Customs Inspections Model
+// Customs clearances, regulatory inspections, holds, and import/export duties.
+// -----------------------------------------------------------------------------
+model CustomsInspection {
+  id                  Int       @id @default(autoincrement())
+  inspection_number   String    @unique @db.VarChar(100)
+  cargo_id            Int       // Relational FK to Cargo
+  inspector_id        Int?      // Relational FK to Users
+  declaration_number  String    @db.VarChar(100)
+  inspection_type     String    @default("X-Ray_Scan") @db.VarChar(50)
+  status              String    @default("Pending") @db.VarChar(50)
+  duty_amount_cents   BigInt    @default(0)
+  findings            String?   @db.Text
+  inspected_at        DateTime? @db.Timestamptz(6)
+  cleared_at          DateTime? @db.Timestamptz(6)
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at          DateTime? @db.Timestamptz(6)
+
+  // Foreign Key Relationships
+  container           Cargo     @relation("CargoInspections", fields: [cargo_id], references: [id], onDelete: Cascade)
+  inspector           User?     @relation("UserInspections", fields: [inspector_id], references: [id], onDelete: SetNull)
+
+  @@index([cargo_id])
+  @@index([inspector_id])
+  @@index([status])
+  @@index([deleted_at])
+  @@map("customs_inspections")
+}
+
+// -----------------------------------------------------------------------------
+// 10. Bills Model
+// Automated tariff calculation engine for berth docking, crane hours, and storage.
+// -----------------------------------------------------------------------------
+model Bill {
+  id                 Int       @id @default(autoincrement())
+  invoice_number     String    @unique @db.VarChar(100)
+  ship_id            Int?      // Relational FK to Ships
+  cargo_id           Int?      // Relational FK to Cargo
+  operation_id       Int?      // Relational FK to Operations
+  customer_name      String    @db.VarChar(150)
+  docking_fee        Float     @default(0.0) @db.DoublePrecision
+  crane_usage_fee    Float     @default(0.0) @db.DoublePrecision
+  storage_fee        Float     @default(0.0) @db.DoublePrecision
+  total_amount       Float     @db.DoublePrecision
+  currency           String    @default("USD") @db.VarChar(10)
+  payment_status     String    @default("Draft") @db.VarChar(50)
+  due_date           DateTime? @db.Timestamptz(6)
+  paid_at            DateTime? @db.Timestamptz(6)
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at         DateTime? @db.Timestamptz(6)
+
+  // Foreign Key Relationships
+  vessel             Ship?      @relation("ShipBills", fields: [ship_id], references: [id], onDelete: SetNull)
+  container          Cargo?     @relation("CargoBills", fields: [cargo_id], references: [id], onDelete: SetNull)
+  operation          Operation? @relation("OperationBills", fields: [operation_id], references: [id], onDelete: SetNull)
+
+  @@index([ship_id])
+  @@index([cargo_id])
+  @@index([operation_id])
+  @@index([payment_status])
+  @@index([deleted_at])
+  @@map("bills")
+}
+
+// -----------------------------------------------------------------------------
+// 11. Issues Model
+// Incident reports, mechanical equipment failure tickets, and operator support.
+// -----------------------------------------------------------------------------
+model Issue {
+  id               Int       @id @default(autoincrement())
+  ticket_number    String    @unique @db.VarChar(50)
+  title            String    @db.VarChar(200)
+  description      String    @db.Text
+  severity         String    @default("Medium") @db.VarChar(50)
+  status           String    @default("Open") @db.VarChar(50)
+  reported_by_id   Int?      // Relational FK to Users
+  equipment_id     Int?      // Relational FK to Equipment
+  resolution_notes String?   @db.Text
+  resolved_at      DateTime? @db.Timestamptz(6)
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  deleted_at       DateTime? @db.Timestamptz(6)
+
+  // Foreign Key Relationships
+  reporter         User?      @relation("UserReportedIssues", fields: [reported_by_id], references: [id], onDelete: SetNull)
+  faulty_equipment Equipment? @relation("EquipmentIssues", fields: [equipment_id], references: [id], onDelete: SetNull)
+
+  @@index([reported_by_id])
+  @@index([equipment_id])
+  @@index([status])
+  @@index([severity])
+  @@index([deleted_at])
+  @@map("issues")
+}
+
+// -----------------------------------------------------------------------------
+// 12. System Logs Model
+// Operational event logging, OS scheduler telemetry, and security audit trail.
+// -----------------------------------------------------------------------------
+model SystemLog {
+  id          Int      @id @default(autoincrement())
+  timestamp   DateTime @default(now()) @db.Timestamptz(6)
+  level       String   @default("INFO") @db.VarChar(20)
+  source      String   @default("Scheduler") @db.VarChar(100)
+  message     String   @db.Text
+  action      String?  @db.VarChar(100)
+  entity_type String?  @db.VarChar(50)
+  entity_id   Int?
+  user_id     Int?     // Relational FK to Users
+  ip_address  String?  @db.VarChar(45)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  // Foreign Key Relationship
+  operator    User?    @relation("UserSystemLogs", fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([timestamp(sort: Desc)])
+  @@index([level])
+  @@index([source])
+  @@index([user_id])
+  @@map("system_logs")
 }

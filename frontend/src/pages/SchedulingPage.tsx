@@ -58,14 +58,7 @@ export function SchedulingPage() {
 
     const handleAlgoChange = async (newAlgo: string) => {
         try {
-            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api/os/algorithm`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('portflow_auth_token')}`
-                },
-                body: JSON.stringify({ algorithm: newAlgo })
-            });
+            await api.os.setAlgorithm(newAlgo);
             void load();
         } catch (err: any) {
             setError(err.message || 'Failed to switch scheduling algorithm');

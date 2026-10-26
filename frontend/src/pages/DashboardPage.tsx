@@ -1,9 +1,6 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
-  Ship,
-  ArrowUp, ArrowDown, Trophy, Star, Clock,
-  ArrowRight, Lightbulb, Settings2,
-  RefreshCw
+  Ship, Settings2, ArrowUp, ArrowDown, Trophy, Star
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -41,21 +38,6 @@ function ContainerIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-// Helper to format relative time from a date string or timestamp
-function formatTimeAgo(dateString?: string): string {
-  if (!dateString) return 'Recent';
-  const timestamp = new Date(dateString).getTime();
-  if (isNaN(timestamp)) return 'Recent';
-  const diffSec = Math.floor((Date.now() - timestamp) / 1000);
-  if (diffSec < 60) return 'Just now';
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin} min ago`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr} hr ago`;
-  const diffDays = Math.floor(diffHr / 24);
-  return `${diffDays}d ago`;
-}
-
 export function DashboardPage(_props: DashboardPageProps = {}) {
   const navigate = useNavigate();
   const basePath = '/operator';
@@ -64,10 +46,8 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
   const [ships, setShips] = useState<any[]>([]);
   const [equipments, setEquipments] = useState<any[]>([]);
   const [cargos, setCargos] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
 
   const loadData = useCallback(async () => {
-    setLoading(true);
     try {
       const [ops, sh, eq, ca] = await Promise.all([
         api.operations.list().catch(() => []),
@@ -82,8 +62,6 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
       setCargos(Array.isArray(ca) ? ca : []);
     } catch (e) {
       console.error('Failed to load dashboard data', e);
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -112,81 +90,6 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
   const resourceAvailabilityPercent = totalEqCount > 0
     ? `${Math.round((availableEqCount / totalEqCount) * 100)}%`
     : '0%';
-
-  // Dynamic activities
-  const recentActivities = useMemo(() => {
-    const list: any[] = [];
-
-    // Operations activities
-    operations.forEach((op) => {
-      const isCompleted = op.status === 'Completed';
-      const isRunning = op.status === 'Running' || op.status === 'In progress';
-      list.push({
-        id: `op-${op.id}`,
-        rawDate: op.created_at || op.updated_at,
-        time: formatTimeAgo(op.created_at || op.updated_at),
-        type: op.operation_type?.toLowerCase().includes('cargo') ? 'Container' : 'Operation',
-        details: `${op.operation_type || 'Cargo Op'} on ${op.ship_name || `Vessel #${op.id}`}`,
-        status: op.status || 'Active',
-        statusClass: isCompleted
-          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
-          : isRunning
-          ? 'bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-400'
-          : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-        icon: op.operation_type?.toLowerCase().includes('cargo')
-          ? <ContainerIcon className="h-3.5 w-3.5" />
-          : <CraneIcon className="h-3.5 w-3.5" />,
-        iconWrap: op.operation_type?.toLowerCase().includes('cargo')
-          ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400'
-          : 'bg-purple-100 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400',
-      });
-    });
-
-    // Ships activities
-    ships.forEach((s) => {
-      list.push({
-        id: `ship-${s.id}`,
-        rawDate: s.arrival_time || s.created_at,
-        time: formatTimeAgo(s.arrival_time || s.created_at),
-        type: 'Ship',
-        details: `${s.name || 'Vessel'} (Type: ${s.type || 'Cargo'}, Berth: ${s.berth_assigned || 'Unassigned'})`,
-        status: s.status || 'Registered',
-        statusClass: s.status === 'Docked'
-          ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400'
-          : s.status === 'Arrived'
-          ? 'bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-400'
-          : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-        icon: <Ship className="h-3.5 w-3.5 stroke-[2.2]" />,
-        iconWrap: 'bg-sky-100 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400',
-      });
-    });
-
-    // Equipment maintenance activities if any
-    equipments
-      .filter((e) => e.status === 'Maintenance' || e.status === 'Offline')
-      .forEach((e) => {
-        list.push({
-          id: `eq-${e.id}`,
-          rawDate: e.updated_at || e.created_at,
-          time: formatTimeAgo(e.updated_at || e.created_at),
-          type: 'Resource',
-          details: `${e.name || e.type || 'Equipment'} (${e.code || `#${e.id}`}) went offline for service`,
-          status: 'Maintenance',
-          statusClass: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400',
-          icon: <Settings2 className="h-3.5 w-3.5 stroke-[2.2]" />,
-          iconWrap: 'bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400',
-        });
-      });
-
-    // Sort by timestamp descending
-    list.sort((a, b) => {
-      const ta = a.rawDate ? new Date(a.rawDate).getTime() : 0;
-      const tb = b.rawDate ? new Date(b.rawDate).getTime() : 0;
-      return tb - ta;
-    });
-
-    return list.slice(0, 6);
-  }, [operations, ships, equipments]);
 
   return (
     <div className="flex flex-col space-y-6 w-full max-w-[1440px] mx-auto pb-10">

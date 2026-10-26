@@ -19,8 +19,8 @@ export function Login() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Handle URL query ?mode=signup or ?mode=login
-  const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : (searchParams.get('mode') === 'login' ? 'login' : 'none');
+  // Handle URL query ?mode=signup or default to login form
+  const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'login';
   const [mode, setMode] = useState<Mode>(initialMode);
   const [activeModal, setActiveModal] = useState<InfoModal>(null);
 

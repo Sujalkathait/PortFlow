@@ -4,6 +4,15 @@ import { trashRepository } from '../repositories/trash.repository';
 
 const VALID_COLLECTIONS: TrashCollection[] = ['operations', 'ships', 'Cargos', 'Equipments'];
 
+function normalizeCollection(collection: string): TrashCollection {
+    const lower = (collection || '').toLowerCase().trim();
+    if (lower === 'cargos' || lower === 'cargo') return 'Cargos';
+    if (lower === 'equipments' || lower === 'equipment') return 'Equipments';
+    if (lower === 'ships' || lower === 'ship') return 'ships';
+    if (lower === 'operations' || lower === 'operation') return 'operations';
+    return collection as TrashCollection;
+}
+
 export class TrashService implements ITrashService {
     private repo: ITrashRepository;
 
@@ -16,14 +25,15 @@ export class TrashService implements ITrashService {
     }
 
     public async restoreItem(collection: string, id: number): Promise<any> {
-        if (!VALID_COLLECTIONS.includes(collection as TrashCollection)) {
+        const normalized = normalizeCollection(collection);
+        if (!VALID_COLLECTIONS.includes(normalized)) {
             throw new Error(`Invalid trash collection: ${collection}. Allowed: ${VALID_COLLECTIONS.join(', ')}`);
         }
         if (!id || id <= 0) {
             throw new Error('Invalid record ID provided.');
         }
 
-        const restored = await this.repo.restore(collection, id);
+        const restored = await this.repo.restore(normalized, id);
         if (!restored) {
             throw new Error(`Record ${id} not found in collection ${collection}`);
         }
@@ -31,14 +41,15 @@ export class TrashService implements ITrashService {
     }
 
     public async permanentlyDeleteItem(collection: string, id: number): Promise<boolean> {
-        if (!VALID_COLLECTIONS.includes(collection as TrashCollection)) {
+        const normalized = normalizeCollection(collection);
+        if (!VALID_COLLECTIONS.includes(normalized)) {
             throw new Error(`Invalid trash collection: ${collection}. Allowed: ${VALID_COLLECTIONS.join(', ')}`);
         }
         if (!id || id <= 0) {
             throw new Error('Invalid record ID provided.');
         }
 
-        return this.repo.permanentDelete(collection, id);
+        return this.repo.permanentDelete(normalized, id);
     }
 
     public async emptyAllTrash(): Promise<{ count: number; total: number; details: Record<string, number> }> {

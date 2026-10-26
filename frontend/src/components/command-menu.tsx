@@ -12,6 +12,9 @@ import {
   Wrench,
   User,
   Trash2,
+  BarChart3,
+  ScrollText,
+  AlertTriangle,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -88,21 +91,33 @@ export function CommandMenu(_props: CommandMenuProps = {}) {
               <Anchor className="mr-2 h-4 w-4" />
               <span>Ships & Berths</span>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/Cargos`))}>
+            <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/cargos`))}>
               <Box className="mr-2 h-4 w-4" />
-              <span>Cargo Management</span>
+              <span>Cargo Containers</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/equipments`))}>
+              <Wrench className="mr-2 h-4 w-4" />
+              <span>Equipment & Cranes</span>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/scheduling`))}>
               <Cpu className="mr-2 h-4 w-4" />
               <span>CPU Scheduling & Algorithms</span>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/Equipments`))}>
-              <Wrench className="mr-2 h-4 w-4" />
-              <span>Equipment & Cranes</span>
+            <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/reports`))}>
+              <BarChart3 className="mr-2 h-4 w-4" />
+              <span>Analytics & Reports</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/logs`))}>
+              <ScrollText className="mr-2 h-4 w-4" />
+              <span>System & Audit Logs</span>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/trash`))}>
               <Trash2 className="mr-2 h-4 w-4" />
               <span>Trash Bin & Recovery</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/report-issue`))}>
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              <span>Report Incident / Fault</span>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/profile`))}>
               <User className="mr-2 h-4 w-4" />

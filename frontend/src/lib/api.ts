@@ -1,6 +1,6 @@
 // PortFlow API Client
 
-const rawBase = import.meta.env.VITE_API_BASE_URL;
+const rawBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
 // If user sets 'https://api.domain.com', append '/api' if not already present
 let resolvedBase = (rawBase || 'http://localhost:10000/api').trim().replace(/\/$/, '');
 if (!resolvedBase.endsWith('/api') && !resolvedBase.includes('/api/')) {
@@ -142,45 +142,65 @@ export const api = {
 
     
     Cargos: {
-        list: () => request<any[]>('/Cargos'),
+        list: () => request<any[]>('/cargos'),
         create: (body: any) =>
-            request<any>('/Cargos', {
+            request<any>('/cargos', {
                 method: 'POST',
                 body: JSON.stringify(body),
             }),
         update: (id: number, body: any) =>
-            request<any>(`/Cargos/${id}`, {
+            request<any>(`/cargos/${id}`, {
                 method: 'PUT',
                 body: JSON.stringify(body),
             }),
         delete: (id: number) =>
-            request<any>(`/Cargos/${id}`, {
+            request<any>(`/cargos/${id}`, {
                 method: 'DELETE',
             }),
     },
+    get cargos() { return this.Cargos; },
+    get cargo() { return this.Cargos; },
 
-    
     Equipments: {
-        list: () => request<any[]>('/Equipments'),
+        list: () => request<any[]>('/equipments'),
         create: (body: any) =>
-            request<any>('/Equipments', {
+            request<any>('/equipments', {
                 method: 'POST',
                 body: JSON.stringify(body),
             }),
         update: (id: number, body: any) =>
-            request<any>(`/Equipments/${id}`, {
+            request<any>(`/equipments/${id}`, {
                 method: 'PUT',
                 body: JSON.stringify(body),
             }),
         delete: (id: number) =>
-            request<any>(`/Equipments/${id}`, {
+            request<any>(`/equipments/${id}`, {
                 method: 'DELETE',
+            }),
+    },
+    get equipments() { return this.Equipments; },
+    get equipment() { return this.Equipments; },
+
+    system: {
+        logs: () => request<any[]>('/system/logs'),
+        audit: () => request<any[]>('/system/audit'),
+        reports: () => request<any>('/system/reports'),
+        dbAnalytics: () => request<any>('/system/db-analytics'),
+        reportIssue: (body: { title: string; description: string; severity?: string }) =>
+            request<any>('/system/report-issue', {
+                method: 'POST',
+                body: JSON.stringify(body),
             }),
     },
 
     
     os: {
         state: () => request<any>('/os/state'),
+        setAlgorithm: (algorithm: string) =>
+            request<any>('/os/algorithm', {
+                method: 'PUT',
+                body: JSON.stringify({ algorithm }),
+            }),
     },
 
     
@@ -203,6 +223,26 @@ export const api = {
             request<{ success: boolean; message: string; details: any }>('/trash/empty', {
                 method: 'DELETE',
             }),
+    },
+
+    graphql: {
+        query: async <T>(query: string, variables?: Record<string, any>): Promise<T> => {
+            const token = localStorage.getItem('portflow_auth_token');
+            const graphqlUrl = `${API_BASE_URL.replace(/\/api$/, '')}/graphql`;
+            const res = await fetch(graphqlUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ query, variables })
+            });
+            const json = await res.json();
+            if (json.errors && json.errors.length > 0) {
+                throw new Error(json.errors[0].message || 'GraphQL execution failed');
+            }
+            return json.data as T;
+        }
     },
 };
 

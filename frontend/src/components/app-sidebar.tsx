@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, Ship, Truck, Settings,
-  LogOut, Cpu, Boxes, User, Trash2, ScrollText, AlertTriangle
+  LogOut, Cpu, Boxes, User, Trash2, AlertTriangle,
+  ScrollText, BarChart3
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
@@ -44,6 +45,8 @@ export function AppSidebar(_props: { role?: string } = {}) {
     { page: 'equipments', label: 'Equipment', icon: Truck },
     { page: 'operations', label: 'Operations', icon: Settings },
     { page: 'scheduling', label: 'OS Scheduler', icon: Cpu },
+    { page: 'reports', label: 'Analytics & Reports', icon: BarChart3 },
+    { page: 'logs', label: 'System Logs', icon: ScrollText },
     { page: 'trash', label: 'Trash', icon: Trash2 },
     { page: 'report-issue', label: 'Report Issue', icon: AlertTriangle },
   ];
@@ -94,8 +97,9 @@ export function AppSidebar(_props: { role?: string } = {}) {
 
       <SidebarFooter className="border-t border-slate-100 dark:border-slate-800 p-3 flex flex-col gap-2">
         {/* System Online Status */}
-        <div className="px-2 py-1 flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
+        <div className="px-2 py-1 flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+          <span className="truncate">Port OS Engine Online</span>
         </div>
         <SidebarMenu className="mt-1">
           <SidebarMenuItem>

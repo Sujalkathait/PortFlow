@@ -22,6 +22,7 @@ const authLimiter = rateLimit({
     max: isDev ? 1000 : 300, // Generous limit for authentication
     standardHeaders: true,
     legacyHeaders: false,
+    skip: () => process.env.NODE_ENV === 'test' || process.env.DISABLE_RATE_LIMIT === 'true' || process.env.LOAD_TEST === 'true',
     message: { success: false, message: 'Too many authentication attempts. Please wait a moment and try again.' },
 });
 
