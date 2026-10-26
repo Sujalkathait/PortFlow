@@ -7,6 +7,22 @@
 
 ---
 
+# PART 0 — QUICK MEMBER RESPONSIBILITY MATRIX (SIMPLE ENGLISH FOR VIVA)
+
+> **💡 Quick Rule for Evaluator / Viva:**  
+> Every member owns **1 Frontend Page**, **1 Backend Service/Controller**, **1 Core OS Concept**, and **1 Dedicated DBMS Table**.
+
+| Member # | Name & Title | Frontend Page (React) | Backend Service / Controller | Dedicated OS Concept | Dedicated Database Table | 10-Second Viva Answer (Plain English) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Member 1** | **Operations & CPU Scheduling** | `OperationsPage.tsx`<br>• Job queue table<br>• "Dispatch Next" button<br>• `useOperations.ts` hook | `operations.controller.ts`<br>`operations.service.ts`<br>`operations.repository.ts` | **CPU Scheduling Algorithms**<br>• FCFS (Arrival Time)<br>• SJF (Shortest Burst Time)<br>• Swappable Strategy | `operations` Table<br>• Stores process state<br>• Waiting & turnaround ms<br>• B-Tree index on status | *"I built the Operations Hub and CPU scheduler. I manage the job queue, run jobs using FCFS and SJF algorithms, and record waiting and turnaround times in the operations table."* |
+| **Member 2** | **Vessel Traffic & PCB Lifecycle** | `ShipsPage.tsx`<br>• Ship registration modal<br>• IMO validation<br>• Docking status chips | `ships.controller.ts`<br>`ships.service.ts`<br>`ships.repository.ts` | **Process Control Block (PCB)**<br>• `Process.ts`<br>• 5 States: `NEW` ➔ `READY` ➔ `RUNNING` ➔ `WAITING` ➔ `TERMINATED` | `ships` Table<br>• Unique IMO numbers<br>• Vessel TEU capacity<br>• Foreign key to `berth_id` | *"I built the Marine Vessel module and OS Process lifecycle. Ships act as PCBs moving through 5 states, validated by unique IMO numbers in the ships table."* |
+| **Member 3** | **Container Cargo & Crane Mutex** | `CargoPage.tsx`<br>• Container manifest list<br>• 20ft/40ft TEU filters<br>• Hazard flags & yard zones | `cargo.controller.ts`<br>`cargo.service.ts`<br>`cargo.repository.ts` | **Mutual Exclusion (Mutex)**<br>• `Mutex.ts`<br>• Quay Crane lock<br>• Async FIFO Promise queue (No busy-waiting) | `cargo` Table<br>• Container weights & TEU<br>• Foreign key to `ship_id`<br>• View `containers` | *"I built the Container Cargo module and Quay Crane Mutex lock. Because one crane can only lift one container at a time, my Mutex prevents conflicts using a FIFO wait-queue."* |
+| **Member 4** | **Equipment & Berth Semaphores** | `EquipmentPage.tsx`<br>• Berth & Crane cards<br>• Availability badges<br>• Maintenance modal | `equipment.controller.ts`<br>`equipment.service.ts`<br>`equipment.repository.ts` | **Counting Semaphores**<br>• `Semaphore.ts`<br>• Pooled docking berths<br>• `acquire()` & `release()` | `equipment` Table<br>• Physical berths & cranes<br>• `status` & `assigned_to`<br>• View `resources` | *"I built the Physical Equipment module and Counting Semaphores. I treat the 5 port berths as a shared resource pool so ships cannot exceed available docking slots."* |
+| **Member 5** | **Telemetry & Deadlock Graph** | `SchedulingPage.tsx`<br>• Algorithm switcher UI<br>• Average $W_t$ and $T_t$ cards<br>• Deadlock alert graph | `os.controller.ts`<br>`PortSystem.ts` (Singleton)<br>`DeadlockDetector.ts` | **Deadlock Detection (DFS)**<br>• Wait-For Graph (WFG)<br>• Cycle detection via DFS<br>• 4 Coffman conditions | `system_logs` & Telemetry<br>• Waiting & turnaround ms<br>• Audit event logging<br>• Telemetry queries | *"I built the Scheduling dashboard and Deadlock Detector. I use a Wait-For Graph with DFS cycle detection to catch circular waits, and track system turnaround telemetry."* |
+| **Member 6** | **Security, Trash & Database** | `Login.tsx` & `TrashPage.tsx`<br>• 30s OTP reset modal<br>• 1-Click Recycle Bin<br>• AuthProvider context | `auth.controller.ts`<br>`auth.service.ts`<br>`trash.repository.ts`<br>`schema.sql` (3NF) | **Protection & Memory Reclaim**<br>• JWT Bearer tokens<br>• 30s OTP Map TTL eviction<br>• 2-Phase soft-delete reclaim | `users` Table & 3NF Schema<br>• Salted bcrypt passwords<br>• Soft-delete `deleted_at`<br>• 17 B-Tree indexes & Triggers | *"I built User Authentication, the 30-second OTP modal, the Recycle Bin, and the 3NF database schema with soft-delete protection and automatic update triggers."* |
+
+---
+
 # PART 1 — PROJECT OVERVIEW
 
 ### 1. What Problem Does PortFlow Solve?
@@ -31,7 +47,7 @@ To provide a full-stack, enterprise-grade Terminal Operating System that models 
 - **Recycle Bin (Soft-Delete Architecture):** Two-phase recovery preserving referential integrity via `deleted_at` timestamps across all entities.
 
 ### 5. Features Planned / Incomplete (Phase 3 & Future Roadmaps)
-- Advanced land-based logistics: Dedicated `trucks` and `warehouses` tables (`FUTURE_PHASES.md`).
+- Advanced land-based logistics: Dedicated `trucks` and `warehouses` tables (`folder/PHASES.md`).
 - Billing & invoicing automated engine (`bills` table).
 - Customs regulatory clearance workflow (`customs` & `inspections` tables).
 - Active Deadlock Recovery via Banker's Algorithm and process preemption (Phase 2 detects deadlocks; automated kill/rollback is marked for future phases).
@@ -649,46 +665,55 @@ Every member must be prepared to answer questions covering **all 4 dimensions** 
 
 ---
 
-### Questions for MEMBER 3 (Auth UI, Equipment & Trash)
-1. **Q: Explain how login works on the frontend.**
-   - *Simple Answer:* Operator enters email and password; if correct, they get access to the dashboard.
-   - *Technical Answer:* `handleLogin()` calls `api.auth.login()`, receives a JWT token and user object, stores the token in `localStorage`, updates `AuthProvider` context, and redirects to `/operator`.
-   - *File:* `frontend/src/pages/Login.tsx`
-2. **Q: How does the 30-second OTP password recovery work?**
-   - *Simple Answer:* You enter your email, a 6-digit code is generated with a 30s timer, and you enter it to change your password.
-   - *Technical Answer:* `handleSendOTP()` requests a 6-digit OTP via `/api/auth/forgot-password`. A `setInterval` timer counts down from 30s. Submitting verifies via `/api/auth/verify-otp` before allowing password reset.
-   - *File:* `frontend/src/pages/Login.tsx`
-3. **Q: How does `ProtectedRoute` prevent unauthorized access?**
-   - *Simple Answer:* If you are not logged in, it redirects you to the login page.
-   - *Technical Answer:* It checks `isAuthenticated` from `useAuth()`. If false, it renders `<Navigate to="/login" replace />`; otherwise, it renders the protected component tree.
-   - *File:* `frontend/src/auth/ProtectedRoute.tsx`
-4. **Q: What does the Equipment page represent?**
-   - *Simple Answer:* It shows all the port berths and cranes and their current status.
-   - *Technical Answer:* Represents the physical shared resources governed by OS Mutexes and Semaphores. Cards show availability (`Available`, `Occupied`, `Maintenance`) and active assignments.
-   - *File:* `frontend/src/pages/EquipmentPage.tsx`
-5. **Q: What is the Trash page and how does restore work?**
-   - *Simple Answer:* It is a recycle bin where you can restore deleted items with one click.
-   - *Technical Answer:* Consumes `/api/trash` displaying all entities with `deleted_at IS NOT NULL`. Clicking "Restore" triggers `POST /api/trash/restore/:collection/:id`, clearing `deleted_at`.
-   - *File:* `frontend/src/pages/TrashPage.tsx`
-6. **Q: What happens if an operator enters an expired OTP?**
-   - *Simple Answer:* The UI shows an error saying the code has expired.
-   - *Technical Answer:* If `otpTimer <= 0`, the client immediately sets an error message asking the user to request a new code; the backend also independently verifies timestamp expiration.
-   - *File:* `frontend/src/pages/Login.tsx`
-7. **Q: Where is the JWT token stored on the frontend?**
-   - *Simple Answer:* In browser local storage.
-   - *Technical Answer:* In `localStorage` under key `'portflow_auth_token'`. It is cleared on logout or on 401 unauthorized responses.
-   - *File:* `frontend/src/lib/api.ts`
-8. **Q: How does the "Empty Trash" feature work?**
-   - *Simple Answer:* It permanently purges everything in the recycle bin.
-   - *Technical Answer:* It sends `DELETE /api/trash/empty`, invoking `deleteMany` queries across all 4 collections on records where `deleted_at IS NOT NULL`.
-   - *File:* `frontend/src/pages/TrashPage.tsx`
-9. **Q: How does the sidebar highlight the active navigation item?**
-   - *Simple Answer:* It checks the current route view.
-   - *Technical Answer:* `app-sidebar.tsx` receives `activeView` as a prop and conditionally applies active background and text colors to the corresponding button.
-   - *File:* `frontend/src/components/app-sidebar.tsx`
-10. **Q: What would you improve in your module for Phase 3?**
-    - *Simple Answer:* Add real email delivery for the OTP instead of console display.
-    - *Technical Answer:* Integrate Nodemailer / SendGrid for production SMTP dispatch and add biometric WebAuthn support.
+### Questions for MEMBER 3 — Container Cargo Logistics & Crane Mutex Synchronization
+
+#### 🎨 Frontend (UI & Components)
+1. **Q: What does the Cargo Manifest page display, and how do operators interact with it?**
+   - *Simple Answer:* It displays the list of containers in the port, allows adding new containers, and filters them by TEU size or hazard status.
+   - *Technical Answer:* `CargoPage.tsx` renders container manifests fetched from `/api/cargos`. It features TEU distribution filters (20ft Standard vs 40ft High Cube), hazardous cargo warning badges, yard location dropdowns (`Yard A`, `Yard B`, `Customs Holding`), and a modal to register new cargo.
+   - *File:* `frontend/src/pages/CargoPage.tsx`
+2. **Q: How does the frontend differentiate between 20ft and 40ft container sizes?**
+   - *Simple Answer:* We provide buttons to filter standard 20ft TEUs or 40ft high-cube containers and calculate their total weight.
+   - *Technical Answer:* The state in `CargoPage.tsx` filters data on `size_type === '20FT'` (1 TEU) or `'40FT'` (2 TEUs), displaying distinct badge styling and computing aggregate tonnage in real time using `useMemo`.
+   - *File:* `frontend/src/pages/CargoPage.tsx`
+
+#### 🛠️ Backend (APIs & Controllers)
+3. **Q: How does `cargo.controller.ts` validate container data on creation?**
+   - *Simple Answer:* It checks container ID format, positive cargo weight, and ensures an incoming vessel name is provided.
+   - *Technical Answer:* It validates `cargo_number` uniqueness, ensures `weight_tons > 0`, checks that `size_type` is valid, and passes the payload to `cargoService.create()`, returning HTTP 201 Created.
+   - *File:* `backend/src/controllers/cargo.controller.ts`
+4. **Q: How does `cargo.repository.ts` implement soft-delete filtering?**
+   - *Simple Answer:* All active queries filter out rows where `deleted_at` is set.
+   - *Technical Answer:* Prisma queries in `cargo.repository.ts` include `where: { deleted_at: null }`. Soft deletion sets `deleted_at = new Date()`, enabling 1-click restoration from the Recycle Bin without losing relationship integrity.
+   - *File:* `backend/src/repositories/cargo.repository.ts`
+
+#### 💻 Dedicated OS Feature (Mutual Exclusion & Quay Crane Locks)
+5. **Q: What is Mutual Exclusion (Mutex), and why is it needed for Quay Cranes?**
+   - *Simple Answer:* Only one operation can use a crane at a time; a Mutex locks the crane so two jobs don't crash into each other.
+   - *Technical Answer:* A Quay Crane is a non-shareable physical resource. `Mutex.ts` enforces the critical section: when Process A acquires the crane lock, any other process requesting Crane A is placed into an asynchronous FIFO wait queue until Process A calls `unlock()`.
+   - *File:* `backend/src/os/Mutex.ts`
+6. **Q: How does `Mutex.ts` avoid CPU busy-waiting (spinlocks)?**
+   - *Simple Answer:* Instead of running a loop that eats CPU, waiting processes receive a Promise and sleep until the owner wakes them up.
+   - *Technical Answer:* In `Mutex.ts`, if the lock is held, the acquiring request creates a new Promise whose `resolve` callback is pushed to `waitQueue: (() => void)[]`. When `unlock()` is called, the next resolver in line is popped and executed without burning CPU cycles.
+   - *File:* `backend/src/os/Mutex.ts`
+7. **Q: What happens if a process crashes while holding a Mutex lock?**
+   - *Simple Answer:* It could cause a deadlock, so our system uses try/finally blocks to guarantee the lock is unlocked even on error.
+   - *Technical Answer:* In `OperationsService.ts`, execution is wrapped in a `try ... finally` block: `finally { await craneMutex.release(proc.id); }`. This ensures the lock is freed and waiting processes are unblocked even if execution throws an unhandled exception.
+   - *File:* `backend/src/os/Mutex.ts`
+
+#### 🗄️ Dedicated DBMS Table (`cargo` Table)
+8. **Q: Explain the schema and columns of your dedicated `cargo` table.**
+   - *Simple Answer:* Stores container ID, size (20ft/40ft), weight in tons, hazard flag, yard location, ship ID, and status.
+   - *Technical Answer:* Columns: `id SERIAL PRIMARY KEY`, `cargo_number VARCHAR(100) UNIQUE`, `size_type VARCHAR(50)`, `weight_tons FLOAT`, `cargo_type VARCHAR(100)`, `status VARCHAR(50)`, `ship_id INT REFERENCES ships(id)`, and `warehouse_id INT REFERENCES warehouses(id)`.
+   - *File:* `backend/supabase/schema.sql` / `backend/prisma/schema.prisma`
+9. **Q: What is the purpose of the backwards-compatible SQL view `containers`?**
+   - *Simple Answer:* It allows legacy code or endpoints that query `containers` to seamlessly read from the `cargo` table.
+   - *Technical Answer:* `CREATE OR REPLACE VIEW containers AS SELECT * FROM cargo;` maps legacy queries directly to the normalized `cargo` table, preserving backward compatibility without duplicating data.
+   - *File:* `backend/supabase/schema.sql`
+10. **Q: How does the foreign key from `cargo` to `ships` ensure referential integrity?**
+    - *Simple Answer:* A container cannot reference a ship that does not exist in the database.
+    - *Technical Answer:* `ship_id REFERENCES ships(id) ON DELETE RESTRICT` guarantees you cannot delete a vessel if containers are still assigned to its manifest, preventing orphaned freight records.
+    - *File:* `backend/supabase/schema.sql`
 
 ---
 

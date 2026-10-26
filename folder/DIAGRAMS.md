@@ -160,17 +160,25 @@ classDiagram
     OperationsService --> PortSystem : sends jobs to run
 ```
 
-### 💡 Simple Explanation
-- **`Process`**: Represents a single port job (like unloading 1 container). It tracks start time, burst duration, priority, and state (READY, RUNNING, TERMINATED).
-- **`Scheduler`**: Decides which job runs next using classic rules:
-  - **FCFS**: First Come, First Served.
-  - **SJF**: Shortest Job First.
-  - **Priority**: High-priority jobs run first.
-  - **Round Robin**: Gives each job a 2-second turn.
-- **`Mutex`**: A lock. Because a crane can only lift one container at a time, a process must lock the crane before use and unlock it when done.
-- **`Semaphore`**: A counter for berths. If 5 berths exist, it counts down when ships dock and counts up when they leave.
-- **`DeadlockDetector`**: Checks if two jobs are waiting for each other's equipment and alerts if a cycle is found.
-- **`PortSystem`**: The single controller that connects the scheduler, locks, and resources together.
+### 💡 Simple Explanation of Classes
+- **`Process`**: Represents a single port job (e.g. unloading a container from a ship). It tracks process ID, arrival time, burst duration, priority, and state (`READY`, `RUNNING`, `TERMINATED`).
+- **`Scheduler`**: The CPU scheduling engine that decides which job runs next using standard algorithms.
+- **`SchedulingStrategy`**: Common interface that lets us swap algorithms at runtime without restarting the server.
+- **`Mutex`**: A mutual-exclusion lock. Because a crane can only lift one container at a time, a process must lock the crane before use and unlock it when finished.
+- **`Semaphore`**: A counting semaphore for berths. If 5 berths exist, it counts down when ships dock and counts up when they depart.
+- **`DeadlockDetector`**: Builds a Wait-For Graph (WFG) and runs Depth-First Search (DFS) to detect circular resource wait cycles.
+- **`PortSystem`**: The Singleton coordinator that binds the scheduler, locks, and berths into one unified OS engine.
+
+### 🔗 Class Diagram Relationships Explained (Plain English)
+1. **Implementation / Realization (`SchedulingStrategy <|.. Strategy`):**
+   - `FCFSStrategy`, `SJFStrategy`, `PriorityStrategy`, and `RoundRobinStrategy` all implement the `SchedulingStrategy` interface.
+   - *Meaning:* The `Scheduler` can switch between any algorithm at runtime instantly without touching the rest of the codebase.
+2. **Composition (`PortSystem` owns `Scheduler`, `Mutex`, `Semaphore`, `DeadlockDetector`):**
+   - `PortSystem` is the master controller that creates and holds the crane mutex map, the berth semaphore counter, and the deadlock detector.
+3. **Aggregation / Queue (`Scheduler` holds `Process[]`):**
+   - The `Scheduler` maintains an internal `readyQueue` array of waiting `Process` objects. Jobs enter the queue, get sorted by algorithm, and leave when executed.
+4. **Dependency / Invocation (`OperationsService` calls `PortSystem`):**
+   - The web API service (`OperationsService`) depends on `PortSystem`. When an operator clicks "Dispatch Next" in the browser, `OperationsService` delegates the work to `PortSystem.executeNextProcess()`.
 
 ---
 
@@ -413,18 +421,40 @@ erDiagram
 ```
 
 ### 💡 Simple Explanation of the 12 Tables
-1. **`users`**: People who can log in (Operator, Admin, Customs Officer).
-2. **`equipment`**: Cranes and Berths used by ships and jobs.
-3. **`ships`**: Cargo vessels visiting the port. Points to an assigned berth via `berth_equipment_id`.
-4. **`warehouses`**: Storage buildings (dry storage, cold storage).
-5. **`cargo`**: Containers. Belongs to a ship (`ship_id`) and can be stored in a warehouse (`warehouse_id`).
-6. **`operations`**: Central table for jobs. Connects a ship, cargo, crane, berth, and the user who started it.
-7. **`trucks`**: Ground vehicles carrying containers away from the port.
-8. **`gate_passes`**: Permission tickets for trucks to enter and leave the gates.
-9. **`customs_inspections`**: Legal inspection records for containers (Passed / Flagged).
-10. **`bills`**: Invoices generated after work completes (docking fee + crane fee).
-11. **`issues`**: Maintenance or incident reports for broken equipment.
-12. **`system_logs`**: Audit trail of every system action and error.
+1. **`users`**: Authenticated staff (Terminal Operator, Admin, Customs Officer).
+2. **`equipment`**: Physical infrastructure — Berths (parking slots) and Cranes (container lifting).
+3. **`ships`**: Cargo vessels visiting the port, linked to assigned berths.
+4. **`warehouses`**: Storage facilities (Cold Chain Reefer Storage and Dry Yard Storage).
+5. **`cargo`**: Shipping container freight inventory with TEU sizes (20ft, 40ft) and tare weight.
+6. **`operations`**: Central operational jobs (Ship + Crane + Berth + Priority + Status).
+7. **`trucks`**: Ground logistics trucks transporting containers in and out of the port.
+8. **`gate_passes`**: Security gate access passes for trucks entering through specific lanes.
+9. **`customs_inspections`**: Legal customs compliance checks and duty tariff records.
+10. **`bills`**: Automated financial invoices itemizing berth docking, crane usage, and storage fees.
+11. **`issues`**: Mechanical incident tickets and breakdown alerts for faulty equipment.
+12. **`system_logs`**: Immutable audit logs of all user actions and OS scheduling events.
+
+### 🔗 Entity-Relationship (ER) Connections Explained (Plain English)
+Every relationship in PortFlow connects tables with explicit Foreign Key (FK) rules (`ON DELETE SetNull` or `Cascade`):
+
+1. **`users` (1) $\rightarrow$ (Many) `operations`, `gate_passes`, `customs_inspections`, `issues`, `system_logs`:**
+   - *Meaning:* One user (operator, inspector, technician) can initiate multiple operations, issue multiple gate passes, clear multiple customs inspections, report multiple issues, or trigger multiple system logs.
+2. **`equipment` (1) $\rightarrow$ (Many) `ships` (`berth_equipment_id`):**
+   - *Meaning:* A physical Berth equipment can have multiple ships dock there over time (one ship at a time per berth).
+3. **`equipment` (1) $\rightarrow$ (Many) `operations` (`crane_equipment_id` & `berth_equipment_id`):**
+   - *Meaning:* A Quay Crane or Berth is used across multiple operations sequentially (protected by Mutex locks in real time).
+4. **`ships` (1) $\rightarrow$ (Many) `cargo` (`ship_id`):**
+   - *Meaning:* One container vessel carries multiple cargo containers on its manifest.
+5. **`ships` (1) $\rightarrow$ (Many) `operations` (`ship_id`):**
+   - *Meaning:* A single ship can have multiple loading and unloading jobs during its stay.
+6. **`warehouses` (1) $\rightarrow$ (Many) `cargo` (`warehouse_id`):**
+   - *Meaning:* One warehouse facility (e.g. Cold Chain CFS) stores many containers in its yard.
+7. **`cargo` (1) $\rightarrow$ (Many) `operations`, `trucks`, `gate_passes`, `customs_inspections`, `bills`:**
+   - *Meaning:* A container is moved by an operation, assigned to a truck, verified by a gate pass, scanned by customs, and charged storage fees on an invoice.
+8. **`trucks` (1) $\rightarrow$ (Many) `gate_passes` (`truck_id`):**
+   - *Meaning:* A drayage truck receives a new Gate Pass each time it checks in or checks out through the terminal security gate.
+9. **`operations` (1) $\rightarrow$ (Many) `bills` (`operation_id`):**
+   - *Meaning:* When an operation completes, an automated invoice is generated itemizing crane hours, turnaround time, and docking tariffs.
 
 ---
 
