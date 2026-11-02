@@ -90,7 +90,7 @@ export function CargoPage() {
         }
     };
 
-    const handleUpdateStatus = async (id: number, status: string) => {
+    const handleUpdateStatus = useCallback(async (id: number, status: string) => {
         try {
             await api.Cargos.update(id, { status });
             showSuccess(`Cargo status updated to ${status}`);
@@ -98,9 +98,9 @@ export function CargoPage() {
         } catch (e: any) {
             setError(e.message || 'Failed to update cargo status');
         }
-    };
+    }, [load, showSuccess, setError]);
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = useCallback(async (id: number) => {
         if (!window.confirm('Move this cargo to Trash?')) return;
         try {
             await api.Cargos.delete(id);
@@ -109,7 +109,7 @@ export function CargoPage() {
         } catch (e: any) {
             setError(e.message || 'Failed to delete cargo');
         }
-    };
+    }, [load, showSuccess, setError]);
 
     const columns: ColumnDef<CargoRecord>[] = useMemo(() => [
         {
@@ -235,7 +235,7 @@ export function CargoPage() {
                 </div>
             ),
         },
-    ], []);
+    ], [handleUpdateStatus, handleDelete]);
 
     return (
         <div className="space-y-6">

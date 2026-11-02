@@ -78,7 +78,7 @@ export function EquipmentPage() {
         }
     };
 
-    const handleUpdateStatus = async (id: number, status: string) => {
+    const handleUpdateStatus = useCallback(async (id: number, status: string) => {
         try {
             await api.Equipments.update(id, { status });
             showSuccess(`Equipment status updated to ${status}`);
@@ -86,9 +86,9 @@ export function EquipmentPage() {
         } catch (e: any) {
             setError(e.message || 'Failed to update equipment');
         }
-    };
+    }, [load, showSuccess, setError]);
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = useCallback(async (id: number) => {
         if (!window.confirm('Move this equipment to Trash?')) return;
         try {
             await api.Equipments.delete(id);
@@ -97,7 +97,7 @@ export function EquipmentPage() {
         } catch (e: any) {
             setError(e.message || 'Failed to delete equipment');
         }
-    };
+    }, [load, showSuccess, setError]);
 
     const typeIcon = (t: string) => {
         if (t === 'Berth') return <Anchor className="h-4 w-4 text-sky-500" />;
@@ -213,7 +213,7 @@ export function EquipmentPage() {
                 </div>
             ),
         },
-    ], []);
+    ], [handleUpdateStatus, handleDelete]);
 
     return (
         <div className="space-y-6">

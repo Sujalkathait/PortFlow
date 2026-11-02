@@ -56,7 +56,7 @@ export function TrashPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setError]);
 
   useEffect(() => {
     void loadTrash();

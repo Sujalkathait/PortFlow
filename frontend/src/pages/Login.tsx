@@ -51,14 +51,16 @@ export function Login() {
 
   // 30-Second Countdown Timer for OTP Expiration
   useEffect(() => {
-    let interval: any = null;
-    if (otpTimerActive && otpTimer > 0) {
-      interval = setInterval(() => {
-        setOtpTimer((prev) => prev - 1);
-      }, 1000);
-    } else if (otpTimer === 0) {
-      setOtpTimerActive(false);
-    }
+    if (!otpTimerActive || otpTimer <= 0) return;
+    const interval = setInterval(() => {
+      setOtpTimer((prev) => {
+        if (prev <= 1) {
+          setOtpTimerActive(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
     return () => clearInterval(interval);
   }, [otpTimerActive, otpTimer]);
 

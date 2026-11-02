@@ -90,7 +90,7 @@ export function ShipsPage() {
         }
     };
 
-    const handleUpdateStatus = async (id: number, status: string) => {
+    const handleUpdateStatus = useCallback(async (id: number, status: string) => {
         try {
             await api.ships.update(id, { status });
             showSuccess(`Ship status updated to ${status}`);
@@ -98,9 +98,9 @@ export function ShipsPage() {
         } catch (e: any) {
             setError(e.message || 'Failed to update ship status');
         }
-    };
+    }, [load, showSuccess, setError]);
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = useCallback(async (id: number) => {
         if (!window.confirm('Move this ship to Trash?')) return;
         try {
             await api.ships.delete(id);
@@ -109,7 +109,7 @@ export function ShipsPage() {
         } catch (e: any) {
             setError(e.message || 'Failed to delete ship');
         }
-    };
+    }, [load, showSuccess, setError]);
 
     const columns: ColumnDef<ShipRecord>[] = useMemo(() => [
         {
@@ -238,7 +238,7 @@ export function ShipsPage() {
                 </div>
             ),
         },
-    ], []);
+    ], [handleUpdateStatus, handleDelete]);
 
     return (
         <div className="space-y-6">

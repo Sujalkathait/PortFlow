@@ -6,9 +6,12 @@ export const getTrash = async (req: AuthenticatedRequest, res: Response): Promis
     try {
         let items = await trashService.getTrash();
 
-        // Operators only see their own trashed operations/cargo
+        // Operators see items they created/deleted, or system-level/unassigned deleted items
         if (req.user && req.user.role === 'Operator') {
             items = items.filter(item => 
+                !item.deleted_by ||
+                item.deleted_by === 'system' ||
+                item.deleted_by === 'unknown' ||
                 item.created_by === req.user!.email || 
                 item.deleted_by === req.user!.email
             );

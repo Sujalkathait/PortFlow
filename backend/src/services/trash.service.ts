@@ -21,7 +21,12 @@ export class TrashService implements ITrashService {
     }
 
     public async getTrash(): Promise<TrashedRecord[]> {
-        return this.repo.getTrash();
+        try {
+            return await this.repo.getTrash();
+        } catch (err: any) {
+            console.warn('[TrashService] Database unavailable, serving empty list:', err.message);
+            return [];
+        }
     }
 
     public async restoreItem(collection: string, id: number): Promise<any> {

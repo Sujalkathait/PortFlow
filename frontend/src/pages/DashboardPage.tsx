@@ -71,7 +71,10 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
 
   // Live counts
   const shipsCount = ships.length;
-  const activeOpsCount = operations.filter(o => o.status === 'Running' || o.status === 'In progress').length;
+  const activeOpsCount = operations.filter(o => {
+    const s = o.status?.toLowerCase();
+    return s === 'running' || s === 'in progress';
+  }).length;
   const totalOpsCount = operations.length;
   const containersCount = cargos.length;
 

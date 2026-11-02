@@ -229,15 +229,27 @@ export const api = {
         query: async <T>(query: string, variables?: Record<string, any>): Promise<T> => {
             const token = localStorage.getItem('portflow_auth_token');
             const graphqlUrl = `${API_BASE_URL.replace(/\/api$/, '')}/graphql`;
-            const res = await fetch(graphqlUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {})
-                },
-                body: JSON.stringify({ query, variables })
-            });
-            const json = await res.json();
+            let res: Response;
+            try {
+                res = await fetch(graphqlUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { Authorization: `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify({ query, variables })
+                });
+            } catch {
+                throw new Error(
+                    `Unable to connect to PortFlow GraphQL endpoint (${graphqlUrl}). Please verify backend is running.`
+                );
+            }
+            let json: any;
+            try {
+                json = await res.json();
+            } catch {
+                throw new Error(`GraphQL endpoint returned an invalid response (HTTP ${res.status}).`);
+            }
             if (json.errors && json.errors.length > 0) {
                 throw new Error(json.errors[0].message || 'GraphQL execution failed');
             }
@@ -245,4 +257,3 @@ export const api = {
         }
     },
 };
-
