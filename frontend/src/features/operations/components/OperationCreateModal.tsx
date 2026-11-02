@@ -66,7 +66,7 @@ export function OperationCreateModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="relative w-full max-w-lg rounded-xl border bg-background p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="relative w-full max-w-lg rounded-xl border bg-background p-4 xs:p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between pb-4 border-b">
                     <div className="flex items-center gap-2">
                         <Plus className="h-5 w-5 text-primary" />
@@ -113,7 +113,7 @@ export function OperationCreateModal({
                     {/* Dynamic Berth Selection */}
                     <div className="space-y-2">
                         <label className="text-xs font-semibold text-muted-foreground uppercase">Berth Allocation</label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                             <select
                                 value={formBerth}
                                 onChange={e => setFormBerth(e.target.value)}
@@ -143,7 +143,7 @@ export function OperationCreateModal({
                     {/* Dynamic Crane Selection */}
                     <div className="space-y-2">
                         <label className="text-xs font-semibold text-muted-foreground uppercase">Crane Allocation</label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                             <select
                                 value={formCrane}
                                 onChange={e => setFormCrane(e.target.value)}
@@ -170,7 +170,7 @@ export function OperationCreateModal({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-2">
                             <label className="text-xs font-semibold text-muted-foreground uppercase">Priority</label>
                             <select

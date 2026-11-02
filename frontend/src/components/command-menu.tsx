@@ -62,12 +62,13 @@ export function CommandMenu(_props: CommandMenuProps = {}) {
       <Button
         variant="outline"
         size="sm"
-        className="relative h-9 w-full justify-start rounded-md bg-muted/40 text-sm font-normal text-muted-foreground shadow-none sm:w-64 sm:pr-12 md:w-80"
+        className="relative h-9 w-9 p-0 xs:w-44 xs:px-3 sm:w-64 md:w-80 justify-center xs:justify-start rounded-lg bg-muted/40 text-xs xs:text-sm font-normal text-muted-foreground shadow-none sm:pr-12 shrink-0 xs:shrink"
         onClick={() => setOpen(true)}
+        aria-label="Search port operations"
       >
-        <Search className="mr-2 h-4 w-4" />
+        <Search className="h-4 w-4 xs:mr-2 shrink-0" />
         <span className="hidden lg:inline-flex">Search port, ships, actions...</span>
-        <span className="inline-flex lg:hidden">Search...</span>
+        <span className="hidden xs:inline-flex lg:hidden">Search...</span>
         <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
           <span className="text-xs">⌘</span>K
         </kbd>
@@ -138,7 +139,7 @@ export function CommandMenu(_props: CommandMenuProps = {}) {
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/Cargos`))}>
               <Plus className="mr-2 h-4 w-4" />
-              <span>Add Cargo Manifest</span>
+              <span>Add Cargo </span>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/scheduling`))}>
               <Play className="mr-2 h-4 w-4" />

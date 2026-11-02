@@ -85,7 +85,7 @@ function DashboardLayout({ children }: { role?: Role; children: React.ReactNode 
             <AppSidebar />
             <a className="skip-link" href="#main-content-area">Skip to main content</a>
             <div className="flex-1 flex flex-col min-w-0 bg-[#f8fafc] dark:bg-background overflow-hidden h-screen">
-                <header className="flex h-16 items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-background/95 px-4 sm:px-6 lg:px-8 gap-3">
+                <header className="flex h-16 items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-background/95 px-3 sm:px-6 lg:px-8 gap-2 sm:gap-3 shrink-0">
                     <div className="flex items-center gap-3">
                         <SidebarTrigger />
                         <span className="text-sm font-medium text-slate-500 hidden md:block">
@@ -98,7 +98,7 @@ function DashboardLayout({ children }: { role?: Role; children: React.ReactNode 
                         <ThemeToggle dark={dark} onToggle={() => setDark(value => !value)} />
 
                         {/* Clock widget */}
-                        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs">
+                        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs whitespace-nowrap">
                             <Calendar className="h-3.5 w-3.5 text-slate-400" />
                             <span>{nowString}</span>
                         </div>
@@ -126,7 +126,7 @@ function DashboardLayout({ children }: { role?: Role; children: React.ReactNode 
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-7" id="main-content-area" role="main" tabIndex={-1}>
+                <main className="flex-1 overflow-auto p-3.5 xs:p-4 sm:p-5 md:p-6 lg:p-7 xl:p-8 safe-bottom" id="main-content-area" role="main" tabIndex={-1}>
                     {children}
                 </main>
             </div>

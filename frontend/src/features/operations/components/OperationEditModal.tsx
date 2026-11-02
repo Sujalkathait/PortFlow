@@ -17,7 +17,7 @@ export function OperationEditModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="relative w-full max-w-md rounded-xl border bg-background p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="relative w-full max-w-md rounded-xl border bg-background p-4 xs:p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between pb-4 border-b">
                     <div className="flex items-center gap-2">
                         <Sliders className="h-5 w-5 text-primary" />

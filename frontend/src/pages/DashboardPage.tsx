@@ -99,7 +99,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             PORT OPERATIONS
           </span>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-0.5">
+          <h1 className="text-2xl xs:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-0.5">
             Dashboard & Monitoring
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -111,7 +111,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
       </div>
 
       {/* Row 1: Key Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* 1. Total Ships */}
         <div
           onClick={() => navigate(`${basePath}/ships`)}
@@ -223,7 +223,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
       </div>
 
       {/* Row 2: Performance & Insights Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Card 5: Best Result */}
         <div className="bg-[#f0fdf4] dark:bg-emerald-950/20 border border-[#dcfce7] dark:border-emerald-900/50 rounded-2xl p-5 shadow-xs">
           <div className="flex items-center gap-2.5">

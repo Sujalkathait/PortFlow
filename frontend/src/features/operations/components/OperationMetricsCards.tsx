@@ -18,9 +18,9 @@ export function OperationMetricsCards({
     disabled = false,
 }: OperationMetricsCardsProps) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {/* Quick Dispatch Card */}
-            <Card className="md:col-span-2 bg-gradient-to-r from-card to-muted/20 border shadow-sm">
+            <Card className="xs:col-span-2 md:col-span-2 bg-gradient-to-r from-card to-muted/20 border shadow-sm">
                 <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4">
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -37,7 +37,7 @@ export function OperationMetricsCards({
                         size="sm"
                         disabled={queuedCount === 0 || disabled}
                         onClick={onDispatch}
-                        className="bg-primary text-primary-foreground shadow"
+                        className="w-full sm:w-auto bg-primary text-primary-foreground shadow min-h-[36px]"
                     >
                         <Play className="mr-2 h-3.5 w-3.5" /> Dispatch Next Process
                     </Button>

@@ -30,11 +30,13 @@ export function OperationsTable({
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="-ml-3 h-8 text-xs font-semibold"
+                    className="h-8 text-xs font-semibold"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                 >
                     Ref
-                    <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
+                    <span className="ml-2 h-3.5 w-3.5 align-middle">
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                    </span>
                 </Button>
             ),
             cell: ({ row }) => (
@@ -56,11 +58,13 @@ export function OperationsTable({
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="-ml-3 h-8 text-xs font-semibold"
+                    className="h-8 text-xs font-semibold"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                 >
                     Ship
-                    <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
+                    <span className="ml-2 h-3.5 w-3.5 align-middle">
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                    </span>
                 </Button>
             ),
             cell: ({ row }) => (

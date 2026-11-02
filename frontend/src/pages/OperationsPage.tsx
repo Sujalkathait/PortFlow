@@ -52,12 +52,12 @@ export function OperationsPage() {
                         Create, monitor, and dispatch real-time port operations with custom crane/berth allocation
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => void refresh()} disabled={loading}>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <Button variant="outline" size="sm" onClick={() => void refresh()} disabled={loading} className="flex-1 sm:flex-initial min-h-[38px] sm:min-h-[36px]">
                         <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         Refresh
                     </Button>
-                    <Button size="sm" onClick={() => setShowCreate(true)}>
+                    <Button size="sm" onClick={() => setShowCreate(true)} className="flex-1 sm:flex-initial min-h-[38px] sm:min-h-[36px]">
                         <Plus className="mr-2 h-4 w-4" />
                         New Operation
                     </Button>

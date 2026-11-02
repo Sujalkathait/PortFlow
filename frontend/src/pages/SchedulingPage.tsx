@@ -74,15 +74,15 @@ export function SchedulingPage() {
                         <Cpu className="w-5 h-5" />
                         <span className="text-xs font-bold tracking-widest uppercase">OS Engine</span>
                     </div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                    <h1 className="text-2xl xs:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                         OS Scheduler & Resource Control
                     </h1>
                     <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xl">
                         Real-time CPU Scheduling, Mutex Lock Allocation, Semaphores, and Deadlock Detection.
                     </p>
                 </div>
-                <div className="flex items-center gap-3 mt-2 sm:mt-0">
-                    <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} className="shadow-sm">
+                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+                    <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} className="flex-1 sm:flex-initial shadow-sm min-h-[38px] sm:min-h-[36px]">
                         <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         Refresh
                     </Button>
@@ -91,7 +91,7 @@ export function SchedulingPage() {
                         size="sm"
                         onClick={() => void handleDispatch()}
                         disabled={readyQueue.length === 0}
-                        className="shadow-sm bg-blue-600 hover:bg-blue-700 text-white"
+                        className="flex-1 sm:flex-initial shadow-sm bg-blue-600 hover:bg-blue-700 text-white min-h-[38px] sm:min-h-[36px]"
                     >
                         <Play className="mr-2 h-4 w-4 fill-current" />
                         Dispatch Next Process
@@ -131,13 +131,13 @@ export function SchedulingPage() {
                     </div>
                     <div className="flex items-center gap-3 w-full md:w-auto">
                         <span className="text-sm text-slate-500 hidden lg:inline">Current Policy:</span>
-                        <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 p-1 bg-white dark:bg-slate-950 shadow-sm w-full md:w-auto flex-wrap">
+                        <div className="grid grid-cols-2 xs:grid-cols-4 md:flex rounded-lg border border-slate-200 dark:border-slate-700 p-1 bg-white dark:bg-slate-950 shadow-sm w-full md:w-auto gap-1">
                             {(['FCFS', 'SJF', 'ROUND_ROBIN', 'PRIORITY'] as const).map((algo) => (
                                 <button
                                     key={algo}
                                     type="button"
                                     onClick={() => void handleAlgoChange(algo)}
-                                    className={`flex-1 md:flex-none px-3.5 py-2 text-xs font-bold rounded-md transition-all ${
+                                    className={`flex-1 md:flex-none px-3.5 py-2 min-h-[38px] text-xs font-bold rounded-md transition-all text-center flex items-center justify-center ${
                                         schedulerType === algo
                                             ? 'bg-blue-600 text-white shadow-sm'
                                             : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
@@ -152,7 +152,7 @@ export function SchedulingPage() {
             </Card>
 
             {/* Top Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="shadow-sm border-slate-200 dark:border-slate-800">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-xs font-bold text-slate-500 uppercase tracking-wider">Algorithm</CardTitle>
@@ -413,7 +413,7 @@ export function SchedulingPage() {
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs">
+                        <table className="w-full text-left text-xs min-w-[760px]">
                             <thead className="bg-slate-100/75 dark:bg-slate-900/50 border-b text-slate-600 dark:text-slate-400 uppercase font-bold tracking-wider">
                                 <tr>
                                     <th className="px-6 py-3.5">Algorithm</th>

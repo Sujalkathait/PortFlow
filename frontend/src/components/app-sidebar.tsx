@@ -8,6 +8,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarHeader,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, Ship, Truck, Settings,
@@ -21,10 +22,21 @@ export function AppSidebar(_props: { role?: string } = {}) {
   const { signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const basePath = '/operator';
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   const handleSignOut = async () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
     await signOut();
     navigate('/login', { replace: true });
   };
@@ -56,7 +68,7 @@ export function AppSidebar(_props: { role?: string } = {}) {
       <SidebarHeader className="border-b border-slate-100 dark:border-slate-800/80 px-4 py-3.5">
         <div
           className="flex items-center gap-2.5 cursor-pointer"
-          onClick={() => navigate(basePath)}
+          onClick={() => handleNavigate(basePath)}
         >
           <div className="h-8 w-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
             <Ship className="h-5 w-5" />
@@ -77,9 +89,9 @@ export function AppSidebar(_props: { role?: string } = {}) {
                   <SidebarMenuItem key={page}>
                     <SidebarMenuButton
                       isActive={isActive}
-                      onClick={() => navigate(page === 'dashboard' ? basePath : `${basePath}/${page}`)}
+                      onClick={() => handleNavigate(page === 'dashboard' ? basePath : `${basePath}/${page}`)}
                       tooltip={label}
-                      className={`w-full rounded-xl text-sm font-medium transition-colors px-3 py-2.5 flex items-center gap-3 ${isActive
+                      className={`w-full rounded-xl text-sm font-medium transition-colors px-3 py-2.5 min-h-[40px] flex items-center gap-3 ${isActive
                           ? 'bg-[#e0f2fe] text-[#0284c7] font-bold hover:bg-[#e0f2fe] dark:bg-sky-950/60 dark:text-sky-300'
                           : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
                         }`}
@@ -104,9 +116,9 @@ export function AppSidebar(_props: { role?: string } = {}) {
         <SidebarMenu className="mt-1">
           <SidebarMenuItem>
             <SidebarMenuButton
-              onClick={() => navigate(`${basePath}/profile`)}
+              onClick={() => handleNavigate(`${basePath}/profile`)}
               tooltip="Profile"
-              className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 rounded-xl"
+              className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 rounded-xl min-h-[40px]"
             >
               <User className="h-4 w-4" />
               <span>Profile</span>
@@ -116,7 +128,7 @@ export function AppSidebar(_props: { role?: string } = {}) {
             <SidebarMenuButton
               onClick={() => void handleSignOut()}
               tooltip="Logout"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl min-h-[40px]"
             >
               <LogOut className="h-4 w-4" />
               <span>Logout</span>

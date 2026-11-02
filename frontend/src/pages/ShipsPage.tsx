@@ -118,11 +118,13 @@ export function ShipsPage() {
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="-ml-3 h-8 text-xs font-semibold"
+                    className="h-8 text-xs font-semibold"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                 >
                     ID
-                    <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
+                    <span className="ml-2 h-3.5 w-3.5 align-middle">
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                    </span>
                 </Button>
             ),
             cell: ({ row }) => (
@@ -137,11 +139,13 @@ export function ShipsPage() {
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="-ml-3 h-8 text-xs font-semibold"
+                    className="h-8 text-xs font-semibold"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                 >
                     Vessel Name
-                    <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
+                    <span className="ml-2 h-3.5 w-3.5 align-middle">
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                    </span>
                 </Button>
             ),
             cell: ({ row }) => (
@@ -169,11 +173,13 @@ export function ShipsPage() {
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="-ml-3 h-8 text-xs font-semibold"
+                    className="h-8 text-xs font-semibold"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                 >
                     Capacity (TEU)
-                    <ArrowUpDown className="ml-2 h-3.5 w-3.5" />
+                    <span className="ml-2 h-3.5 w-3.5 align-middle">
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                    </span>
                 </Button>
             ),
             cell: ({ row }) => (
@@ -247,12 +253,12 @@ export function ShipsPage() {
                         Register, track berthing locations, and manage vessels in port
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} className="flex-1 sm:flex-initial min-h-[38px] sm:min-h-[36px]">
                         <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                         Refresh
                     </Button>
-                    <Button size="sm" onClick={() => setShowCreate(true)}>
+                    <Button size="sm" onClick={() => setShowCreate(true)} className="flex-1 sm:flex-initial min-h-[38px] sm:min-h-[36px]">
                         <Plus className="mr-2 h-4 w-4" />
                         Register Ship
                     </Button>
@@ -309,7 +315,7 @@ export function ShipsPage() {
             {/* REGISTER SHIP MODAL */}
             {showCreate && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="relative w-full max-w-lg rounded-xl border bg-background p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+                    <div className="relative w-full max-w-lg rounded-xl border bg-background p-4 xs:p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between pb-4 border-b">
                             <div className="flex items-center gap-2">
                                 <Ship className="h-5 w-5 text-primary" />
@@ -340,7 +346,7 @@ export function ShipsPage() {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-semibold text-muted-foreground uppercase">Vessel Type</label>
                                     <select
@@ -370,7 +376,7 @@ export function ShipsPage() {
                             {/* Dynamic Berth Selection (apne according) */}
                             <div className="space-y-2">
                                 <label className="text-xs font-semibold text-muted-foreground uppercase">Assign Berth (Dynamic)</label>
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                                     <select
                                         value={berthOption}
                                         onChange={e => setBerthOption(e.target.value)}
