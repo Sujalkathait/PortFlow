@@ -85,6 +85,12 @@ Scale PortFlow to an enterprise-grade Marine Terminal Operating System (TOS) fea
    - 100% passing automated Jest unit tests for OS algorithms and PortSystem ([`Scheduler.test.ts`](../backend/src/os/__tests__/Scheduler.test.ts)).
    - Grafana k6 load test script simulating 50 to 3,000 concurrent virtual users ([`load-test.k6.js`](../load-test.k6.js)).
    - Zero linter errors with Oxlint.
+6. **Cloud Deployment Architecture & Production Readiness:**
+   - **Infrastructure as Code (IaC):** Production blueprint in [`render.yaml`](../render.yaml) targeting Render Web Services.
+   - **Dual Database Connections:** PgBouncer pooled connection on port 6543 for web traffic (`DATABASE_URL`) and direct connection on port 5432 (`DIRECT_URL`) for Prisma migrations.
+   - **Zero-Downtime Health Probing:** Built-in `GET /health` endpoint monitoring database connectivity, system uptime, and memory usage.
+   - **Optimized Production Build:** Clean build pipeline (`npm run build` $\rightarrow$ `tsc`) emitting lightweight JavaScript bundle to `./dist`, invoked by `node index.js`.
+   - **Production Security:** Hardened with Helmet HTTP headers, CORS origin allowlisting, and Express rate limiting.
 
 ---
 

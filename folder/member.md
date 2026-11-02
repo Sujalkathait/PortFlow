@@ -918,6 +918,11 @@ Every member must be prepared to answer questions covering **all 4 dimensions** 
 28. **What are the 4 CPU scheduling algorithms implemented?** First-Come First-Served (FCFS), Shortest Job First (SJF), Priority Scheduling, and Round Robin.
 29. **What represents Mutexes and Semaphores in PortFlow?** Quay Cranes represent Mutexes (1:1 lock); Docking Berths represent Counting Semaphores (pooled permits).
 30. **What is the goal for Phase 3?** Advanced analytics dashboards, system logging, and land-based truck/warehouse logistics.
+31. **How is the backend deployed to the cloud?** Deployed as a containerized Node.js Web Service on **Render**, configured via our Infrastructure-as-Code blueprint ([`render.yaml`](../render.yaml)) connected to a managed **Supabase PostgreSQL** instance.
+32. **What happens during the deployment build phase on Render?** Render runs `npm install` (which automatically triggers `postinstall: prisma generate` to build the type-safe Prisma client) followed by `npm run build` (`tsc` compiling TypeScript to the `./dist` folder).
+33. **How does the server start in production?** Render executes `npm start` $\to$ `node index.js`. It detects `./dist/index.js` and runs the pre-compiled JavaScript bundle directly, requiring zero TypeScript runtime overhead.
+34. **How does the backend prevent database connection exhaustion in production?** We use Supabase's PgBouncer transaction pooler on port 6543 (`DATABASE_URL`) for fast, multiplexed API transactions, and direct port 5432 (`DIRECT_URL`) for Prisma schema synchronizations.
+35. **How is backend health monitored in production?** Through `GET /health`, which pings PostgreSQL to verify live database connectivity and reports server uptime before Render routes live production traffic.
 
 ---
 
@@ -954,6 +959,19 @@ npm run dev
 ```
 - Client starts on: `http://localhost:5173`
 - Build verified via: `npm run build`
+
+### 4. Cloud Deployment (Render & Supabase)
+1. **Database:** Host on [Supabase](https://supabase.com/). Run `backend/supabase/schema.sql` in the SQL Editor to provision tables, indexes, and initial seeds.
+2. **Backend Web Service (Render):**
+   - Push repository to GitHub.
+   - On [Render](https://dashboard.render.com/), select **New +** $\to$ **Blueprint** $\to$ select `PortFlow` repository (or create a Web Service pointing to `backend/`).
+   - Render detects [`render.yaml`](../render.yaml): runs `npm install && npm run build` and starts with `npm start` (`node index.js`).
+   - Configure environment variables: `DATABASE_URL` (Supabase port 6543 pooler), `DIRECT_URL` (Supabase port 5432), `JWT_SECRET`, and `CORS_ORIGIN`.
+   - Health check URL: `https://<your-render-app>.onrender.com/health`.
+3. **Frontend SPA (Vercel):**
+   - Import repository on [Vercel](https://vercel.com/) with root directory set to `frontend`.
+   - Add environment variable `VITE_API_URL=https://<your-render-app>.onrender.com/api`.
+   - Deploy. Vercel applies SPA routing rewrites via `frontend/vercel.json`.
 
 ### Default Evaluator Login Credentials
 - **Email:** `operator@portflow.com`

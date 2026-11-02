@@ -26,7 +26,7 @@ This diagram shows the 5 main parts of PortFlow and how they connect with each o
 ```mermaid
 graph TB
     subgraph CLIENT["1. Client Layer (Frontend)"]
-        UI["React 18 + Vite Web App"]
+        UI["React 19 + Vite Web App"]
         P1["Dashboard Page"]
         P2["Operations Page"]
         P3["Ships Page"]
