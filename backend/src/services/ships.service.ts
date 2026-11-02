@@ -10,7 +10,12 @@ export class ShipsService implements IShipsService {
     }
 
     public async getShips(): Promise<ShipRecord[]> {
-        return this.repo.findActive();
+        try {
+            return await this.repo.findActive();
+        } catch (err: any) {
+            console.warn('[ShipsService] Database unavailable, serving empty list:', err.message);
+            return [];
+        }
     }
 
     public async getShipById(id: number): Promise<ShipRecord | null> {

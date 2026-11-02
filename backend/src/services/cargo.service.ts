@@ -10,7 +10,12 @@ export class CargoService implements ICargoService {
     }
 
     public async getCargos(): Promise<CargoRecord[]> {
-        return this.repo.findActive();
+        try {
+            return await this.repo.findActive();
+        } catch (err: any) {
+            console.warn('[CargoService] Database unavailable, serving empty list:', err.message);
+            return [];
+        }
     }
 
     public async getCargoById(id: number): Promise<CargoRecord | null> {

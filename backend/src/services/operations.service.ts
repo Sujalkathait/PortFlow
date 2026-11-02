@@ -52,12 +52,17 @@ export class OperationsService implements IOperationsService {
 
     /** READ — all active operations with optional user filtering */
     public async getOperations(userFilter?: { role?: string; email?: string }): Promise<OperationRecord[]> {
-        await this.syncQueuedOperations();
-        let ops = await this.repo.findActive();
-        if (userFilter?.role === 'Operator' && userFilter?.email) {
-            ops = ops.filter(op => op.created_by === userFilter.email);
+        try {
+            await this.syncQueuedOperations();
+            let ops = await this.repo.findActive();
+            if (userFilter?.role === 'Operator' && userFilter?.email) {
+                ops = ops.filter(op => op.created_by === userFilter.email);
+            }
+            return ops;
+        } catch (err: any) {
+            console.warn('[OperationsService] Database unavailable, serving empty queue:', err.message);
+            return [];
         }
-        return ops;
     }
 
     /** READ — single active operation by ID */

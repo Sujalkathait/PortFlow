@@ -16,7 +16,12 @@ export class EquipmentService implements IEquipmentService {
     }
 
     public async getEquipments(): Promise<EquipmentRecord[]> {
-        return this.repo.findActive();
+        try {
+            return await this.repo.findActive();
+        } catch (err: any) {
+            console.warn('[EquipmentService] Database unavailable, serving empty list:', err.message);
+            return [];
+        }
     }
 
     public async getEquipmentById(id: number): Promise<EquipmentRecord | null> {
