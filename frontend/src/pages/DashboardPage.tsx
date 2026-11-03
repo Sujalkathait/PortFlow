@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-  Ship, Settings2, ArrowUp, ArrowDown, Trophy, Star
+  Ship, Settings2, ArrowUp, ArrowDown, Trophy, Star,
+  Warehouse, Truck, Ticket, ShieldCheck, CreditCard, ShieldAlert,
+  Users, ScrollText, ArrowRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -315,6 +317,198 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
               ? `${availableEqCount} of ${totalEqCount} resources ready for deployment.`
               : 'Add cranes and berths to monitor utilization.'}
           </p>
+        </div>
+      </div>
+
+      {/* Row 3: 12-Table Enterprise Relational Schema Overview */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+          <div>
+            <h2 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-blue-600" />
+              PortFlow 12-Table Enterprise Architecture
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Normalized 3NF relational data model covering port operations, physical infrastructure, logistics, and billing.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate(`${basePath}/logistics`)}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+          >
+            Open Logistics & Compliance Hub <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {/* 1. users */}
+          <div
+            onClick={() => navigate(`${basePath}/profile`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <Users className="h-4 w-4 text-blue-500 group-hover:scale-110 transition-transform" />
+              <span>1. users</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              Authenticated staff & RBAC operators
+            </p>
+          </div>
+
+          {/* 2. equipment */}
+          <div
+            onClick={() => navigate(`${basePath}/equipments`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <Settings2 className="h-4 w-4 text-sky-500 group-hover:scale-110 transition-transform" />
+              <span>2. equipment</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              Berths & STS Quay Cranes
+            </p>
+          </div>
+
+          {/* 3. ships */}
+          <div
+            onClick={() => navigate(`${basePath}/ships`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <Ship className="h-4 w-4 text-cyan-500 group-hover:scale-110 transition-transform" />
+              <span>3. ships</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              Visiting container cargo vessels
+            </p>
+          </div>
+
+          {/* 4. warehouses */}
+          <div
+            onClick={() => navigate(`${basePath}/logistics`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <Warehouse className="h-4 w-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+              <span>4. warehouses</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              CFS Dry Yards & Reefer Units
+            </p>
+          </div>
+
+          {/* 5. cargo */}
+          <div
+            onClick={() => navigate(`${basePath}/cargos`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <ContainerIcon className="h-4 w-4 text-amber-500 group-hover:scale-110 transition-transform" />
+              <span>5. cargo</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              20ft / 40ft TEU freight inventory
+            </p>
+          </div>
+
+          {/* 6. operations */}
+          <div
+            onClick={() => navigate(`${basePath}/operations`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <CraneIcon className="h-4 w-4 text-purple-500 group-hover:scale-110 transition-transform" />
+              <span>6. operations</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              Central PCB scheduling jobs
+            </p>
+          </div>
+
+          {/* 7. trucks */}
+          <div
+            onClick={() => navigate(`${basePath}/logistics`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <Truck className="h-4 w-4 text-indigo-500 group-hover:scale-110 transition-transform" />
+              <span>7. trucks</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              Ground drayage transport fleet
+            </p>
+          </div>
+
+          {/* 8. gate_passes */}
+          <div
+            onClick={() => navigate(`${basePath}/logistics`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <Ticket className="h-4 w-4 text-teal-500 group-hover:scale-110 transition-transform" />
+              <span>8. gate_passes</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              Security lane access passes
+            </p>
+          </div>
+
+          {/* 9. customs_inspections */}
+          <div
+            onClick={() => navigate(`${basePath}/logistics`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <ShieldCheck className="h-4 w-4 text-yellow-500 group-hover:scale-110 transition-transform" />
+              <span>9. customs</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              Regulatory scans & duty tariffs
+            </p>
+          </div>
+
+          {/* 10. bills */}
+          <div
+            onClick={() => navigate(`${basePath}/logistics`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <CreditCard className="h-4 w-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+              <span>10. bills</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              Itemized docking & crane invoices
+            </p>
+          </div>
+
+          {/* 11. issues */}
+          <div
+            onClick={() => navigate(`${basePath}/logistics`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <ShieldAlert className="h-4 w-4 text-rose-500 group-hover:scale-110 transition-transform" />
+              <span>11. issues</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              Incident breakdown alerts
+            </p>
+          </div>
+
+          {/* 12. system_logs */}
+          <div
+            onClick={() => navigate(`${basePath}/logs`)}
+            className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+              <ScrollText className="h-4 w-4 text-slate-500 group-hover:scale-110 transition-transform" />
+              <span>12. system_logs</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+              Immutable OS & audit logs
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -22,6 +22,7 @@ const ProfilePage = lazy(async () => ({ default: (await import('./pages/ProfileP
 const ReportIssuePage = lazy(async () => ({ default: (await import('./pages/ReportIssuePage')).ReportIssuePage }));
 const LogsPage = lazy(async () => ({ default: (await import('./pages/LogsPage')).LogsPage }));
 const ReportsPage = lazy(async () => ({ default: (await import('./pages/ReportsPage')).ReportsPage }));
+const LogisticsPage = lazy(async () => ({ default: (await import('./pages/LogisticsPage')).LogisticsPage }));
 
 function RouteLoading() {
     return <main className="page-loader" aria-live="polite">Loading workspace…</main>;
@@ -72,6 +73,12 @@ function DashboardLayout({ children }: { role?: Role; children: React.ReactNode 
         equipments: 'Equipment & Cranes',
         equipment: 'Equipment & Cranes',
         scheduling: 'OS CPU Scheduling',
+        logistics: 'Logistics, Gate & Billing Hub',
+        warehouses: 'Warehouses & Facilities',
+        trucks: 'Drayage Truck Fleet',
+        'gate-passes': 'Gate Passes & Security',
+        customs: 'Customs Compliance',
+        bills: 'Invoices & Billing',
         reports: 'Analytics & Reports',
         logs: 'System & Audit Logs',
         trash: 'Recycle Bin & Trash',
@@ -238,9 +245,27 @@ function App() {
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
+                    <Route path="/operator/logistics" element={
+                        <ProtectedRoute>
+                            <DashboardLayout>
+                                <LogisticsPage />
+                            </DashboardLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/operator/warehouses" element={<Navigate to="/operator/logistics" replace />} />
+                    <Route path="/operator/trucks" element={<Navigate to="/operator/logistics" replace />} />
+                    <Route path="/operator/gate-passes" element={<Navigate to="/operator/logistics" replace />} />
+                    <Route path="/operator/customs" element={<Navigate to="/operator/logistics" replace />} />
+                    <Route path="/operator/bills" element={<Navigate to="/operator/logistics" replace />} />
 
                     {/* Root Aliases */}
                     <Route path="/dashboard" element={<Navigate to="/operator/dashboard" replace />} />
+                    <Route path="/logistics" element={<Navigate to="/operator/logistics" replace />} />
+                    <Route path="/warehouses" element={<Navigate to="/operator/logistics" replace />} />
+                    <Route path="/trucks" element={<Navigate to="/operator/logistics" replace />} />
+                    <Route path="/gate-passes" element={<Navigate to="/operator/logistics" replace />} />
+                    <Route path="/customs" element={<Navigate to="/operator/logistics" replace />} />
+                    <Route path="/bills" element={<Navigate to="/operator/logistics" replace />} />
                     <Route path="/operations" element={<Navigate to="/operator/operations" replace />} />
                     <Route path="/ships" element={<Navigate to="/operator/ships" replace />} />
                     <Route path="/cargos" element={<Navigate to="/operator/cargos" replace />} />

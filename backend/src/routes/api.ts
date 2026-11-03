@@ -10,7 +10,10 @@ import { getCargos, createCargo, updateCargo, deleteCargo } from '../controllers
 import { getEquipments, createEquipment, updateEquipment, deleteEquipment } from '../controllers/equipment.controller';
 import { register, login, getMe, deleteAccount, forgotPassword, verifyOTP, resetPassword } from '../controllers/auth.controller';
 import { requireAuth, requireRole } from '../middleware/auth';
-import { getSystemLogs, getAuditLogs, getDatabaseAnalytics, reportIssue } from '../controllers/system.controller';
+import {
+    getSystemLogs, getAuditLogs, getDatabaseAnalytics, reportIssue,
+    getWarehouses, getTrucks, getGatePasses, getCustomsInspections, getBills, getIssues
+} from '../controllers/system.controller';
 import { getTrash, restoreItem, emptyTrash, permanentDeleteItem } from '../controllers/trash.controller';
 
 export const apiRouter = Router();
@@ -70,6 +73,26 @@ apiRouter.put('/equipments/:id', requireAuth, updateEquipment);
 apiRouter.patch('/equipments/:id', requireAuth, updateEquipment);
 apiRouter.delete('/equipments/:id', requireAuth, deleteEquipment);
 
+
+// Warehouses (Table 4)
+apiRouter.get('/warehouses', requireAuth, getWarehouses);
+
+// Trucks Drayage Fleet (Table 7)
+apiRouter.get('/trucks', requireAuth, getTrucks);
+
+// Gate Passes (Table 8)
+apiRouter.get('/gate-passes', requireAuth, getGatePasses);
+
+// Customs Inspections (Table 9)
+apiRouter.get('/customs', requireAuth, getCustomsInspections);
+apiRouter.get('/customs-inspections', requireAuth, getCustomsInspections);
+
+// Billing & Invoices (Table 10)
+apiRouter.get('/bills', requireAuth, getBills);
+
+// Incident Issues & Breakdown Alerts (Table 11)
+apiRouter.get('/issues', requireAuth, getIssues);
+apiRouter.post('/issues', requireAuth, reportIssue);
 
 apiRouter.get('/analytics', requireAuth, getAnalytics);
 apiRouter.get('/system/logs', requireAuth, getSystemLogs);

@@ -300,6 +300,16 @@ export const typeDefs = `#graphql
         trucks(status: String): [Truck!]!
 
         """
+        Retrieve registered users and terminal staff
+        """
+        users(role: String): [User!]!
+
+        """
+        Retrieve security gate access passes
+        """
+        gatePasses(status: String): [GatePass!]!
+
+        """
         Retrieve regulatory customs inspections
         """
         customsInspections(status: String): [CustomsInspection!]!

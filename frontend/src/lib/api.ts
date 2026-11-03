@@ -181,6 +181,41 @@ export const api = {
     get equipments() { return this.Equipments; },
     get equipment() { return this.Equipments; },
 
+    // Table 4: Warehouses
+    warehouses: {
+        list: () => request<any[]>('/warehouses'),
+    },
+
+    // Table 7: Trucks
+    trucks: {
+        list: () => request<any[]>('/trucks'),
+    },
+
+    // Table 8: Gate Passes
+    gatePasses: {
+        list: () => request<any[]>('/gate-passes'),
+    },
+
+    // Table 9: Customs Inspections
+    customs: {
+        list: () => request<any[]>('/customs'),
+    },
+
+    // Table 10: Bills & Invoices
+    bills: {
+        list: () => request<any[]>('/bills'),
+    },
+
+    // Table 11: Issues & Breakdown Tickets
+    issues: {
+        list: () => request<any[]>('/issues'),
+        report: (body: { title: string; description: string; severity?: string; equipmentId?: number }) =>
+            request<any>('/issues', {
+                method: 'POST',
+                body: JSON.stringify(body),
+            }),
+    },
+
     system: {
         logs: () => request<any[]>('/system/logs'),
         audit: () => request<any[]>('/system/audit'),

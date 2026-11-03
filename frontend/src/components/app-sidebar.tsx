@@ -13,7 +13,7 @@ import {
 import {
   LayoutDashboard, Ship, Truck, Settings,
   LogOut, Cpu, Boxes, User, Trash2, AlertTriangle,
-  ScrollText, BarChart3
+  ScrollText, BarChart3, Warehouse
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
@@ -55,6 +55,7 @@ export function AppSidebar(_props: { role?: string } = {}) {
     { page: 'ships', label: 'Ships', icon: Ship },
     { page: 'cargos', label: 'Containers', icon: Boxes },
     { page: 'equipments', label: 'Equipment', icon: Truck },
+    { page: 'logistics', label: 'Logistics & Gate', icon: Warehouse },
     { page: 'operations', label: 'Operations', icon: Settings },
     { page: 'scheduling', label: 'OS Scheduler', icon: Cpu },
     { page: 'reports', label: 'Analytics & Reports', icon: BarChart3 },

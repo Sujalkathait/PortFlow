@@ -178,6 +178,26 @@ export const resolvers = {
             }
         },
 
+        users: async (_: any, { role }: { role?: string }, { prisma }: GraphQLContext) => {
+            const where: any = { deleted_at: null };
+            if (role) where.role = role;
+            try {
+                return await prisma.user.findMany({ where, orderBy: { created_at: 'desc' } });
+            } catch {
+                return [];
+            }
+        },
+
+        gatePasses: async (_: any, { status }: { status?: string }, { prisma }: GraphQLContext) => {
+            const where: any = { deleted_at: null };
+            if (status) where.status = status;
+            try {
+                return await prisma.gatePass.findMany({ where, orderBy: { created_at: 'desc' } });
+            } catch {
+                return [];
+            }
+        },
+
         customsInspections: async (_: any, { status }: { status?: string }, { prisma }: GraphQLContext) => {
             const where: any = { deleted_at: null };
             if (status) where.status = status;
@@ -471,6 +491,126 @@ export const resolvers = {
             } catch {
                 return [];
             }
+        }
+    },
+
+    Warehouse: {
+        zoneType: (parent: any) => parent.zone_type,
+        capacityTeu: (parent: any) => parent.capacity_teu,
+        currentOccupancyTeu: (parent: any) => parent.current_occupancy_teu,
+        temperatureCelsius: (parent: any) => parent.temperature_celsius,
+        storedCargo: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            try {
+                return await prisma.cargo.findMany({ where: { warehouse_id: parent.id, deleted_at: null } });
+            } catch {
+                return [];
+            }
+        }
+    },
+
+    Truck: {
+        licensePlate: (parent: any) => parent.license_plate,
+        driverName: (parent: any) => parent.driver_name,
+        driverPhone: (parent: any) => parent.driver_phone,
+        transportCompany: (parent: any) => parent.transport_company,
+        maxPayloadTons: (parent: any) => parent.max_payload_tons,
+        currentCargo: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            if (!parent.assigned_cargo_id) return null;
+            try {
+                return await prisma.cargo.findUnique({ where: { id: parent.assigned_cargo_id } });
+            } catch {
+                return null;
+            }
+        },
+        gatePasses: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            try {
+                return await prisma.gatePass.findMany({ where: { truck_id: parent.id, deleted_at: null } });
+            } catch {
+                return [];
+            }
+        }
+    },
+
+    GatePass: {
+        passNumber: (parent: any) => parent.pass_number,
+        gateLane: (parent: any) => parent.gate_lane,
+        passType: (parent: any) => parent.pass_type,
+        checkInTime: (parent: any) => parent.check_in_time ? new Date(parent.check_in_time).toISOString() : null,
+        checkOutTime: (parent: any) => parent.check_out_time ? new Date(parent.check_out_time).toISOString() : null,
+        truck: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            return prisma.truck.findUnique({ where: { id: parent.truck_id } });
+        },
+        container: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            if (!parent.cargo_id) return null;
+            return prisma.cargo.findUnique({ where: { id: parent.cargo_id } });
+        },
+        issuer: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            if (!parent.issued_by_id) return null;
+            return prisma.user.findUnique({ where: { id: parent.issued_by_id } });
+        }
+    },
+
+    CustomsInspection: {
+        inspectionNumber: (parent: any) => parent.inspection_number,
+        declarationNumber: (parent: any) => parent.declaration_number,
+        inspectionType: (parent: any) => parent.inspection_type,
+        dutyAmountCents: (parent: any) => parent.duty_amount_cents ? parent.duty_amount_cents.toString() : '0',
+        inspectedAt: (parent: any) => parent.inspected_at ? new Date(parent.inspected_at).toISOString() : null,
+        clearedAt: (parent: any) => parent.cleared_at ? new Date(parent.cleared_at).toISOString() : null,
+        container: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            return prisma.cargo.findUnique({ where: { id: parent.cargo_id } });
+        },
+        inspector: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            if (!parent.inspector_id) return null;
+            return prisma.user.findUnique({ where: { id: parent.inspector_id } });
+        }
+    },
+
+    Bill: {
+        invoiceNumber: (parent: any) => parent.invoice_number,
+        customerName: (parent: any) => parent.customer_name,
+        dockingFee: (parent: any) => parent.docking_fee,
+        craneUsageFee: (parent: any) => parent.crane_usage_fee,
+        storageFee: (parent: any) => parent.storage_fee,
+        totalAmount: (parent: any) => parent.total_amount,
+        paymentStatus: (parent: any) => parent.payment_status,
+        dueDate: (parent: any) => parent.due_date ? new Date(parent.due_date).toISOString() : null,
+        paidAt: (parent: any) => parent.paid_at ? new Date(parent.paid_at).toISOString() : null,
+        vessel: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            if (!parent.ship_id) return null;
+            return prisma.ship.findUnique({ where: { id: parent.ship_id } });
+        },
+        container: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            if (!parent.cargo_id) return null;
+            return prisma.cargo.findUnique({ where: { id: parent.cargo_id } });
+        },
+        operation: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            if (!parent.operation_id) return null;
+            return prisma.operation.findUnique({ where: { id: parent.operation_id } });
+        }
+    },
+
+    Issue: {
+        ticketNumber: (parent: any) => parent.ticket_number,
+        resolutionNotes: (parent: any) => parent.resolution_notes,
+        resolvedAt: (parent: any) => parent.resolved_at ? new Date(parent.resolved_at).toISOString() : null,
+        createdAt: (parent: any) => parent.created_at ? new Date(parent.created_at).toISOString() : '',
+        reporter: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            if (!parent.reported_by_id) return null;
+            return prisma.user.findUnique({ where: { id: parent.reported_by_id } });
+        },
+        faultyEquipment: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            if (!parent.equipment_id) return null;
+            return prisma.equipment.findUnique({ where: { id: parent.equipment_id } });
+        }
+    },
+
+    SystemLog: {
+        entityType: (parent: any) => parent.entity_type,
+        entityId: (parent: any) => parent.entity_id,
+        operator: async (parent: any, _: any, { prisma }: GraphQLContext) => {
+            if (!parent.user_id) return null;
+            return prisma.user.findUnique({ where: { id: parent.user_id } });
         }
     },
 

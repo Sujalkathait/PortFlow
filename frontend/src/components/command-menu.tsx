@@ -15,6 +15,7 @@ import {
   BarChart3,
   ScrollText,
   AlertTriangle,
+  Warehouse,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -99,6 +100,10 @@ export function CommandMenu(_props: CommandMenuProps = {}) {
             <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/equipments`))}>
               <Wrench className="mr-2 h-4 w-4" />
               <span>Equipment & Cranes</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/logistics`))}>
+              <Warehouse className="mr-2 h-4 w-4" />
+              <span>Logistics, Gate & Billing Hub</span>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => navigate(`${basePath}/scheduling`))}>
               <Cpu className="mr-2 h-4 w-4" />
