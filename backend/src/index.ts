@@ -111,8 +111,8 @@ async function startServer() {
         });
     });
 
-    // 5. Start HTTP Listener
-    const server = app.listen(port, async () => {
+    // 5. Start HTTP Listener (Explicitly listen on 0.0.0.0 for IPv4/IPv6 loopback compatibility)
+    const server = app.listen(port, '0.0.0.0', async () => {
         console.log(`\n======================================================`);
         console.log(`  ⚓ PortFlow ${process.env.NODE_ENV === 'production' ? 'Production' : 'Development'} Backend`);
         console.log(`  Listening on port: ${port}`);

@@ -4,3 +4,5 @@ export * from './cargo.service';
 export * from './equipment.service';
 export * from './trash.service';
 export * from './auth.service';
+export * from './billing.service';
+

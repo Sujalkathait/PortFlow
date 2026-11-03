@@ -8,6 +8,7 @@ import {
 import { operationsRepository } from '../repositories/operations.repository';
 import { PortSystem } from '../os/PortSystem';
 import { Process } from '../os/Process';
+import { billingService } from './billing.service';
 
 export class OperationsService implements IOperationsService {
     private repo: IOperationsRepository;
@@ -113,13 +114,20 @@ export class OperationsService implements IOperationsService {
         const op = await this.repo.findById(opId);
         if (op) {
             const isCompleted = result.status === 'TERMINATED' || result.remainingTime <= 0;
-            await this.repo.update(opId, {
+            const updated = await this.repo.update(opId, {
                 status: isCompleted ? 'Completed' : 'Running',
                 start_time: result.startTime ? new Date(result.startTime).toISOString() : new Date().toISOString(),
                 end_time: isCompleted ? new Date().toISOString() : undefined,
                 waiting_time_ms: result.waitingTime,
                 turnaround_time_ms: isCompleted ? result.turnaroundTime : undefined,
             });
+
+            if (isCompleted && updated) {
+                // Table 10: Automated Billing Engine trigger
+                billingService.generateBillForOperation(updated).catch(err => {
+                    console.warn('[OperationsService] Error auto-generating bill:', err.message);
+                });
+            }
         }
 
         return { operationId: opId, process: result };
@@ -144,7 +152,14 @@ export class OperationsService implements IOperationsService {
                 }
             }
         }
-        return this.repo.update(id, updates);
+        const updated = await this.repo.update(id, updates);
+        if (updates.status === 'Completed' && updated) {
+            // Table 10: Automated Billing Engine trigger
+            billingService.generateBillForOperation(updated).catch(err => {
+                console.warn('[OperationsService] Error auto-generating bill on status update:', err.message);
+            });
+        }
+        return updated;
     }
 
     /** SOFT DELETE — move to trash & remove from OS queue */

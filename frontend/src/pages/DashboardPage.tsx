@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-  Ship, Settings2, ArrowUp, ArrowDown, Trophy, Star,
+  Ship, Settings2, ArrowUp,
   Warehouse, Truck, Ticket, ShieldCheck, CreditCard, ShieldAlert,
   Users, ScrollText, ArrowRight
 } from 'lucide-react';
@@ -85,16 +85,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
   const resourcesRatio = totalEqCount > 0 ? `${availableEqCount}/${totalEqCount}` : '0/0';
 
   const dockedShipsCount = ships.filter(s => s.status === 'Docked' || s.status === 'Arrived').length;
-  const maintenanceCount = equipments.filter(e => e.status === 'Maintenance' || e.status === 'Offline').length;
-
   const completedOps = operations.filter(o => o.status === 'Completed').length;
-  const overallPerformance = totalOpsCount > 0
-    ? `${Math.round((completedOps / totalOpsCount) * 100)}%`
-    : '100%';
-
-  const resourceAvailabilityPercent = totalEqCount > 0
-    ? `${Math.round((availableEqCount / totalEqCount) * 100)}%`
-    : '0%';
 
   return (
     <div className="flex flex-col space-y-6 w-full max-w-[1440px] mx-auto pb-10">
@@ -227,100 +218,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
         </div>
       </div>
 
-      {/* Row 2: Performance & Insights Cards */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        {/* Card 5: Best Result */}
-        <div className="bg-[#f0fdf4] dark:bg-emerald-950/20 border border-[#dcfce7] dark:border-emerald-900/50 rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="h-6 w-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <ArrowUp className="h-3.5 w-3.5 stroke-[3]" />
-            </div>
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-              Best Result
-            </span>
-          </div>
-          <div className="text-3xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
-            +{containersCount}
-          </div>
-          <div className="text-xs font-bold text-emerald-950 dark:text-emerald-300 mt-1">
-            Container Increase
-          </div>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-            {containersCount > 0
-              ? `You have ${containersCount} active container manifests registered.`
-              : 'Container throughput logged across active berths.'}
-          </p>
-        </div>
-
-        {/* Card 6: Overall Performance */}
-        <div className="bg-[#eff6ff] dark:bg-blue-950/20 border border-[#dbeafe] dark:border-blue-900/50 rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="h-6 w-6 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <Trophy className="h-3.5 w-3.5 fill-white" />
-            </div>
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-              Overall Performance
-            </span>
-          </div>
-          <div className="text-3xl font-extrabold text-blue-700 dark:text-blue-400 mt-3 tracking-tight">
-            {overallPerformance}
-          </div>
-          <div className="text-xs font-bold text-slate-900 dark:text-white mt-1">
-            Operations On Track
-          </div>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-            Everything is running well and on schedule.
-          </p>
-        </div>
-
-        {/* Card 7: Maintenance Status */}
-        <div className="bg-[#fffbeb] dark:bg-amber-950/20 border border-[#fef3c7] dark:border-amber-900/50 rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="h-6 w-6 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <ArrowDown className="h-3.5 w-3.5 stroke-[3]" />
-            </div>
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-              Maintenance
-            </span>
-          </div>
-          <div className="text-3xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
-            {maintenanceCount}
-          </div>
-          <div className="text-xs font-bold text-amber-950 dark:text-amber-300 mt-1">
-            Offline Resources
-          </div>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-            {maintenanceCount > 0
-              ? `${maintenanceCount} equipment units currently under service inspection.`
-              : 'All cranes and berths are currently fully operational.'}
-          </p>
-        </div>
-
-        {/* Card 8: Key Insight */}
-        <div className="bg-[#faf5ff] dark:bg-purple-950/20 border border-[#f3e8ff] dark:border-purple-900/50 rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="h-6 w-6 rounded-full bg-purple-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <Star className="h-3.5 w-3.5 fill-white" />
-            </div>
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-              Key Insight
-            </span>
-          </div>
-          <div className="text-3xl font-extrabold text-slate-900 dark:text-white mt-3 tracking-tight">
-            {resourceAvailabilityPercent}
-          </div>
-          <div className="text-xs font-bold text-purple-950 dark:text-purple-300 mt-1">
-            Resource Availability
-          </div>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-            {totalEqCount > 0
-              ? `${availableEqCount} of ${totalEqCount} resources ready for deployment.`
-              : 'Add cranes and berths to monitor utilization.'}
-          </p>
-        </div>
-      </div>
-
-      {/* Row 3: 12-Table Enterprise Relational Schema Overview */}
+      {/* Row 2: 12-Table Enterprise Relational Schema Overview */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
           <div>
@@ -329,12 +227,12 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
               PortFlow 12-Table Enterprise Architecture
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Normalized 3NF relational data model covering port operations, physical infrastructure, logistics, and billing.
+              Normalized 3NF relational data model covering port operations, physical infrastructure, logistics, and billing. Click any card to navigate.
             </p>
           </div>
           <button
             type="button"
-            onClick={() => navigate(`${basePath}/logistics`)}
+            onClick={() => navigate(`${basePath}/logistics?tab=warehouses`)}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
           >
             Open Logistics & Compliance Hub <ArrowRight className="h-3.5 w-3.5" />
@@ -386,7 +284,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
 
           {/* 4. warehouses */}
           <div
-            onClick={() => navigate(`${basePath}/logistics`)}
+            onClick={() => navigate(`${basePath}/logistics?tab=warehouses`)}
             className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
           >
             <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -428,7 +326,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
 
           {/* 7. trucks */}
           <div
-            onClick={() => navigate(`${basePath}/logistics`)}
+            onClick={() => navigate(`${basePath}/logistics?tab=trucks`)}
             className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
           >
             <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -442,7 +340,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
 
           {/* 8. gate_passes */}
           <div
-            onClick={() => navigate(`${basePath}/logistics`)}
+            onClick={() => navigate(`${basePath}/logistics?tab=gate-passes`)}
             className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
           >
             <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -456,7 +354,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
 
           {/* 9. customs_inspections */}
           <div
-            onClick={() => navigate(`${basePath}/logistics`)}
+            onClick={() => navigate(`${basePath}/logistics?tab=customs`)}
             className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
           >
             <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -470,7 +368,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
 
           {/* 10. bills */}
           <div
-            onClick={() => navigate(`${basePath}/logistics`)}
+            onClick={() => navigate(`${basePath}/logistics?tab=bills`)}
             className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
           >
             <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -484,7 +382,7 @@ export function DashboardPage(_props: DashboardPageProps = {}) {
 
           {/* 11. issues */}
           <div
-            onClick={() => navigate(`${basePath}/logistics`)}
+            onClick={() => navigate(`${basePath}/logistics?tab=issues`)}
             className="p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 transition cursor-pointer group"
           >
             <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">

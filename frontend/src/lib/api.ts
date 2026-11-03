@@ -184,35 +184,121 @@ export const api = {
     // Table 4: Warehouses
     warehouses: {
         list: () => request<any[]>('/warehouses'),
+        create: (body: { code: string; name: string; zone_type?: string; capacity_teu?: number; temperature_celsius?: number }) =>
+            request<any>('/warehouses', {
+                method: 'POST',
+                body: JSON.stringify(body),
+            }),
+        update: (id: number, body: any) =>
+            request<any>(`/warehouses/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(body),
+            }),
+        delete: (id: number) =>
+            request<any>(`/warehouses/${id}`, {
+                method: 'DELETE',
+            }),
     },
 
     // Table 7: Trucks
     trucks: {
         list: () => request<any[]>('/trucks'),
+        create: (body: { license_plate: string; driver_name: string; driver_phone?: string; transport_company?: string; max_payload_tons?: number; status?: string }) =>
+            request<any>('/trucks', {
+                method: 'POST',
+                body: JSON.stringify(body),
+            }),
+        update: (id: number, body: any) =>
+            request<any>(`/trucks/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(body),
+            }),
+        delete: (id: number) =>
+            request<any>(`/trucks/${id}`, {
+                method: 'DELETE',
+            }),
     },
 
     // Table 8: Gate Passes
     gatePasses: {
         list: () => request<any[]>('/gate-passes'),
+        create: (body: { gate_lane?: string; pass_type?: string; truck_id?: number; status?: string }) =>
+            request<any>('/gate-passes', {
+                method: 'POST',
+                body: JSON.stringify(body),
+            }),
+        update: (id: number, body: any) =>
+            request<any>(`/gate-passes/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(body),
+            }),
+        delete: (id: number) =>
+            request<any>(`/gate-passes/${id}`, {
+                method: 'DELETE',
+            }),
     },
 
     // Table 9: Customs Inspections
     customs: {
         list: () => request<any[]>('/customs'),
+        create: (body: { declaration_number?: string; inspection_type?: string; duty_amount_dollars?: number; findings?: string; status?: string; cargo_id?: number }) =>
+            request<any>('/customs', {
+                method: 'POST',
+                body: JSON.stringify(body),
+            }),
+        update: (id: number, body: any) =>
+            request<any>(`/customs/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(body),
+            }),
+        delete: (id: number) =>
+            request<any>(`/customs/${id}`, {
+                method: 'DELETE',
+            }),
     },
 
     // Table 10: Bills & Invoices
     bills: {
         list: () => request<any[]>('/bills'),
+        generate: (body: {
+            customer_name?: string;
+            docking_fee?: number;
+            crane_usage_fee?: number;
+            storage_fee?: number;
+            operation_id?: number;
+            ship_id?: number;
+        }) =>
+            request<any>('/bills/generate', {
+                method: 'POST',
+                body: JSON.stringify(body),
+            }),
+        pay: (id: number) =>
+            request<any>(`/bills/${id}/pay`, {
+                method: 'PUT',
+            }),
     },
 
     // Table 11: Issues & Breakdown Tickets
     issues: {
         list: () => request<any[]>('/issues'),
+        create: (body: { title: string; description: string; severity?: string; equipmentId?: number }) =>
+            request<any>('/issues', {
+                method: 'POST',
+                body: JSON.stringify(body),
+            }),
         report: (body: { title: string; description: string; severity?: string; equipmentId?: number }) =>
             request<any>('/issues', {
                 method: 'POST',
                 body: JSON.stringify(body),
+            }),
+        update: (id: number, body: any) =>
+            request<any>(`/issues/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(body),
+            }),
+        delete: (id: number) =>
+            request<any>(`/issues/${id}`, {
+                method: 'DELETE',
             }),
     },
 

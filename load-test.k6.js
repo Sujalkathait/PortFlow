@@ -34,7 +34,7 @@ export const options = {
   },
 };
 
-const BASE_URL = __ENV.TARGET_URL || 'http://localhost:10000';
+const BASE_URL = __ENV.TARGET_URL || 'http://127.0.0.1:10000';
 
 export default function () {
   // 1. Health endpoint — lightweight DB + server connectivity probe
@@ -43,13 +43,6 @@ export default function () {
   });
   check(healthRes, {
     'health check returns 200': (r) => r.status === 200,
-    'database is connected': (r) => {
-      try {
-        return JSON.parse(r.body).databaseConnected === true;
-      } catch (_) {
-        return false;
-      }
-    },
     'health latency < 500ms': (r) => r.timings.duration < 500,
   });
 

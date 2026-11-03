@@ -1,5 +1,6 @@
 import { GraphQLContext } from './context';
 import { operationsService } from '../services/operations.service';
+import { billingService } from '../services/billing.service';
 
 let cachedOverview: any = null;
 let lastOverviewFetchTime = 0;
@@ -212,14 +213,8 @@ export const resolvers = {
             }
         },
 
-        bills: async (_: any, { paymentStatus }: { paymentStatus?: string }, { prisma }: GraphQLContext) => {
-            const where: any = { deleted_at: null };
-            if (paymentStatus) where.payment_status = paymentStatus;
-            try {
-                return await prisma.bill.findMany({ where });
-            } catch {
-                return [];
-            }
+        bills: async (_: any, { paymentStatus }: { paymentStatus?: string }, _context: GraphQLContext) => {
+            return billingService.getBills(paymentStatus);
         },
 
         issues: async (_: any, { status, severity }: { status?: string; severity?: string }, { prisma }: GraphQLContext) => {
@@ -695,6 +690,32 @@ export const resolvers = {
             const result = await operationsService.dispatchNext();
             if (!result || !result.operationId) return null;
             return operationsService.getOperationById(result.operationId);
+        },
+
+        generateBill: async (
+            _: any,
+            args: {
+                customerName: string;
+                dockingFee?: number;
+                craneUsageFee?: number;
+                storageFee?: number;
+                operationId?: number;
+                shipId?: number;
+            },
+            _context: GraphQLContext
+        ) => {
+            return billingService.createManualBill({
+                customer_name: args.customerName,
+                docking_fee: args.dockingFee,
+                crane_usage_fee: args.craneUsageFee,
+                storage_fee: args.storageFee,
+                operation_id: args.operationId,
+                ship_id: args.shipId
+            });
+        },
+
+        payBill: async (_: any, { id }: { id: number }, _context: GraphQLContext) => {
+            return billingService.payBill(id);
         }
     }
 };

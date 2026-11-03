@@ -11,8 +11,12 @@ import { getEquipments, createEquipment, updateEquipment, deleteEquipment } from
 import { register, login, getMe, deleteAccount, forgotPassword, verifyOTP, resetPassword } from '../controllers/auth.controller';
 import { requireAuth, requireRole } from '../middleware/auth';
 import {
-    getSystemLogs, getAuditLogs, getDatabaseAnalytics, reportIssue,
-    getWarehouses, getTrucks, getGatePasses, getCustomsInspections, getBills, getIssues
+    getSystemLogs, getAuditLogs, getDatabaseAnalytics, reportIssue, updateIssue, deleteIssue,
+    getWarehouses, createWarehouse, updateWarehouse, deleteWarehouse,
+    getTrucks, createTruck, updateTruck, deleteTruck,
+    getGatePasses, createGatePass, updateGatePass, deleteGatePass,
+    getCustomsInspections, createCustomsInspection, updateCustomsInspection, deleteCustomsInspection,
+    getBills, generateBill, payBill, getIssues
 } from '../controllers/system.controller';
 import { getTrash, restoreItem, emptyTrash, permanentDeleteItem } from '../controllers/trash.controller';
 
@@ -76,23 +80,40 @@ apiRouter.delete('/equipments/:id', requireAuth, deleteEquipment);
 
 // Warehouses (Table 4)
 apiRouter.get('/warehouses', requireAuth, getWarehouses);
+apiRouter.post('/warehouses', requireAuth, createWarehouse);
+apiRouter.put('/warehouses/:id', requireAuth, updateWarehouse);
+apiRouter.delete('/warehouses/:id', requireAuth, deleteWarehouse);
 
 // Trucks Drayage Fleet (Table 7)
 apiRouter.get('/trucks', requireAuth, getTrucks);
+apiRouter.post('/trucks', requireAuth, createTruck);
+apiRouter.put('/trucks/:id', requireAuth, updateTruck);
+apiRouter.delete('/trucks/:id', requireAuth, deleteTruck);
 
 // Gate Passes (Table 8)
 apiRouter.get('/gate-passes', requireAuth, getGatePasses);
+apiRouter.post('/gate-passes', requireAuth, createGatePass);
+apiRouter.put('/gate-passes/:id', requireAuth, updateGatePass);
+apiRouter.delete('/gate-passes/:id', requireAuth, deleteGatePass);
 
 // Customs Inspections (Table 9)
 apiRouter.get('/customs', requireAuth, getCustomsInspections);
 apiRouter.get('/customs-inspections', requireAuth, getCustomsInspections);
+apiRouter.post('/customs', requireAuth, createCustomsInspection);
+apiRouter.put('/customs/:id', requireAuth, updateCustomsInspection);
+apiRouter.delete('/customs/:id', requireAuth, deleteCustomsInspection);
 
 // Billing & Invoices (Table 10)
 apiRouter.get('/bills', requireAuth, getBills);
+apiRouter.post('/bills/generate', requireAuth, generateBill);
+apiRouter.post('/bills', requireAuth, generateBill);
+apiRouter.put('/bills/:id/pay', requireAuth, payBill);
 
 // Incident Issues & Breakdown Alerts (Table 11)
 apiRouter.get('/issues', requireAuth, getIssues);
 apiRouter.post('/issues', requireAuth, reportIssue);
+apiRouter.put('/issues/:id', requireAuth, updateIssue);
+apiRouter.delete('/issues/:id', requireAuth, deleteIssue);
 
 apiRouter.get('/analytics', requireAuth, getAnalytics);
 apiRouter.get('/system/logs', requireAuth, getSystemLogs);

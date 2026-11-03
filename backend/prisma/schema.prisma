@@ -331,6 +331,7 @@ model Bill {
   ship_id            Int?      // Relational FK to Ships
   cargo_id           Int?      // Relational FK to Cargo
   operation_id       Int?      // Relational FK to Operations
+  ship_name          String    @default("") @db.VarChar(120)
   customer_name      String    @db.VarChar(150)
   docking_fee        Float     @default(0.0) @db.DoublePrecision
   crane_usage_fee    Float     @default(0.0) @db.DoublePrecision

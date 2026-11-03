@@ -367,5 +367,22 @@ export const typeDefs = `#graphql
         Trigger OS scheduler to dispatch next highest priority process
         """
         dispatchOperation: Operation
+
+        """
+        Generate an invoice for port services
+        """
+        generateBill(
+            customerName: String!
+            dockingFee: Float
+            craneUsageFee: Float
+            storageFee: Float
+            operationId: Int
+            shipId: Int
+        ): Bill!
+
+        """
+        Mark an invoice as Paid
+        """
+        payBill(id: Int!): Bill!
     }
 `;
