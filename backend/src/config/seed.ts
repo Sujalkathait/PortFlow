@@ -3,407 +3,360 @@ import { prisma } from './prisma';
 
 /**
  * PortFlow 12-Table Enterprise Relational Database Seeder
- * Populates all 12 relational tables in PostgreSQL with realistic operational records:
- * 1. users
- * 2. equipment (Berths, STS Quay Cranes, Yard Gantries)
- * 3. ships
- * 4. warehouses (Dry Storage & Cold Chain Reefer Units)
- * 5. cargo (20ft, 40ft containers with TEU & tare weights)
- * 6. operations (PCBs with OS scheduling priorities)
- * 7. trucks (Land logistics drayage fleet)
- * 8. gate_passes (Security lanes & access timestamps)
- * 9. customs_inspections (Regulatory tariff checks & duty rates)
- * 10. bills (Itemized docking, crane, and storage fee invoices)
- * 11. issues (Fault tickets & mechanical breakdown alerts)
- * 12. system_logs (Immutable audit trail & OS kernel events)
+ * Populates all 12 relational tables in PostgreSQL according to DIAGRAMS.md:
+ * 1. users (100 demo accounts: Admin, Operator, Customs, Dispatch, Tech)
+ * 2. equipment (550 records: Berths, Cranes, Gantries)
+ * 3. ships (600 vessels)
+ * 4. warehouses (520 facilities & distribution zones)
+ * 5. cargo (1,200 manifests & containers)
+ * 6. operations (1,500 OS Process Control Blocks)
+ * 7. trucks (550 drayage transport trucks)
+ * 8. gate_passes (850 security passes)
+ * 9. customs_inspections (750 border clearance reviews)
+ * 10. bills (800 automated tariff invoices)
+ * 11. issues (600 mechanical & operational maintenance tickets)
+ * 12. system_logs (2,500 OS kernel and audit logs)
  */
+
+function chunkArray<T>(array: T[], size: number): T[][] {
+    const result: T[][] = [];
+    for (let i = 0; i < array.length; i += size) {
+        result.push(array.slice(i, i + size));
+    }
+    return result;
+}
+
 export async function seedDatabase(force: boolean = false): Promise<void> {
     try {
-        const existingShips = await prisma.ship.count({ where: { deleted_at: null } }).catch(() => -1);
-        if (existingShips > 0 && !force) {
-            console.log(`[Seed] Database already contains ${existingShips} vessels. Skipping automatic re-seed.`);
+        const existingUsers = await prisma.user.count({ where: { deleted_at: null } }).catch(() => -1);
+        if (existingUsers >= 100 && !force) {
+            console.log(`[Seed] Database already contains ${existingUsers} users. Skipping automatic re-seed.`);
             return;
         }
 
-        console.log('[Seed] Populating PortFlow 12-Table Relational Schema...');
+        console.log('[Seed] Populating PortFlow 12-Table Relational Schema with 500+ records per table and 100 demo users...');
 
-        // 1. Users
+        // 1. Users (100 demo accounts)
         const passwordHash = await bcrypt.hash('Password123!', 10);
-        const usersData = [
+        const userBatch = [
             { email: 'admin@portflow.com', full_name: 'System Administrator', role: 'Admin', password_hash: passwordHash },
-            { email: 'operator@portflow.com', full_name: 'Terminal Operator', role: 'Operator', password_hash: passwordHash },
-            { email: 'customs@portflow.com', full_name: 'Customs Officer Sarah Chen', role: 'Inspector', password_hash: passwordHash },
+            { email: 'operator@portflow.com', full_name: 'Lead Terminal Operator', role: 'Operator', password_hash: passwordHash },
+            { email: 'customs@portflow.com', full_name: 'Chief Customs Officer Sarah Chen', role: 'Customs', password_hash: passwordHash },
             { email: 'dispatch@portflow.com', full_name: 'Logistics Dispatcher Mike Ross', role: 'Operator', password_hash: passwordHash },
         ];
 
-        for (const u of usersData) {
-            await prisma.user.upsert({
-                where: { email: u.email },
-                update: {},
-                create: u
-            }).catch(() => {});
+        for (let i = 1; i <= 9; i++) {
+            userBatch.push({ email: `admin${i}@portflow.com`, full_name: `Administrator ${i}`, role: 'Admin', password_hash: passwordHash });
+        }
+        for (let i = 1; i <= 48; i++) {
+            userBatch.push({ email: `operator${i}@portflow.com`, full_name: `Terminal Operator ${i}`, role: 'Operator', password_hash: passwordHash });
+        }
+        for (let i = 1; i <= 14; i++) {
+            userBatch.push({ email: `customs${i}@portflow.com`, full_name: `Customs Inspector ${i}`, role: 'Customs', password_hash: passwordHash });
+        }
+        for (let i = 1; i <= 14; i++) {
+            userBatch.push({ email: `dispatch${i}@portflow.com`, full_name: `Fleet Dispatcher ${i}`, role: 'Operator', password_hash: passwordHash });
+        }
+        for (let i = 1; i <= 11; i++) {
+            userBatch.push({ email: `tech${i}@portflow.com`, full_name: `Port Technician ${i}`, role: 'Technician', password_hash: passwordHash });
         }
 
-        const adminUser = await prisma.user.findFirst({ where: { email: 'admin@portflow.com' } });
-        const operatorUser = await prisma.user.findFirst({ where: { email: 'operator@portflow.com' } });
-        const customsUser = await prisma.user.findFirst({ where: { email: 'customs@portflow.com' } });
-
-        // 2. Equipment (Berths & Cranes)
-        const equipmentData = [
-            { equipment_id: 'BERTH-01', name: 'Quay Berth 01 (Deepwater)', type: 'Berth', status: 'Occupied', capacity_metric: 250000, assigned_to: 'MV Ever Given' },
-            { equipment_id: 'BERTH-02', name: 'Quay Berth 02 (Standard)', type: 'Berth', status: 'Available', capacity_metric: 180000, assigned_to: null },
-            { equipment_id: 'BERTH-03', name: 'Quay Berth 03 (Feeder)', type: 'Berth', status: 'Available', capacity_metric: 120000, assigned_to: null },
-            { equipment_id: 'CRANE-STS-01', name: 'Super Post-Panamax STS Crane 01', type: 'Crane', status: 'Busy', capacity_metric: 65, assigned_to: 'MV Ever Given' },
-            { equipment_id: 'CRANE-STS-02', name: 'Post-Panamax STS Crane 02', type: 'Crane', status: 'Available', capacity_metric: 50, assigned_to: null },
-            { equipment_id: 'CRANE-STS-03', name: 'Heavy Lift STS Crane 03', type: 'Crane', status: 'Maintenance', capacity_metric: 80, assigned_to: null },
-            { equipment_id: 'WH-EQ-01', name: 'Yard Gantry Transporter 01', type: 'Warehouse', status: 'Available', capacity_metric: 40, assigned_to: null },
-        ];
-
-        for (const eq of equipmentData) {
-            await prisma.equipment.upsert({
-                where: { equipment_id: eq.equipment_id },
-                update: {},
-                create: eq
-            }).catch(() => {});
+        for (const chunk of chunkArray(userBatch, 50)) {
+            await prisma.user.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
         }
+        const userRecords = await prisma.user.findMany({ select: { id: true, email: true }, take: 100 }).catch(() => []);
+        const userIds = userRecords.map(u => u.id);
 
-        const berth1 = await prisma.equipment.findFirst({ where: { equipment_id: 'BERTH-01' } });
-        const crane1 = await prisma.equipment.findFirst({ where: { equipment_id: 'CRANE-STS-01' } });
-
-        // 3. Ships
-        const shipsData = [
-            {
-                imo_number: 'IMO9811000',
-                name: 'MV Ever Given',
-                vessel_type: 'Container Ship',
-                capacity_teu: 20124,
-                status: 'Docked',
-                berth_id: 'BERTH-01',
-                berth_equipment_id: berth1?.id || null,
-                eta: new Date(Date.now() - 86400000),
-                etd: new Date(Date.now() + 86400000 * 2)
-            },
-            {
-                imo_number: 'IMO9708693',
-                name: 'MSC Oscar',
-                vessel_type: 'Ultra Large Container Vessel',
-                capacity_teu: 19224,
-                status: 'Arriving',
-                berth_id: 'BERTH-02',
-                eta: new Date(Date.now() + 3600000 * 4),
-                etd: new Date(Date.now() + 86400000 * 3)
-            },
-            {
-                imo_number: 'IMO9839272',
-                name: 'CMA CGM Jacques Saadé',
-                vessel_type: 'LNG Powered Container Vessel',
-                capacity_teu: 23000,
-                status: 'Docked',
-                berth_id: 'BERTH-03',
-                eta: new Date(Date.now() - 43200000),
-                etd: new Date(Date.now() + 86400000)
-            },
-            {
-                imo_number: 'IMO9632064',
-                name: 'Maersk Mc-Kinney Moller',
-                vessel_type: 'Triple-E Class Container Ship',
-                capacity_teu: 18270,
-                status: 'Departed',
-                berth_id: null,
-                eta: new Date(Date.now() - 86400000 * 3),
-                etd: new Date(Date.now() - 86400000)
-            }
-        ];
-
-        for (const s of shipsData) {
-            await prisma.ship.upsert({
-                where: { imo_number: s.imo_number },
-                update: {},
-                create: s
-            }).catch(() => {});
-        }
-
-        const ship1 = await prisma.ship.findFirst({ where: { imo_number: 'IMO9811000' } });
-
-        // 4. Warehouses
-        const warehousesData = [
-            { code: 'WH-CFS-01', name: 'Central CFS Dry Storage Yard', zone_type: 'Dry_Storage', capacity_teu: 500, current_occupancy_teu: 142, status: 'Active' },
-            { code: 'WH-REEFER-01', name: 'Cold Chain Reefer Storage Unit', zone_type: 'Reefer_Cold_Storage', capacity_teu: 200, current_occupancy_teu: 45, temperature_celsius: -18.5, status: 'Active' },
-            { code: 'WH-HAZ-01', name: 'Hazmat Hazardous Freight Enclosure', zone_type: 'Dangerous_Goods', capacity_teu: 100, current_occupancy_teu: 12, status: 'Active' },
-            { code: 'WH-INSP-01', name: 'Customs Examination Warehouse', zone_type: 'Inspection_Shed', capacity_teu: 150, current_occupancy_teu: 28, status: 'Active' }
-        ];
-
-        for (const w of warehousesData) {
-            await prisma.warehouse.upsert({
-                where: { code: w.code },
-                update: {},
-                create: w
-            }).catch(() => {});
-        }
-
-        const dryWh = await prisma.warehouse.findFirst({ where: { code: 'WH-CFS-01' } });
-        const reeferWh = await prisma.warehouse.findFirst({ where: { code: 'WH-REEFER-01' } });
-
-        // 5. Cargo Containers
-        const cargoData = [
-            { cargo_number: 'MSKU-902148', size_type: '40ft', weight_tons: 28.5, cargo_type: 'Electronics', current_location: 'Yard A-04', ship_name: 'MV Ever Given', ship_id: ship1?.id, warehouse_id: dryWh?.id, hazard_class: 'None', status: 'In Yard' },
-            { cargo_number: 'CMAU-332194', size_type: '20ft', weight_tons: 14.2, cargo_type: 'Perishables', current_location: 'Reefer Zone R-02', ship_name: 'MV Ever Given', ship_id: ship1?.id, warehouse_id: reeferWh?.id, hazard_class: 'None', status: 'Cleared' },
-            { cargo_number: 'COSU-771239', size_type: '40ft', weight_tons: 31.0, cargo_type: 'Industrial Machinery', current_location: 'Vessel Bay 12', ship_name: 'MV Ever Given', ship_id: ship1?.id, warehouse_id: dryWh?.id, hazard_class: 'None', status: 'On Ship' },
-            { cargo_number: 'EVER-114920', size_type: '20ft', weight_tons: 18.7, cargo_type: 'Chemical Products', current_location: 'Hazmat Enclosure', ship_name: 'CMA CGM Jacques Saadé', warehouse_id: dryWh?.id, hazard_class: 'Class 3 (Flammable Liquid)', status: 'In Yard' },
-            { cargo_number: 'HLCU-552910', size_type: '40ft', weight_tons: 24.0, cargo_type: 'Consumer Goods', current_location: 'Truck Interchange', ship_name: 'MSC Oscar', warehouse_id: dryWh?.id, hazard_class: 'None', status: 'In Transit' }
-        ];
-
-        for (const c of cargoData) {
-            await prisma.cargo.upsert({
-                where: { cargo_number: c.cargo_number },
-                update: {},
-                create: c
-            }).catch(() => {});
-        }
-
-        const cargo1 = await prisma.cargo.findFirst({ where: { cargo_number: 'MSKU-902148' } });
-        const cargo2 = await prisma.cargo.findFirst({ where: { cargo_number: 'CMAU-332194' } });
-
-        // 6. Operations (PCBs)
-        const operationsData = [
-            {
-                process_id: 'OP-PROC-101',
-                operation_type: 'Cargo Discharge',
-                ship_name: 'MV Ever Given',
-                ship_id: ship1?.id,
-                cargo_id: cargo1?.id,
-                crane_id: 'CRANE-STS-01',
-                crane_equipment_id: crane1?.id,
-                berth_id: 'BERTH-01',
-                berth_equipment_id: berth1?.id,
-                created_by_user_id: operatorUser?.id,
-                priority: 3,
-                status: 'Running',
-                start_time: new Date(Date.now() - 1800000),
-                waiting_time_ms: 1240,
-                turnaround_time_ms: 0,
-                created_by: 'operator@portflow.com'
-            },
-            {
-                process_id: 'OP-PROC-102',
-                operation_type: 'Cargo Loading',
-                ship_name: 'MV Ever Given',
-                ship_id: ship1?.id,
-                cargo_id: cargo2?.id,
-                crane_id: 'CRANE-STS-01',
-                crane_equipment_id: crane1?.id,
-                berth_id: 'BERTH-01',
-                berth_equipment_id: berth1?.id,
-                created_by_user_id: operatorUser?.id,
-                priority: 2,
-                status: 'Queued',
-                waiting_time_ms: 850,
-                turnaround_time_ms: 0,
-                created_by: 'operator@portflow.com'
-            },
-            {
-                process_id: 'OP-PROC-103',
-                operation_type: 'Berthing Assist',
-                ship_name: 'CMA CGM Jacques Saadé',
-                crane_id: 'None',
-                berth_id: 'BERTH-03',
-                priority: 1,
-                status: 'Completed',
-                start_time: new Date(Date.now() - 7200000),
-                end_time: new Date(Date.now() - 3600000),
-                waiting_time_ms: 450,
-                turnaround_time_ms: 3600000,
+        // 2. Equipment (550 records)
+        const eqBatch: any[] = [];
+        for (let i = 1; i <= 200; i++) {
+            eqBatch.push({
+                equipment_id: `BERTH-${String(i).padStart(3, '0')}`,
+                name: `Deepwater Berth Quay ${i}`,
+                type: 'Berth',
+                status: i % 3 === 0 ? 'Occupied' : 'Available',
+                capacity_metric: 250000,
+                assigned_to: i % 3 === 0 ? `Vessel-Alloc-${i}` : null,
                 created_by: 'system'
-            }
-        ];
+            });
+        }
+        for (let i = 1; i <= 200; i++) {
+            eqBatch.push({
+                equipment_id: `CRANE-STS-${String(i).padStart(3, '0')}`,
+                name: `Super Post-Panamax STS Crane ${i}`,
+                type: 'Crane',
+                status: i % 4 === 0 ? 'Busy' : i % 8 === 0 ? 'Maintenance' : 'Available',
+                capacity_metric: 65,
+                assigned_to: i % 4 === 0 ? `Quay-Section-${i}` : null,
+                created_by: 'system'
+            });
+        }
+        for (let i = 1; i <= 150; i++) {
+            eqBatch.push({
+                equipment_id: `GANTRY-RTG-${String(i).padStart(3, '0')}`,
+                name: `Rubber Tired Yard Gantry ${i}`,
+                type: 'Gantry',
+                status: i % 5 === 0 ? 'Busy' : 'Available',
+                capacity_metric: 45,
+                assigned_to: `Yard-Block-${String.fromCharCode(65 + (i % 8))}`,
+                created_by: 'system'
+            });
+        }
+        for (const chunk of chunkArray(eqBatch, 100)) {
+            await prisma.equipment.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
+        }
+        const berthRecords = await prisma.equipment.findMany({ where: { type: 'Berth' }, select: { id: true } }).catch(() => []);
+        const craneRecords = await prisma.equipment.findMany({ where: { type: 'Crane' }, select: { id: true } }).catch(() => []);
+        const berthIds = berthRecords.map(e => e.id);
+        const craneIds = craneRecords.map(e => e.id);
 
-        for (const op of operationsData) {
-            await prisma.operation.upsert({
-                where: { process_id: op.process_id },
-                update: {},
-                create: op
-            }).catch(() => {});
+        // 3. Ships (600 records)
+        const vesselPrefixes = ['MSC', 'Maersk', 'CMA CGM', 'COSCO', 'Hapag-Lloyd', 'ONE', 'Evergreen', 'HMM', 'ZIM', 'Yang Ming'];
+        const vesselSuffixes = ['Titan', 'Glory', 'Pioneer', 'Horizon', 'Voyager', 'Navigator', 'Express', 'Leader', 'Sovereign', 'Vanguard'];
+        const shipBatch: any[] = [];
+        for (let i = 1; i <= 600; i++) {
+            const pfx = vesselPrefixes[i % vesselPrefixes.length];
+            const sfx = vesselSuffixes[Math.floor(i / 10) % vesselSuffixes.length];
+            const assignedBerthId = berthIds.length > 0 ? berthIds[i % berthIds.length] : null;
+            shipBatch.push({
+                imo_number: `IMO-${String(9000000 + i)}`,
+                name: `${pfx} ${sfx} ${i}`,
+                vessel_type: i % 5 === 0 ? 'Bulk Carrier' : i % 4 === 0 ? 'Oil Tanker' : 'Container Ship',
+                capacity_teu: 5000 + ((i * 37) % 19000),
+                status: i % 4 === 0 ? 'Docked' : i % 3 === 0 ? 'Berthed' : i % 2 === 0 ? 'Arriving' : 'Arrived',
+                berth_equipment_id: assignedBerthId,
+                berth_id: assignedBerthId ? `Berth ${(i % 200) + 1}` : 'Berth 1',
+                created_by: 'system'
+            });
+        }
+        for (const chunk of chunkArray(shipBatch, 150)) {
+            await prisma.ship.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
+        }
+        const shipRecords = await prisma.ship.findMany({ select: { id: true, name: true }, take: 600 }).catch(() => []);
+        const shipIds = shipRecords.map(s => s.id);
+
+        // 4. Warehouses (520 records)
+        const warehouseBatch: any[] = [];
+        const zoneTypes = ['Dry_Storage', 'Reefer_Cold_Storage', 'Dangerous_Goods', 'Inspection_Shed', 'Bonded_Customs'];
+        for (let i = 1; i <= 520; i++) {
+            const zt = zoneTypes[i % zoneTypes.length];
+            warehouseBatch.push({
+                name: `Port Logistics Terminal Zone ${String.fromCharCode(65 + (i % 26))}-${String(i).padStart(3, '0')}`,
+                code: `WH-ZONE-${String(i).padStart(3, '0')}`,
+                zone_type: zt,
+                capacity_teu: 1500 + (i * 20),
+                current_occupancy_teu: 200 + (i * 12),
+                temperature_celsius: zt === 'Reefer_Cold_Storage' ? -18.5 : null,
+                status: 'Active'
+            });
+        }
+        for (const chunk of chunkArray(warehouseBatch, 100)) {
+            await prisma.warehouse.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
+        }
+        const whRecords = await prisma.warehouse.findMany({ select: { id: true }, take: 520 }).catch(() => []);
+        const whIds = whRecords.map(w => w.id);
+
+        // 5. Cargo Containers (1,200 records)
+        const cargoTypes = ['Electronics', 'Automotive Parts', 'Pharmaceuticals', 'Machinery', 'Textiles', 'Perishables', 'Chemicals'];
+        const cargoBatch: any[] = [];
+        for (let i = 1; i <= 1200; i++) {
+            const shipObj = shipRecords.length > 0 ? shipRecords[i % shipRecords.length] : null;
+            const whId = whIds.length > 0 ? whIds[i % whIds.length] : null;
+            cargoBatch.push({
+                cargo_number: `MSCU${String(7000000 + i)}`,
+                size_type: i % 3 === 0 ? '40ft' : '20ft',
+                weight_tons: parseFloat((12.5 + ((i * 1.7) % 24.0)).toFixed(1)),
+                cargo_type: cargoTypes[i % cargoTypes.length],
+                current_location: i % 3 === 0 ? 'Warehouse' : i % 2 === 0 ? `Yard Bay ${(i % 30) + 1}` : 'Vessel Hold',
+                ship_name: shipObj?.name || 'MSC Titan 1',
+                ship_id: shipObj?.id || null,
+                warehouse_id: whId,
+                hazard_class: i % 8 === 0 ? 'Class 3 (Flammable)' : null,
+                status: i % 4 === 0 ? 'Discharged' : i % 3 === 0 ? 'In Yard' : i % 2 === 0 ? 'Cleared' : 'On Ship',
+                created_by: 'system'
+            });
+        }
+        for (const chunk of chunkArray(cargoBatch, 200)) {
+            await prisma.cargo.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
+        }
+        const cargoRecords = await prisma.cargo.findMany({ select: { id: true }, take: 1200 }).catch(() => []);
+        const cargoIds = cargoRecords.map(c => c.id);
+
+        // 6. Operations (1,500 records)
+        const opTypes = ['Discharge', 'Loading', 'Transshipment', 'Yard-Shifting', 'Customs-Inspection', 'Drayage-Gate'];
+        const opBatch: any[] = [];
+        for (let i = 1; i <= 1500; i++) {
+            const shipObj = shipRecords.length > 0 ? shipRecords[i % shipRecords.length] : null;
+            const cargoId = cargoIds.length > 0 ? cargoIds[i % cargoIds.length] : null;
+            const craneId = craneIds.length > 0 ? craneIds[i % craneIds.length] : null;
+            const berthId = berthIds.length > 0 ? berthIds[i % berthIds.length] : null;
+            const userId = userIds.length > 0 ? userIds[i % userIds.length] : null;
+            const priority = (i % 5) + 1;
+            const status = i % 5 === 0 ? 'Completed' : i % 3 === 0 ? 'Running' : 'Queued';
+
+            opBatch.push({
+                process_id: `op-heavy-${i}`,
+                operation_type: opTypes[i % opTypes.length],
+                ship_name: shipObj?.name || 'MSC Titan 1',
+                ship_id: shipObj?.id || null,
+                cargo_id: cargoId,
+                crane_id: `CRANE-STS-${String((i % 200) + 1).padStart(3, '0')}`,
+                crane_equipment_id: craneId,
+                berth_id: `Berth ${(i % 200) + 1}`,
+                berth_equipment_id: berthId,
+                created_by_user_id: userId,
+                priority: priority,
+                status: status,
+                waiting_time_ms: (i * 45) % 12000,
+                turnaround_time_ms: 15000 + ((i * 120) % 45000),
+                created_by: `operator${(i % 40) + 1}@portflow.com`
+            });
+        }
+        for (const chunk of chunkArray(opBatch, 200)) {
+            await prisma.operation.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
+        }
+        const opRecords = await prisma.operation.findMany({ select: { id: true }, take: 1500 }).catch(() => []);
+        const opIds = opRecords.map(o => o.id);
+
+        // 7. Trucks (550 records)
+        const transportCompanies = ['Maersk Line Haul', 'Apex Logistics', 'FastTrack Freight', 'Evergreen Drayage', 'DHL Supply Chain', 'Pacific Haulage Ltd'];
+        const truckBatch: any[] = [];
+        for (let i = 1; i <= 550; i++) {
+            const assignedCargo = cargoIds.length > 0 ? cargoIds[i % cargoIds.length] : null;
+            truckBatch.push({
+                license_plate: `TRK-${String(1000 + i)}`,
+                driver_name: `Driver ${(i % 80) + 1} Vance`,
+                driver_phone: `+1-555-${String(100000 + i)}`,
+                transport_company: transportCompanies[i % transportCompanies.length],
+                status: i % 4 === 0 ? 'In Transit' : i % 3 === 0 ? 'At Gate' : 'Idle',
+                max_payload_tons: 32.5,
+                assigned_cargo_id: assignedCargo
+            });
+        }
+        for (const chunk of chunkArray(truckBatch, 150)) {
+            await prisma.truck.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
+        }
+        const truckRecords = await prisma.truck.findMany({ select: { id: true }, take: 550 }).catch(() => []);
+        const truckIds = truckRecords.map(t => t.id);
+
+        // 8. Gate Passes (850 records)
+        const gatePassBatch: any[] = [];
+        for (let i = 1; i <= 850; i++) {
+            const truckId = truckIds.length > 0 ? truckIds[i % truckIds.length] : 1;
+            const cargoId = cargoIds.length > 0 ? cargoIds[i % cargoIds.length] : null;
+            const issuerId = userIds.length > 0 ? userIds[i % userIds.length] : null;
+            gatePassBatch.push({
+                pass_number: `PASS-GATE-${String(10000 + i)}`,
+                truck_id: truckId,
+                cargo_id: cargoId,
+                issued_by_id: issuerId,
+                gate_lane: `Gate-Lane-${(i % 8) + 1}`,
+                pass_type: i % 3 === 0 ? 'Outbound_Pickup' : i % 2 === 0 ? 'Empty_Return' : 'Inbound_Delivery',
+                status: i % 3 === 0 ? 'Completed' : i % 2 === 0 ? 'Checked_In' : 'Issued'
+            });
+        }
+        for (const chunk of chunkArray(gatePassBatch, 200)) {
+            await prisma.gatePass.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
         }
 
-        const op1 = await prisma.operation.findFirst({ where: { process_id: 'OP-PROC-101' } });
-
-        // 7. Trucks (Drayage fleet)
-        const trucksData = [
-            { license_plate: 'TRK-9821', driver_name: 'John Miller', driver_phone: '+1-555-0192', transport_company: 'Pacific Haulage Ltd', status: 'In Transit', max_payload_tons: 32.5, assigned_cargo_id: cargo1?.id },
-            { license_plate: 'TRK-4412', driver_name: 'David Vance', driver_phone: '+1-555-0188', transport_company: 'Harbor Drayage Corp', status: 'Idle', max_payload_tons: 30.0, assigned_cargo_id: null },
-            { license_plate: 'TRK-7734', driver_name: 'Carlos Ruiz', driver_phone: '+1-555-0144', transport_company: 'Maritime Express Freight', status: 'Loading', max_payload_tons: 35.0, assigned_cargo_id: cargo2?.id },
-            { license_plate: 'TRK-5520', driver_name: 'Robert Hayes', driver_phone: '+1-555-0163', transport_company: 'Interstate Freightway', status: 'Checked In', max_payload_tons: 28.0, assigned_cargo_id: null }
-        ];
-
-        for (const t of trucksData) {
-            await prisma.truck.upsert({
-                where: { license_plate: t.license_plate },
-                update: {},
-                create: t
-            }).catch(() => {});
+        // 9. Customs Inspections (750 records)
+        const inspectionBatch: any[] = [];
+        for (let i = 1; i <= 750; i++) {
+            const cargoId = cargoIds.length > 0 ? cargoIds[i % cargoIds.length] : 1;
+            const inspectorId = userIds.length > 0 ? userIds[i % userIds.length] : null;
+            inspectionBatch.push({
+                inspection_number: `CUST-INSP-${String(20000 + i)}`,
+                cargo_id: cargoId,
+                inspector_id: inspectorId,
+                declaration_number: `DECL-${String(500000 + i)}`,
+                inspection_type: i % 4 === 0 ? 'Physical_Inspection' : i % 3 === 0 ? 'Document_Audit' : 'X-Ray_Scan',
+                status: i % 5 === 0 ? 'Held' : i % 2 === 0 ? 'Cleared' : 'Pending',
+                duty_amount_cents: BigInt((i * 4500) % 500000),
+                findings: i % 5 === 0 ? 'Secondary drill inspection ordered.' : 'Standard manifest clearance satisfied.'
+            });
+        }
+        for (const chunk of chunkArray(inspectionBatch, 200)) {
+            await prisma.customsInspection.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
         }
 
-        const truck1 = await prisma.truck.findFirst({ where: { license_plate: 'TRK-9821' } });
-        const truck3 = await prisma.truck.findFirst({ where: { license_plate: 'TRK-7734' } });
+        // 10. Bills (800 records)
+        const billBatch: any[] = [];
+        for (let i = 1; i <= 800; i++) {
+            const shipId = shipIds.length > 0 ? shipIds[i % shipIds.length] : null;
+            const cargoId = cargoIds.length > 0 ? cargoIds[i % cargoIds.length] : null;
+            const opId = opIds.length > 0 ? opIds[i % opIds.length] : null;
+            const dock = parseFloat((1500 + ((i * 45) % 5000)).toFixed(2));
+            const crane = parseFloat((800 + ((i * 30) % 3500)).toFixed(2));
+            const storage = parseFloat((350 + ((i * 15) % 1200)).toFixed(2));
+            const total = parseFloat((dock + crane + storage).toFixed(2));
 
-        // 8. Gate Passes
-        if (truck1 && truck3) {
-            const gatePassesData = [
-                {
-                    pass_number: 'GP-2026-0089',
-                    truck_id: truck1.id,
-                    cargo_id: cargo1?.id,
-                    issued_by_id: operatorUser?.id,
-                    gate_lane: 'Gate-In-Lane-1',
-                    pass_type: 'Inbound_Delivery',
-                    status: 'Checked_In',
-                    check_in_time: new Date(Date.now() - 3600000)
-                },
-                {
-                    pass_number: 'GP-2026-0090',
-                    truck_id: truck3.id,
-                    cargo_id: cargo2?.id,
-                    issued_by_id: operatorUser?.id,
-                    gate_lane: 'Gate-Out-Lane-2',
-                    pass_type: 'Outbound_Dispatch',
-                    status: 'Completed',
-                    check_in_time: new Date(Date.now() - 7200000),
-                    check_out_time: new Date(Date.now() - 1800000)
-                }
-            ];
-
-            for (const gp of gatePassesData) {
-                await prisma.gatePass.upsert({
-                    where: { pass_number: gp.pass_number },
-                    update: {},
-                    create: gp
-                }).catch(() => {});
-            }
-        }
-
-        // 9. Customs Inspections
-        if (cargo1 && cargo2) {
-            const customsData = [
-                {
-                    inspection_number: 'CUST-INSP-4401',
-                    cargo_id: cargo1.id,
-                    inspector_id: customsUser?.id,
-                    declaration_number: 'DEC-2026-991',
-                    inspection_type: 'X-Ray_Scan',
-                    status: 'Cleared',
-                    duty_amount_cents: BigInt(450000),
-                    findings: 'No anomalies detected. Seal verified intact.',
-                    cleared_at: new Date(Date.now() - 5400000)
-                },
-                {
-                    inspection_number: 'CUST-INSP-4402',
-                    cargo_id: cargo2.id,
-                    inspector_id: customsUser?.id,
-                    declaration_number: 'DEC-2026-992',
-                    inspection_type: 'Physical_Inspection',
-                    status: 'Under_Review',
-                    duty_amount_cents: BigInt(1200000),
-                    findings: 'Physical cargo count verification in progress at CFS-01.',
-                    inspected_at: new Date(Date.now() - 1800000)
-                }
-            ];
-
-            for (const ci of customsData) {
-                await prisma.customsInspection.upsert({
-                    where: { inspection_number: ci.inspection_number },
-                    update: {},
-                    create: ci
-                }).catch(() => {});
-            }
-        }
-
-        // 10. Bills & Invoices
-        const billsData = [
-            {
-                invoice_number: 'INV-2026-0012',
-                ship_id: ship1?.id,
-                cargo_id: cargo1?.id,
-                operation_id: op1?.id,
-                customer_name: 'Evergreen Marine Corp',
-                docking_fee: 1450.0,
-                crane_usage_fee: 800.0,
-                storage_fee: 250.0,
-                total_amount: 2500.0,
+            billBatch.push({
+                invoice_number: `INV-2026-${String(10000 + i)}`,
+                ship_id: shipId,
+                cargo_id: cargoId,
+                operation_id: opId,
+                customer_name: `Global Logistics Client ${(i % 50) + 1} Ltd`,
+                docking_fee: dock,
+                crane_usage_fee: crane,
+                storage_fee: storage,
+                total_amount: total,
                 currency: 'USD',
-                payment_status: 'Paid',
-                paid_at: new Date(Date.now() - 86400000)
-            },
-            {
-                invoice_number: 'INV-2026-0013',
-                ship_id: ship1?.id,
-                cargo_id: cargo2?.id,
-                operation_id: null,
-                customer_name: 'Maersk Logistics Alliance',
-                docking_fee: 2200.0,
-                crane_usage_fee: 1200.0,
-                storage_fee: 450.0,
-                total_amount: 3850.0,
-                currency: 'USD',
-                payment_status: 'Pending',
-                due_date: new Date(Date.now() + 86400000 * 7)
-            }
-        ];
-
-        for (const b of billsData) {
-            await prisma.bill.upsert({
-                where: { invoice_number: b.invoice_number },
-                update: {},
-                create: b
-            }).catch(() => {});
+                payment_status: i % 4 === 0 ? 'Paid' : i % 3 === 0 ? 'Issued' : 'Pending'
+            });
+        }
+        for (const chunk of chunkArray(billBatch, 200)) {
+            await prisma.bill.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
         }
 
-        // 11. Issues (Incident tickets)
-        const issuesData = [
-            {
-                ticket_number: 'TICK-801294',
-                title: 'STS Crane 02 Hoist Sensor Calibration Warning',
-                description: 'Encoder sensor jittering on load hoist 40ft spreader. Mechanical team dispatched.',
-                severity: 'High',
-                status: 'Open',
-                reported_by_id: operatorUser?.id,
-                equipment_id: crane1?.id
-            },
-            {
-                ticket_number: 'TICK-801295',
-                title: 'Berth 3 Mooring Bollard Maintenance Scheduled',
-                description: 'Routine integrity check on marine bollard 3B completed.',
-                severity: 'Low',
-                status: 'Resolved',
-                reported_by_id: adminUser?.id,
-                equipment_id: berth1?.id,
-                resolution_notes: 'Bolts tightened to 450Nm. Safe for vessel docking.',
-                resolved_at: new Date(Date.now() - 43200000)
-            }
+        // 11. Issues (600 records)
+        const issueBatch: any[] = [];
+        const issueTitles = [
+            'STS Crane 04 Spreader Cable Tension Alarm',
+            'Berth 12 Hydraulic Fender Pressure Drop',
+            'Container Gantry 02 Position Sensor Intermittent',
+            'Gate Lane 03 RFID Reader Network Disconnect',
+            'Reefer Plugs Substation Voltage Fluctuation',
+            'Tugboat Towline Winch Brake Pad Wear Warning'
         ];
-
-        for (const iss of issuesData) {
-            await prisma.issue.upsert({
-                where: { ticket_number: iss.ticket_number },
-                update: {},
-                create: iss
-            }).catch(() => {});
+        for (let i = 1; i <= 600; i++) {
+            const reporterId = userIds.length > 0 ? userIds[i % userIds.length] : null;
+            const eqId = craneIds.length > 0 ? craneIds[i % craneIds.length] : null;
+            issueBatch.push({
+                ticket_number: `TICK-${String(10000 + i)}`,
+                title: `${issueTitles[i % issueTitles.length]} (#${i})`,
+                description: `Operational telemetry anomaly detected during high-throughput shift. Maintenance technician dispatched for physical inspection.`,
+                severity: i % 10 === 0 ? 'Critical' : i % 4 === 0 ? 'High' : 'Medium',
+                status: i % 3 === 0 ? 'Resolved' : i % 2 === 0 ? 'Investigating' : 'Open',
+                reported_by_id: reporterId,
+                equipment_id: eqId
+            });
+        }
+        for (const chunk of chunkArray(issueBatch, 200)) {
+            await prisma.issue.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
         }
 
-        // 12. System Logs
-        const logsData = [
-            { level: 'INFO', source: 'Scheduler', message: 'CPU Scheduling Engine initialized with Non-Preemptive FCFS queue.', action: 'INIT_SCHEDULER', user_id: adminUser?.id },
-            { level: 'INFO', source: 'DeadlockDetector', message: 'Cycle detection scan ran on Resource Allocation Graph: 0 cycles detected.', action: 'CYCLE_CHECK', user_id: null },
-            { level: 'WARN', source: 'CraneLock', message: 'Resource contention: Crane STS-01 requested while held by OP-PROC-101. Process queued.', action: 'MUTEX_ACQUIRE', user_id: operatorUser?.id },
-            { level: 'INFO', source: 'GateControl', message: 'Truck TRK-9821 successfully scanned at Gate-In Lane 1 (Pass GP-2026-0089).', action: 'GATE_CHECKIN', user_id: operatorUser?.id }
-        ];
-
-        for (const lg of logsData) {
-            await prisma.systemLog.create({
-                data: lg
-            }).catch(() => {});
+        // 12. System Logs (2,500 records)
+        const sources = ['Scheduler', 'DeadlockDetector', 'EquipmentManager', 'AuthService', 'CustomsSync', 'TariffBilling'];
+        const actions = ['CPU_DISPATCH', 'MUTEX_ACQUIRE', 'MUTEX_RELEASE', 'SEMAPHORE_WAIT', 'SEMAPHORE_POST', 'INSPECTION_HOLD', 'INVOICE_GENERATED'];
+        const logBatch: any[] = [];
+        for (let i = 1; i <= 2500; i++) {
+            const userId = userIds.length > 0 ? userIds[i % userIds.length] : null;
+            logBatch.push({
+                level: i % 50 === 0 ? 'WARN' : i % 100 === 0 ? 'ERROR' : 'INFO',
+                source: sources[i % sources.length],
+                message: `Kernel Event #${i}: Process op-${i} executed on CPU core ${(i % 8) + 1}. Lock status: OK.`,
+                action: actions[i % actions.length],
+                entity_type: 'OPERATION',
+                entity_id: (i % 1500) + 1,
+                user_id: userId,
+                ip_address: `10.0.${(i % 16) + 1}.${(i % 254) + 1}`
+            });
+        }
+        for (const chunk of chunkArray(logBatch, 500)) {
+            await prisma.systemLog.createMany({ data: chunk, skipDuplicates: true }).catch(() => {});
         }
 
-        console.log('✓ PortFlow 12-Table Relational Schema successfully seeded!');
+        console.log('✓ PortFlow 12-Table Relational Schema successfully seeded with 500+ records in each table and 100 demo users!');
     } catch (err: any) {
         console.warn('[Seed] Warning during database seed:', err.message);
     }
