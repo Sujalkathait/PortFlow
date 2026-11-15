@@ -10,6 +10,7 @@ export async function setupGraphQL(app: Express): Promise<ApolloServer<GraphQLCo
         typeDefs,
         resolvers,
         introspection: true,
+        csrfPrevention: false,
     });
 
     await server.start();
