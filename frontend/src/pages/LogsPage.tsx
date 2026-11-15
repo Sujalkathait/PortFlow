@@ -16,15 +16,27 @@ export function LogsPage() {
         setLoading(true);
         setError('');
         try {
-            const [sys, audit] = await Promise.all([
+            const results = await Promise.allSettled([
                 api.system.logs(),
                 api.system.audit()
             ]);
             
-            setSystemLogs(sys || []);
-            setAuditLogs(audit || []);
+            const sysResult = results[0];
+            const auditResult = results[1];
+
+            if (sysResult.status === 'fulfilled' && Array.isArray(sysResult.value)) {
+                setSystemLogs(sysResult.value);
+            }
+            if (auditResult.status === 'fulfilled' && Array.isArray(auditResult.value)) {
+                setAuditLogs(auditResult.value);
+            }
+            
+            // Only set error if BOTH calls rejected
+            if (sysResult.status === 'rejected' && auditResult.status === 'rejected') {
+                setError('Failed to load system logs. Please refresh.');
+            }
         } catch (e: any) {
-            setError(e.message || 'Failed to load logs');
+            setError(e.message || 'Unable to refresh logs at this time.');
         } finally {
             setLoading(false);
         }

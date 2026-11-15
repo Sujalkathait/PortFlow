@@ -72,13 +72,13 @@ export function SchedulingPage() {
                 <div className="space-y-1">
                     <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-1">
                         <Cpu className="w-5 h-5" />
-                        <span className="text-xs font-bold tracking-widest uppercase">OS Engine</span>
+                        <span className="text-xs font-bold tracking-widest uppercase">DISPATCH CONTROLLER</span>
                     </div>
                     <h1 className="text-2xl xs:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        OS Scheduler & Resource Control
+                        Operations Scheduler & Resource Control
                     </h1>
                     <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xl">
-                        Real-time CPU Scheduling, Mutex Lock Allocation, Semaphores, and Deadlock Detection.
+                        Real-time operation scheduling, crane allocations, berth coordination, and conflict prevention.
                     </p>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto mt-2 sm:mt-0">
@@ -94,7 +94,7 @@ export function SchedulingPage() {
                         className="flex-1 sm:flex-initial shadow-sm bg-blue-600 hover:bg-blue-700 text-white min-h-[38px] sm:min-h-[36px]"
                     >
                         <Play className="mr-2 h-4 w-4 fill-current" />
-                        Dispatch Next Process
+                        Dispatch Next Operation
                     </Button>
                 </div>
             </div>
@@ -122,15 +122,15 @@ export function SchedulingPage() {
                         </div>
                         <div>
                             <div className="font-bold text-slate-900 dark:text-slate-100">
-                                Active CPU Scheduling Algorithm
+                                Active Dispatch Scheduling Strategy
                             </div>
                             <div className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                                Select how operations in the ready queue are ordered and dispatched to resources.
+                                Select how queued operations are prioritized and dispatched to cranes and berths.
                             </div>
                         </div>
                     </div>
                     <div className="flex items-center gap-3 w-full md:w-auto">
-                        <span className="text-sm text-slate-500 hidden lg:inline">Current Policy:</span>
+                        <span className="text-sm text-slate-500 hidden lg:inline">Current Strategy:</span>
                         <div className="grid grid-cols-2 xs:grid-cols-4 md:flex rounded-lg border border-slate-200 dark:border-slate-700 p-1 bg-white dark:bg-slate-950 shadow-sm w-full md:w-auto gap-1">
                             {(['FCFS', 'SJF', 'ROUND_ROBIN', 'PRIORITY'] as const).map((algo) => (
                                 <button
@@ -143,7 +143,7 @@ export function SchedulingPage() {
                                             : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
                                     }`}
                                 >
-                                    {algo === 'ROUND_ROBIN' ? 'Round Robin' : algo}
+                                    {algo === 'ROUND_ROBIN' ? 'Round Robin' : algo === 'FCFS' ? 'First-Come (FIFO)' : algo === 'SJF' ? 'Shortest Job' : 'Priority'}
                                 </button>
                             ))}
                         </div>
@@ -155,55 +155,55 @@ export function SchedulingPage() {
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="shadow-sm border-slate-200 dark:border-slate-800">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-xs font-bold text-slate-500 uppercase tracking-wider">Algorithm</CardTitle>
+                        <CardTitle className="text-xs font-bold text-slate-500 uppercase tracking-wider">Strategy</CardTitle>
                         <Cpu className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                            {schedulerType === 'ROUND_ROBIN' ? 'Round Robin' : schedulerType}
+                            {schedulerType === 'ROUND_ROBIN' ? 'Round Robin' : schedulerType === 'FCFS' ? 'First-Come (FIFO)' : schedulerType === 'SJF' ? 'Shortest Job First' : 'Priority First'}
                         </div>
                         <p className="text-xs font-medium text-slate-500 mt-1">
-                            {schedulerType === 'FCFS' && 'First-Come, First-Served'}
-                            {schedulerType === 'SJF' && 'Shortest Job First'}
-                            {schedulerType === 'ROUND_ROBIN' && 'Round Robin (Time Quantum: 2000ms)'}
-                            {schedulerType === 'PRIORITY' && 'Highest Priority First'}
+                            {schedulerType === 'FCFS' && 'First-Come, First-Served queue ordering'}
+                            {schedulerType === 'SJF' && 'Shortest Job First for optimal throughput'}
+                            {schedulerType === 'ROUND_ROBIN' && 'Round Robin balanced time intervals (2.0s)'}
+                            {schedulerType === 'PRIORITY' && 'Highest Priority First for critical vessels'}
                         </p>
                     </CardContent>
                 </Card>
 
                 <Card className="shadow-sm border-slate-200 dark:border-slate-800">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ready Queue</CardTitle>
+                        <CardTitle className="text-xs font-bold text-slate-500 uppercase tracking-wider">Queued Operations</CardTitle>
                         <Clock className="h-4 w-4 text-amber-500" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-mono">{String(readyQueue.length).padStart(2, '0')}</div>
-                        <p className="text-xs font-medium text-slate-500 mt-1">Processes waiting execution</p>
+                        <p className="text-xs font-medium text-slate-500 mt-1">Operations waiting in queue</p>
                     </CardContent>
                 </Card>
 
                 <Card className="shadow-sm border-slate-200 dark:border-slate-800">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-xs font-bold text-slate-500 uppercase tracking-wider">Completed</CardTitle>
+                        <CardTitle className="text-xs font-bold text-slate-500 uppercase tracking-wider">Dispatched Operations</CardTitle>
                         <Play className="h-4 w-4 text-emerald-500" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-mono">{String(executedCount).padStart(2, '0')}</div>
-                        <p className="text-xs font-medium text-slate-500 mt-1">Total processes dispatched</p>
+                        <p className="text-xs font-medium text-slate-500 mt-1">Total operations executed</p>
                     </CardContent>
                 </Card>
 
                 <Card className={`shadow-sm border-slate-200 dark:border-slate-800 transition-colors ${deadlock ? 'bg-red-50/50 dark:bg-red-950/10 border-red-200 dark:border-red-900/50' : ''}`}>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className={`text-xs font-bold uppercase tracking-wider ${deadlock ? 'text-red-700 dark:text-red-400' : 'text-slate-500'}`}>Deadlock State</CardTitle>
+                        <CardTitle className={`text-xs font-bold uppercase tracking-wider ${deadlock ? 'text-red-700 dark:text-red-400' : 'text-slate-500'}`}>Resource Conflicts</CardTitle>
                         {deadlock ? <ShieldAlert className="h-4 w-4 text-red-600" /> : <ShieldCheck className="h-4 w-4 text-emerald-500" />}
                     </CardHeader>
                     <CardContent>
                         <div className={`text-2xl font-bold tracking-tight ${deadlock ? 'text-red-700 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                            {deadlock ? 'DEADLOCK' : 'SAFE'}
+                            {deadlock ? 'CONFLICT' : 'SAFE'}
                         </div>
                         <p className={`text-xs font-medium mt-1 ${deadlock ? 'text-red-600/80 dark:text-red-400/80' : 'text-slate-500'}`}>
-                            {deadlock ? 'Circular wait detected! System halted.' : 'No circular wait detected'}
+                            {deadlock ? 'Crane/berth circular contention detected!' : 'All cranes & berths operating conflict-free'}
                         </p>
                     </CardContent>
                 </Card>
@@ -215,10 +215,10 @@ export function SchedulingPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
                             <CardTitle className="text-base font-semibold flex items-center gap-2 text-slate-900 dark:text-slate-100">
-                                <Clock className="h-5 w-5 text-blue-600 dark:text-blue-500" /> Ready Queue Process Visualizer
+                                <Clock className="h-5 w-5 text-blue-600 dark:text-blue-500" /> Queued Operations Queue
                             </CardTitle>
                             <CardDescription className="mt-1">
-                                Processes ordered dynamically by the {schedulerType} algorithm.
+                                Operations ordered dynamically by the {schedulerType} dispatch policy.
                             </CardDescription>
                         </div>
                         <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">
@@ -267,22 +267,22 @@ export function SchedulingPage() {
                 </CardContent>
             </Card>
 
-            {/* Resource Allocation Cards: Mutexes & Semaphores */}
+            {/* Resource Allocation Cards: Cranes & Berths */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Mutex Locks (Cranes) */}
+                {/* Crane Locks */}
                 <Card className="shadow-sm border-slate-200 dark:border-slate-800">
                     <CardHeader className="border-b bg-slate-50/50 dark:bg-slate-900/20 px-6 py-4">
                         <CardTitle className="text-base font-semibold flex items-center gap-2 text-slate-900 dark:text-slate-100">
-                            <Lock className="h-5 w-5 text-blue-600 dark:text-blue-500" /> Mutex Locks <span className="text-slate-400 font-normal text-sm ml-1">(Cranes)</span>
+                            <Lock className="h-5 w-5 text-blue-600 dark:text-blue-500" /> Crane Allocations & Locks
                         </CardTitle>
                         <CardDescription>
-                            Mutual exclusion locks dynamically managed for crane allocations.
+                            Exclusive equipment allocation preventing multiple jobs from conflicting on the same crane.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-6 space-y-3">
                         {Object.keys(mutexes).length === 0 ? (
                             <div className="py-6 text-center text-sm font-medium text-slate-500 italic">
-                                No active crane locks currently tracked in the system.
+                                No active crane allocations currently tracked in the system.
                             </div>
                         ) : (
                             Object.entries(mutexes).map(([name, lock]: [string, any]) => (
@@ -303,7 +303,7 @@ export function SchedulingPage() {
                                     <span className={`text-xs px-2.5 py-1 rounded-md ${
                                         lock.isLocked ? 'bg-amber-200/50 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 font-bold' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                                     }`}>
-                                        {lock.isLocked ? `Locked by OP-${String(lock.ownerId).padStart(4, '0')}` : 'Unlocked / Free'}
+                                        {lock.isLocked ? `Assigned to OP-${String(lock.ownerId).padStart(4, '0')}` : 'Available / Free'}
                                     </span>
                                 </div>
                             ))
@@ -311,20 +311,20 @@ export function SchedulingPage() {
                     </CardContent>
                 </Card>
 
-                {/* Semaphores (Berths) */}
+                {/* Berth Capacity */}
                 <Card className="shadow-sm border-slate-200 dark:border-slate-800">
                     <CardHeader className="border-b bg-slate-50/50 dark:bg-slate-900/20 px-6 py-4">
                         <CardTitle className="text-base font-semibold flex items-center gap-2 text-slate-900 dark:text-slate-100">
-                            <Anchor className="h-5 w-5 text-blue-600 dark:text-blue-500" /> Semaphores <span className="text-slate-400 font-normal text-sm ml-1">(Berths)</span>
+                            <Anchor className="h-5 w-5 text-blue-600 dark:text-blue-500" /> Berth Capacity & Allocations
                         </CardTitle>
                         <CardDescription>
-                            Counting semaphores coordinating vessel docking and capacity limits.
+                            Berth docking capacity limits and vessel assignment coordination.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-6 space-y-3">
                         {Object.keys(semaphores).length === 0 ? (
                             <div className="py-6 text-center text-sm font-medium text-slate-500 italic">
-                                No semaphore berths currently registered.
+                                No berths currently registered in the scheduler.
                             </div>
                         ) : (
                             Object.entries(semaphores).map(([name, sem]: [string, any]) => (
@@ -383,13 +383,13 @@ export function SchedulingPage() {
 
                     <Card className="shadow-sm border-slate-200 dark:border-slate-800">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-xs font-bold text-slate-500 uppercase tracking-wider">Concurrency Health</CardTitle>
+                            <CardTitle className="text-xs font-bold text-slate-500 uppercase tracking-wider">Resource Allocation Health</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                                 Optimal
                             </div>
-                            <p className="text-xs font-medium text-slate-500 mt-1">Lock hierarchy and semaphore permits validated</p>
+                            <p className="text-xs font-medium text-slate-500 mt-1">Crane locks and berth allocations validated conflict-free</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -401,14 +401,14 @@ export function SchedulingPage() {
                     <CardTitle className="text-base font-semibold flex items-center justify-between">
                         <span className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
                             <Cpu className="h-4 w-4 text-blue-600 dark:text-blue-500" />
-                            Scheduling Algorithm Comparison Matrix
+                            Dispatch Strategy Comparison & Trade-Offs
                         </span>
                         <span className="text-xs font-normal text-slate-500">
-                            Theoretical & Empirical Evaluation
+                            Port Operations Evaluation
                         </span>
                     </CardTitle>
                     <CardDescription>
-                        Comparative evaluation of CPU scheduling policies applied to port crane allocation, vessel berthing, and container throughput.
+                        Comparative evaluation of dispatch policies applied to port crane allocation, vessel berthing, and container throughput.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">

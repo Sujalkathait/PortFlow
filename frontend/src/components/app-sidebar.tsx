@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, Ship, Truck, Settings,
-  LogOut, Cpu, Boxes, User, Trash2, AlertTriangle,
-  ScrollText, BarChart3, Warehouse
+  LogOut, Cpu, Boxes, User, Trash2,
+  ScrollText, Warehouse, Receipt
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
@@ -55,13 +55,12 @@ export function AppSidebar(_props: { role?: string } = {}) {
     { page: 'ships', label: 'Ships', icon: Ship },
     { page: 'cargos', label: 'Containers', icon: Boxes },
     { page: 'equipments', label: 'Equipment', icon: Truck },
-    { page: 'logistics', label: 'Logistics & Gate', icon: Warehouse },
+    { page: 'logistics', label: 'Logistics Hub', icon: Warehouse },
+    { page: 'transactions', label: 'Transactions', icon: Receipt },
     { page: 'operations', label: 'Operations', icon: Settings },
-    { page: 'scheduling', label: 'OS Scheduler', icon: Cpu },
-    { page: 'reports', label: 'Analytics & Reports', icon: BarChart3 },
+    { page: 'scheduling', label: 'Scheduler', icon: Cpu },
     { page: 'logs', label: 'System Logs', icon: ScrollText },
     { page: 'trash', label: 'Trash', icon: Trash2 },
-    { page: 'report-issue', label: 'Report Issue', icon: AlertTriangle },
   ];
 
   return (

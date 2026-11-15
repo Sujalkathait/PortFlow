@@ -257,9 +257,10 @@ export const api = {
             }),
     },
 
-    // Table 10: Bills & Invoices
+    // Bills, Invoices & Financial Transactions
     bills: {
-        list: () => request<any[]>('/bills'),
+        list: (status?: string) => request<any[]>(`/bills${status ? `?status=${encodeURIComponent(status)}` : ''}`),
+        get: (id: number) => request<any>(`/bills/${id}`),
         generate: (body: {
             customer_name?: string;
             docking_fee?: number;
@@ -267,14 +268,25 @@ export const api = {
             storage_fee?: number;
             operation_id?: number;
             ship_id?: number;
+            currency?: string;
+            due_date?: string;
         }) =>
             request<any>('/bills/generate', {
                 method: 'POST',
                 body: JSON.stringify(body),
             }),
+        update: (id: number, body: any) =>
+            request<any>(`/bills/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(body),
+            }),
         pay: (id: number) =>
             request<any>(`/bills/${id}/pay`, {
                 method: 'PUT',
+            }),
+        delete: (id: number) =>
+            request<any>(`/bills/${id}`, {
+                method: 'DELETE',
             }),
     },
 

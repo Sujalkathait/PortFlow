@@ -19,10 +19,9 @@ const EquipmentPage = lazy(async () => ({ default: (await import('./pages/Equipm
 const SchedulingPage = lazy(async () => ({ default: (await import('./pages/SchedulingPage')).SchedulingPage }));
 const TrashPage = lazy(async () => ({ default: (await import('./pages/TrashPage')).TrashPage }));
 const ProfilePage = lazy(async () => ({ default: (await import('./pages/ProfilePage')).ProfilePage }));
-const ReportIssuePage = lazy(async () => ({ default: (await import('./pages/ReportIssuePage')).ReportIssuePage }));
 const LogsPage = lazy(async () => ({ default: (await import('./pages/LogsPage')).LogsPage }));
-const ReportsPage = lazy(async () => ({ default: (await import('./pages/ReportsPage')).ReportsPage }));
 const LogisticsPage = lazy(async () => ({ default: (await import('./pages/LogisticsPage')).LogisticsPage }));
+const TransactionsPage = lazy(async () => ({ default: (await import('./pages/TransactionsPage')).TransactionsPage }));
 
 function RouteLoading() {
     return <main className="page-loader" aria-live="polite">Loading workspace…</main>;
@@ -72,17 +71,17 @@ function DashboardLayout({ children }: { role?: Role; children: React.ReactNode 
         cargo: 'Containers & Manifests',
         equipments: 'Equipment & Cranes',
         equipment: 'Equipment & Cranes',
-        scheduling: 'OS CPU Scheduling',
-        logistics: 'Logistics, Gate & Billing Hub',
+        scheduling: 'Operations Scheduler',
+        logistics: 'Logistics Hub',
+        transactions: 'Transactions & Invoices',
+        billing: 'Transactions & Invoices',
         warehouses: 'Warehouses & Facilities',
         trucks: 'Drayage Truck Fleet',
         'gate-passes': 'Gate Passes & Security',
         customs: 'Customs Compliance',
-        bills: 'Invoices & Billing',
-        reports: 'Analytics & Reports',
+        bills: 'Transactions & Invoices',
         logs: 'System & Audit Logs',
         trash: 'Recycle Bin & Trash',
-        'report-issue': 'Report Incident',
         profile: 'Operator Profile',
     };
     const pageName = titleMap[pathPart.toLowerCase()] || (pathPart.charAt(0).toUpperCase() + pathPart.slice(1).replace('-', ' '));
@@ -224,24 +223,12 @@ function App() {
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
-                    <Route path="/operator/report-issue" element={
-                        <ProtectedRoute>
-                            <DashboardLayout>
-                                <ReportIssuePage />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
+                    <Route path="/operator/report-issue" element={<Navigate to="/operator/dashboard" replace />} />
+                    <Route path="/operator/reports" element={<Navigate to="/operator/dashboard" replace />} />
                     <Route path="/operator/logs" element={
                         <ProtectedRoute>
                             <DashboardLayout>
                                 <LogsPage />
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    } />
-                    <Route path="/operator/reports" element={
-                        <ProtectedRoute>
-                            <DashboardLayout>
-                                <ReportsPage />
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
@@ -252,20 +239,30 @@ function App() {
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
+                    <Route path="/operator/transactions" element={
+                        <ProtectedRoute>
+                            <DashboardLayout>
+                                <TransactionsPage />
+                            </DashboardLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/operator/billing" element={<Navigate to="/operator/transactions" replace />} />
+                    <Route path="/operator/bills" element={<Navigate to="/operator/transactions" replace />} />
                     <Route path="/operator/warehouses" element={<Navigate to="/operator/logistics" replace />} />
                     <Route path="/operator/trucks" element={<Navigate to="/operator/logistics" replace />} />
                     <Route path="/operator/gate-passes" element={<Navigate to="/operator/logistics" replace />} />
                     <Route path="/operator/customs" element={<Navigate to="/operator/logistics" replace />} />
-                    <Route path="/operator/bills" element={<Navigate to="/operator/logistics" replace />} />
 
                     {/* Root Aliases */}
                     <Route path="/dashboard" element={<Navigate to="/operator/dashboard" replace />} />
+                    <Route path="/transactions" element={<Navigate to="/operator/transactions" replace />} />
+                    <Route path="/billing" element={<Navigate to="/operator/transactions" replace />} />
+                    <Route path="/bills" element={<Navigate to="/operator/transactions" replace />} />
                     <Route path="/logistics" element={<Navigate to="/operator/logistics" replace />} />
                     <Route path="/warehouses" element={<Navigate to="/operator/logistics" replace />} />
                     <Route path="/trucks" element={<Navigate to="/operator/logistics" replace />} />
                     <Route path="/gate-passes" element={<Navigate to="/operator/logistics" replace />} />
                     <Route path="/customs" element={<Navigate to="/operator/logistics" replace />} />
-                    <Route path="/bills" element={<Navigate to="/operator/logistics" replace />} />
                     <Route path="/operations" element={<Navigate to="/operator/operations" replace />} />
                     <Route path="/ships" element={<Navigate to="/operator/ships" replace />} />
                     <Route path="/cargos" element={<Navigate to="/operator/cargos" replace />} />
@@ -274,9 +271,9 @@ function App() {
                     <Route path="/equipment" element={<Navigate to="/operator/equipments" replace />} />
                     <Route path="/scheduling" element={<Navigate to="/operator/scheduling" replace />} />
                     <Route path="/trash" element={<Navigate to="/operator/trash" replace />} />
-                    <Route path="/report-issue" element={<Navigate to="/operator/report-issue" replace />} />
+                    <Route path="/report-issue" element={<Navigate to="/operator/dashboard" replace />} />
+                    <Route path="/reports" element={<Navigate to="/operator/dashboard" replace />} />
                     <Route path="/logs" element={<Navigate to="/operator/logs" replace />} />
-                    <Route path="/reports" element={<Navigate to="/operator/reports" replace />} />
                     <Route path="/profile" element={<Navigate to="/operator/profile" replace />} />
 
                     {/* 404 Catch-All Fallback */}

@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Warehouse, Truck, Ticket, ShieldAlert,
   CreditCard, RefreshCw, AlertCircle, CheckCircle2,
   Thermometer, ShieldCheck, Search, Plus,
-  Pencil, Trash2, Check
+  Pencil, Trash2, Check, Receipt
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 
 export function LogisticsPage() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
 
@@ -314,13 +315,13 @@ export function LogisticsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            PORT LOGISTICS & COMPLIANCE
+            PORT LOGISTICS & FLEET
           </span>
           <h1 className="text-2xl xs:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-0.5">
-            Logistics, Gate & Billing Hub
+            Logistics & Fleet Operations Hub
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Real-time tracking and full CRUD control over Warehouses, Drayage Fleet, Gate Passes, Customs Inspections, Billing Invoices, and Fault Tickets.
+            Real-time management of Warehouses, Drayage Fleet, Gate Passes, Customs Compliance, Port Billing, and Incident Tickets.
           </p>
         </div>
 
@@ -328,6 +329,10 @@ export function LogisticsPage() {
           <Button variant="outline" size="sm" onClick={() => void loadData()} disabled={loading}>
             <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
+          </Button>
+          <Button size="sm" variant="default" onClick={() => navigate('/operator/transactions')} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Receipt className="mr-1.5 h-4 w-4" />
+            Transactions Ledger
           </Button>
         </div>
       </div>
@@ -358,7 +363,7 @@ export function LogisticsPage() {
         >
           <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400">
             <Warehouse className="h-4 w-4 text-blue-600" />
-            <span>4. Warehouses</span>
+            <span>Warehouses</span>
           </div>
           <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1.5 font-mono">
             {warehouses.length}
@@ -376,12 +381,12 @@ export function LogisticsPage() {
         >
           <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400">
             <Truck className="h-4 w-4 text-indigo-600" />
-            <span>7. Trucks</span>
+            <span>Drayage Trucks</span>
           </div>
           <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1.5 font-mono">
             {trucks.length}
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Drayage Fleet</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Transport Fleet</p>
         </div>
 
         <div
@@ -394,7 +399,7 @@ export function LogisticsPage() {
         >
           <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400">
             <Ticket className="h-4 w-4 text-emerald-600" />
-            <span>8. Gate Passes</span>
+            <span>Gate Passes</span>
           </div>
           <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1.5 font-mono">
             {gatePasses.length}
@@ -412,7 +417,7 @@ export function LogisticsPage() {
         >
           <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400">
             <ShieldCheck className="h-4 w-4 text-amber-600" />
-            <span>9. Customs</span>
+            <span>Customs</span>
           </div>
           <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1.5 font-mono">
             {customs.length}
@@ -430,7 +435,7 @@ export function LogisticsPage() {
         >
           <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400">
             <CreditCard className="h-4 w-4 text-cyan-600" />
-            <span>10. Invoices</span>
+            <span>Invoices</span>
           </div>
           <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1.5 font-mono">
             {bills.length}
@@ -448,7 +453,7 @@ export function LogisticsPage() {
         >
           <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400">
             <ShieldAlert className="h-4 w-4 text-rose-600" />
-            <span>11. Issues</span>
+            <span>Incidents</span>
           </div>
           <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1.5 font-mono">
             {issues.length}
@@ -474,12 +479,12 @@ export function LogisticsPage() {
       {/* Interactive Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList className="grid grid-cols-3 sm:grid-cols-6 w-full max-w-3xl">
-          <TabsTrigger value="warehouses">4. Warehouses</TabsTrigger>
-          <TabsTrigger value="trucks">7. Trucks</TabsTrigger>
-          <TabsTrigger value="gate-passes">8. Gate Passes</TabsTrigger>
-          <TabsTrigger value="customs">9. Customs</TabsTrigger>
-          <TabsTrigger value="bills">10. Invoices</TabsTrigger>
-          <TabsTrigger value="issues">11. Fault Tickets</TabsTrigger>
+          <TabsTrigger value="warehouses">Warehouses</TabsTrigger>
+          <TabsTrigger value="trucks">Drayage Trucks</TabsTrigger>
+          <TabsTrigger value="gate-passes">Gate Passes</TabsTrigger>
+          <TabsTrigger value="customs">Customs</TabsTrigger>
+          <TabsTrigger value="bills">Invoices</TabsTrigger>
+          <TabsTrigger value="issues">Incidents</TabsTrigger>
         </TabsList>
 
         {/* 1. Warehouses Tab (Table 4) */}
@@ -489,7 +494,7 @@ export function LogisticsPage() {
               <div>
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <Warehouse className="h-5 w-5 text-blue-600" />
-                  Table 4: Warehouses & Storage Facilities
+                  Warehouses & Storage Facilities
                 </CardTitle>
                 <CardDescription>
                   CFS Dry Storage, Reefer Cold Chain, Dangerous Goods, and Inspection Sheds.
@@ -596,7 +601,7 @@ export function LogisticsPage() {
               <div>
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <Truck className="h-5 w-5 text-indigo-600" />
-                  Table 7: Ground Logistics Drayage Fleet
+                  Ground Logistics Drayage Fleet
                 </CardTitle>
                 <CardDescription>
                   Registered transport carriers, assigned payloads, and driver gate dispatching.
@@ -679,7 +684,7 @@ export function LogisticsPage() {
               <div>
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <Ticket className="h-5 w-5 text-emerald-600" />
-                  Table 8: Gate Passes & Terminal Access Control
+                  Gate Passes & Terminal Access Control
                 </CardTitle>
                 <CardDescription>
                   Lane access control, physical security logging, and check-in / check-out timestamps.
@@ -770,7 +775,7 @@ export function LogisticsPage() {
               <div>
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-amber-600" />
-                  Table 9: Customs Compliance & Regulatory Inspections
+                  Customs Compliance & Regulatory Inspections
                 </CardTitle>
                 <CardDescription>
                   X-Ray scans, physical container holds, and regulatory tariff assessments.
@@ -867,15 +872,20 @@ export function LogisticsPage() {
               <div>
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <CreditCard className="h-5 w-5 text-cyan-600" />
-                  Table 10: Automated Billing Engine & Invoices
+                  Port Billing & Automated Invoices
                 </CardTitle>
                 <CardDescription>
                   Invoices auto-generated on operation completion, plus manual billing for marine docking, cranes, and storage.
                 </CardDescription>
               </div>
-              <Button size="sm" onClick={() => setBillModal({ open: true, data: { customer_name: '', docking_fee: 1250, crane_usage_fee: 850, storage_fee: 350 } })}>
-                <Plus className="mr-1.5 h-4 w-4" /> Generate Invoice
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" onClick={() => navigate('/operator/transactions')}>
+                  <Receipt className="mr-1.5 h-4 w-4 text-blue-600" /> Full Ledger
+                </Button>
+                <Button size="sm" onClick={() => setBillModal({ open: true, data: { customer_name: '', docking_fee: 1250, crane_usage_fee: 850, storage_fee: 350 } })}>
+                  <Plus className="mr-1.5 h-4 w-4" /> Generate Invoice
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -953,7 +963,7 @@ export function LogisticsPage() {
               <div>
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <ShieldAlert className="h-5 w-5 text-rose-600" />
-                  Table 11: Mechanical Incidents & Breakdown Alerts
+                  Mechanical Incidents & Breakdown Alerts
                 </CardTitle>
                 <CardDescription>
                   STS Quay Crane malfunctions, berth maintenance tickets, and equipment telemetry warnings.

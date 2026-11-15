@@ -542,7 +542,7 @@ export function Login() {
                   <div className="feature-sheet-item">
                     <Ship className="w-5 h-5 text-blue-600 mb-2" />
                     <h3>Vessel &amp; Berth Scheduling</h3>
-                    <p>Automated berthing allocation with mutual exclusion mutex locks preventing crane conflicts.</p>
+                    <p>Automated berthing and crane allocations preventing equipment contention and operational delays.</p>
                   </div>
                   <div className="feature-sheet-item">
                     <Boxes className="w-5 h-5 text-blue-600 mb-2" />
