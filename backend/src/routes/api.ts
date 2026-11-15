@@ -16,7 +16,7 @@ import {
     getTrucks, createTruck, updateTruck, deleteTruck,
     getGatePasses, createGatePass, updateGatePass, deleteGatePass,
     getCustomsInspections, createCustomsInspection, updateCustomsInspection, deleteCustomsInspection,
-    getBills, generateBill, payBill, getIssues
+    getBills, getBillById, generateBill, updateBill, deleteBill, payBill, getIssues
 } from '../controllers/system.controller';
 import { getTrash, restoreItem, emptyTrash, permanentDeleteItem } from '../controllers/trash.controller';
 
@@ -103,11 +103,14 @@ apiRouter.post('/customs', requireAuth, createCustomsInspection);
 apiRouter.put('/customs/:id', requireAuth, updateCustomsInspection);
 apiRouter.delete('/customs/:id', requireAuth, deleteCustomsInspection);
 
-// Billing & Invoices (Table 10)
+// Billing & Invoices (Transactions)
 apiRouter.get('/bills', requireAuth, getBills);
+apiRouter.get('/bills/:id', requireAuth, getBillById);
 apiRouter.post('/bills/generate', requireAuth, generateBill);
 apiRouter.post('/bills', requireAuth, generateBill);
+apiRouter.put('/bills/:id', requireAuth, updateBill);
 apiRouter.put('/bills/:id/pay', requireAuth, payBill);
+apiRouter.delete('/bills/:id', requireAuth, deleteBill);
 
 // Incident Issues & Breakdown Alerts (Table 11)
 apiRouter.get('/issues', requireAuth, getIssues);

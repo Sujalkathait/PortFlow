@@ -37,6 +37,7 @@ model User {
   gate_passes_issued  GatePass[]           @relation("UserGatePasses")
   system_logs         SystemLog[]          @relation("UserSystemLogs")
 
+  @@index([role])
   @@index([deleted_at])
   @@index([created_at(sort: Desc)])
   @@map("users")
@@ -67,6 +68,7 @@ model Equipment {
   berth_operations     Operation[]  @relation("BerthOperations")
   reported_issues      Issue[]      @relation("EquipmentIssues")
 
+  @@index([equipment_id])
   @@index([type])
   @@index([status])
   @@index([deleted_at])
@@ -103,6 +105,8 @@ model Ship {
   operations         Operation[] @relation("ShipOperations")
   bills              Bill[]      @relation("ShipBills")
 
+  @@index([imo_number])
+  @@index([name])
   @@index([status])
   @@index([berth_equipment_id])
   @@index([deleted_at])
@@ -131,6 +135,7 @@ model Warehouse {
   // Child Relationships
   stored_cargo           Cargo[]   @relation("WarehouseCargo")
 
+  @@index([code])
   @@index([zone_type])
   @@index([status])
   @@index([deleted_at])
@@ -171,6 +176,7 @@ model Cargo {
   gate_passes      GatePass[]           @relation("CargoGatePasses")
   bills            Bill[]               @relation("CargoBills")
 
+  @@index([cargo_number])
   @@index([ship_id])
   @@index([warehouse_id])
   @@index([status])
@@ -218,6 +224,8 @@ model Operation {
   // Child Relationships
   bills               Bill[]     @relation("OperationBills")
 
+  @@index([priority])
+  @@index([ship_name])
   @@index([ship_id])
   @@index([cargo_id])
   @@index([crane_equipment_id])
@@ -254,6 +262,7 @@ model Truck {
   // Child Relationships
   gate_passes        GatePass[] @relation("TruckGatePasses")
 
+  @@index([license_plate])
   @@index([status])
   @@index([assigned_cargo_id])
   @@index([deleted_at])
@@ -283,6 +292,8 @@ model GatePass {
   container       Cargo?    @relation("CargoGatePasses", fields: [cargo_id], references: [id], onDelete: SetNull)
   issuer          User?     @relation("UserGatePasses", fields: [issued_by_id], references: [id], onDelete: SetNull)
 
+  @@index([pass_number])
+  @@index([gate_lane])
   @@index([truck_id])
   @@index([cargo_id])
   @@index([status])
@@ -314,6 +325,8 @@ model CustomsInspection {
   container           Cargo     @relation("CargoInspections", fields: [cargo_id], references: [id], onDelete: Cascade)
   inspector           User?     @relation("UserInspections", fields: [inspector_id], references: [id], onDelete: SetNull)
 
+  @@index([inspection_number])
+  @@index([declaration_number])
   @@index([cargo_id])
   @@index([inspector_id])
   @@index([status])
@@ -350,6 +363,8 @@ model Bill {
   container          Cargo?     @relation("CargoBills", fields: [cargo_id], references: [id], onDelete: SetNull)
   operation          Operation? @relation("OperationBills", fields: [operation_id], references: [id], onDelete: SetNull)
 
+  @@index([invoice_number])
+  @@index([customer_name])
   @@index([ship_id])
   @@index([cargo_id])
   @@index([operation_id])
@@ -381,6 +396,7 @@ model Issue {
   reporter         User?      @relation("UserReportedIssues", fields: [reported_by_id], references: [id], onDelete: SetNull)
   faulty_equipment Equipment? @relation("EquipmentIssues", fields: [equipment_id], references: [id], onDelete: SetNull)
 
+  @@index([ticket_number])
   @@index([reported_by_id])
   @@index([equipment_id])
   @@index([status])
@@ -412,6 +428,7 @@ model SystemLog {
   @@index([timestamp(sort: Desc)])
   @@index([level])
   @@index([source])
+  @@index([action])
   @@index([user_id])
   @@map("system_logs")
 }

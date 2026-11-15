@@ -109,12 +109,20 @@ export class OperationsService implements IOperationsService {
         const result = await this.portSystem.executeNextProcess();
         if (!result) return null;
 
-        // Find matching operation by process id or numerical id
-        const opId = Number(result.id.replace('op-', ''));
-        const op = await this.repo.findById(opId);
+        // Find matching operation by process id or numerical id (supports both 'op-123' and timestamp formats)
+        let op = await this.repo.findByProcessId(result.id);
+        if (!op) {
+            const numPart = Number(result.id.replace(/^op-/, ''));
+            if (!isNaN(numPart) && numPart > 0) {
+                op = await this.repo.findById(numPart);
+            }
+        }
+
+        const opId = op ? op.id : (Number(result.id.replace(/^op-/, '')) || 0);
+
         if (op) {
             const isCompleted = result.status === 'TERMINATED' || result.remainingTime <= 0;
-            const updated = await this.repo.update(opId, {
+            const updated = await this.repo.update(op.id, {
                 status: isCompleted ? 'Completed' : 'Running',
                 start_time: result.startTime ? new Date(result.startTime).toISOString() : new Date().toISOString(),
                 end_time: isCompleted ? new Date().toISOString() : undefined,

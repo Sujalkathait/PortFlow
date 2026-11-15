@@ -82,5 +82,30 @@ describe('BillingService Unit Tests', () => {
         expect(paidBill.payment_status).toBe('Paid');
         expect(paidBill.paid_at).toBeDefined();
     });
+
+    test('should get a bill by ID, update it, and delete it', async () => {
+        const manualBill = await billingService.createManualBill({
+            customer_name: 'ONE Ocean Network',
+            docking_fee: 1100,
+            crane_usage_fee: 400,
+            storage_fee: 150,
+        });
+
+        const fetched = await billingService.getBillById(manualBill.id);
+        expect(fetched).toBeDefined();
+        expect(fetched.customer_name).toBe('ONE Ocean Network');
+
+        const updated = await billingService.updateBill(manualBill.id, {
+            customer_name: 'ONE Ocean Network Express',
+            docking_fee: 1300,
+        });
+        expect(updated.customer_name).toBe('ONE Ocean Network Express');
+        expect(updated.docking_fee).toBe(1300);
+
+        const deleted = await billingService.deleteBill(manualBill.id);
+        expect(deleted).toBe(true);
+        const afterDelete = await billingService.getBillById(manualBill.id);
+        expect(afterDelete).toBeNull();
+    });
 });
 
