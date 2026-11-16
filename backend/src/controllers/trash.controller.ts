@@ -2,21 +2,9 @@ import { Response } from 'express';
 import { trashService } from '../services/trash.service';
 import { AuthenticatedRequest } from '../middleware/auth';
 
-export const getTrash = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const getTrash = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        let items = await trashService.getTrash();
-
-        // Operators see items they created/deleted, or system-level/unassigned deleted items
-        if (req.user && req.user.role === 'Operator') {
-            items = items.filter(item => 
-                !item.deleted_by ||
-                item.deleted_by === 'system' ||
-                item.deleted_by === 'unknown' ||
-                item.created_by === req.user!.email || 
-                item.deleted_by === req.user!.email
-            );
-        }
-
+        const items = await trashService.getTrash();
         res.status(200).json(items);
     } catch (err: any) {
         console.error('[TrashController] getTrash error:', err.message);
