@@ -3,7 +3,7 @@
 
 # ⚓ PortFlow — Smart Maritime Port Management System
 
-**A Complete Full-Stack Port Operations Platform with Built-in OS Scheduling & 12-Table Relational DBMS Engines**
+**A Full-Stack Port & Terminal Operating Platform with Built-in OS Scheduling & 12-Table Relational DBMS Engine**
 
 [![Frontend](https://img.shields.io/badge/Frontend-React_19_%7C_Vite_%7C_TypeScript-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Backend](https://img.shields.io/badge/Backend-Node.js_%7C_Express_5_%7C_TypeScript-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
@@ -18,12 +18,17 @@
 
 ## 📑 Table of Contents
 
-- [🌊 What is PortFlow?](#-what-is-portflow)
-- [🏛️ System Architecture](#️-system-architecture)
-- [📊 Class Diagram (OS Simulation Engine)](#-class-diagram-os-simulation-engine)
-- [🗄️ Entity Relationship (ER) Diagram (12-Table 3NF Design)](#️-entity-relationship-er-diagram-12-table-3nf-design)
-- [🧠 Operating System (OS) Concepts in Plain English](#-operating-system-os-concepts-in-plain-english)
-- [💾 Database (DBMS) Concepts in Plain English](#-database-dbms-concepts-in-plain-english)
+- [🌊 PortFlow in Simple English (The Everyday Guide)](#-portflow-in-simple-english-the-everyday-guide)
+- [⏱️ 100-Word Elevator Pitch](#️-100-word-elevator-pitch)
+- [🏛️ All 5 System Diagrams (from `folder/DIAGRAMS.md`)](#️-all-5-system-diagrams-from-folderdiagramsmd)
+  - [1. System Architecture Diagram](#1-system-architecture-diagram)
+  - [2. Class Diagram (OS Simulation Engine)](#2-class-diagram-os-simulation-engine)
+  - [3. Entity-Relationship (ER) Diagram (12-Table 3NF Design)](#3-entity-relationship-er-diagram-12-table-3nf-design)
+  - [4. Operation Lifecycle Flowchart](#4-operation-lifecycle-flowchart)
+  - [5. Sequence Diagram (Request & Response Timeline)](#5-sequence-diagram-request--response-timeline)
+  - [🛠️ How to Open & Edit in Draw.io](#️-how-to-open--edit-in-drawio)
+- [🧠 Operating System (OS) Concepts Made Simple](#-operating-system-os-concepts-made-simple)
+- [💾 Database (DBMS) Concepts Made Simple](#-database-dbms-concepts-made-simple)
 - [✨ Key Features & Modules](#-key-features--modules)
 - [🗑️ Trash & 10-Table Soft-Delete Recovery System](#️-trash--10-table-soft-delete-recovery-system)
 - [📦 Enterprise High-Volume Seeding (100 Users, 500+ Rows/Table)](#-enterprise-high-volume-seeding-100-users-500-rowstable)
@@ -36,28 +41,61 @@
 
 ---
 
-## 🌊 What is PortFlow?
+## 🌊 PortFlow in Simple English (The Everyday Guide)
 
-Modern commercial shipping ports handle thousands of container vessels, cranes, trucks, and cargo boxes every day. If resources are managed poorly, ships wait for days (causing millions of dollars in demurrage fees) and cranes sit idle.
+Imagine a **massive commercial seaport** where giant container ships arrive from all over the world. Thousands of metal shipping containers must be lifted by enormous cranes, stored in warehouses, inspected by customs officials, picked up by transport trucks, and billed accurately.
 
-**PortFlow** solves this problem by combining **Maritime Logistics** with core **Computer Science principles**:
+Without a smart management system, a seaport becomes pure chaos:
+* Ships wait for days burning fuel at sea while waiting for a parking spot.
+* Cranes sit idle because jobs aren't scheduled efficiently.
+* Warehouses overflow, trucks cause traffic jams at terminal gates, and paperwork gets lost.
 
-1. **Physical Port Management**: Track ships arriving at sea, berths for docking, cranes for container lifting, reefer/dry warehouses, drayage trucks, gate passes, customs border compliance, and automated tariff billing.
-2. **OS Scheduling Simulator**: Treats port operations like CPU processes. Cranes are locked using **Mutexes**, berths are managed using **Counting Semaphores**, and unloading tasks are scheduled using **FCFS, SJF, Priority, and Round Robin** algorithms with automatic **Deadlock Detection**.
-3. **Dual API Architecture**: Fast transactional endpoints via **REST API** (`/api/*`) and composite relational data fetching via **Apollo GraphQL** (`/graphql`).
-4. **High-Performance Relational Database**: Built on **PostgreSQL 15 (Supabase)** with 12 normalized tables in strict 3NF, B-Tree indexes on all foreign keys and filter fields, soft-deletes, and in-memory TTL caching.
-5. **Universal Trash & Recovery Bin**: 1-click restore or permanent purge across all 10 soft-deletable resources (operations, ships, cargo, equipment, warehouses, trucks, gate passes, customs, bills, issues).
+**PortFlow is the "Digital Brain and Control Tower" for a modern seaport.**
+Just as an airport control tower manages airplanes, runways, baggage, and passengers, **PortFlow coordinates ships, docking berths, heavy cranes, storage warehouses, trucks, gate passes, and billing in real-time.**
 
 ---
 
-## 🏛️ System Architecture
+### ⚓ The 6 Core Things PortFlow Does:
 
-PortFlow uses a **Modular Monolith Architecture** within a monorepo. The React frontend and the Express backend are decoupled and communicate through typed REST and GraphQL APIs.
+1. **🚢 Ship & Dock Management (Berth Parking)**:
+   * Tracks incoming vessels, assigns available docks ("berths"), monitors departure times, and prevents two ships from competing for the same berth.
+2. **🧠 The "Smart Brain" (OS Scheduling Engine)**:
+   * Uses real computer science CPU algorithms (like **First-Come-First-Served**, **Shortest Job First**, and **Priority**) to decide which ship or container gets unloaded first so nobody waits unnecessarily.
+3. **📦 Cargo & Warehouse Tracking (Inventory)**:
+   * Tracks every container's weight, size (20ft, 40ft), hazard level, and exact shelf location across Dry Yards, CFS Depots, and Reefer Cold Storage facilities (-18.5°C).
+4. **🚛 Land Logistics & Security (Trucks, Gates & Customs)**:
+   * Issues digital **Gate Passes** to truck drivers for secure terminal entry/exit, logs **Customs Inspections** (X-Ray scan, physical audit, quarantine), and prevents uncleared goods from leaving the gates.
+5. **💳 Automated Invoicing (Billing Engine)**:
+   * Calculates port fees automatically based on vessel docking hours, crane hours, and warehouse storage days, generating official itemized receipts.
+6. **🗑️ Universal Safety Net (The 10-Table Trash Bin)**:
+   * If an operator accidentally deletes a ship, invoice, container, or warehouse, data is **never destroyed**. It moves into a centralized **Trash & Recovery Bin** where an administrator can restore it with a single click across all 10 core tables.
+
+---
+
+## ⏱️ 100-Word Elevator Pitch
+
+> **PortFlow** is a smart digital operating system for modern cargo seaports. It acts like an airport control tower, coordinating incoming ships, docking berths, cranes, warehouses, and transport trucks. 
+> 
+> What makes PortFlow unique is its scheduling brain: it applies computer science algorithms (such as First-Come-First-Served and Priority) to eliminate port traffic jams and unload vessels faster. It also automates customs clearances, truck gate passes, and fee billing. 
+> 
+> Built with React, Node.js, and a 12-table PostgreSQL database, PortFlow features an enterprise 10-table trash recovery bin so critical port data is never accidentally lost.
+
+---
+
+## 🏛️ All 5 System Diagrams (from `folder/DIAGRAMS.md`)
+
+All diagrams are written in standard Mermaid format so they render directly in GitHub, VS Code, and Markdown viewers. 
+
+---
+
+### 1. System Architecture Diagram
+
+This diagram displays the 5 main tiers of PortFlow and how frontend, backend, OS simulator, and database communicate.
 
 ```mermaid
 graph TB
     subgraph CLIENT["1. Client Layer (React 19 + Vite + Tailwind CSS)"]
-        UI["Operator Single Page Application"]
+        UI["Operator Web Dashboard"]
         P1["Dashboard Overview"]
         P2["Vessels & Berthing"]
         P3["Containers & Cargo Manifests"]
@@ -69,32 +107,32 @@ graph TB
         P9["Trash & Recovery Bin (10 Collections 1-Click Restore)"]
     end
 
-    subgraph GATEWAY["2. Backend Server (Node.js + Express 5)"]
-        AUTH_CHECK["Security Middleware (JWT Auth + Helmet + Rate Limit)"]
-        REST_API["REST API Router (/api/*)"]
+    subgraph GATEWAY["2. Backend Server Gateway (Node.js + Express 5)"]
+        AUTH_CHECK["Security & Token Check (JWT Auth + Helmet + Rate Limit)"]
+        REST_API["REST API Routes (/api/*)"]
         GRAPHQL_API["Apollo GraphQL Server (/graphql)"]
     end
 
     subgraph SERVICES["3. Business Logic (Service Layer)"]
         AUTH_SVC["Auth Service (Login, Register, Demo Accounts)"]
         OPS_SVC["Operations Service (Process Control Blocks & Dispatches)"]
-        SHIP_SVC["Ships Service (Vessels & Berthing Allocations)"]
+        SHIP_SVC["Ships Service (Vessels Management & Allocations)"]
         EQUIP_SVC["Equipment Service (Cranes & Berths)"]
-        BILL_SVC["Billing Service (Automated Tariff Calculations & Line Items)"]
+        BILL_SVC["Billing Service (Automated Tariff Calculations)"]
         TRASH_SVC["Trash Service (10-Collection Soft-Delete & Restore)"]
     end
 
-    subgraph OS_SIM["4. OS Simulation Engine (In-Memory Kernel)"]
+    subgraph OS_SIM["4. OS Simulator Engine (In-Memory Kernel)"]
         PORT_SYS["PortSystem (Singleton Coordinator)"]
         SCHEDULER["CPU Scheduler (FCFS / SJF / Priority / Round Robin)"]
         MUTEX["Mutex Locks (1 Crane = 1 Job at a time)"]
-        SEMAPHORE["Counting Semaphore (Available Berths Pool)"]
+        SEMAPHORE["Counting Semaphore (Berths 1-5: Limited Parking Slots)"]
         DEADLOCK["Deadlock Detector (Wait-For Graph Cycle Finder)"]
     end
 
-    subgraph DATABASE["5. Database Layer (PostgreSQL / Supabase via Prisma)"]
+    subgraph DATABASE["5. Database Layer (PostgreSQL 15 / Supabase)"]
         PRISMA["Prisma ORM (Data Access Layer with B-Tree Indexes)"]
-        DB[(PostgreSQL 15 - 12 Tables in 3NF)]
+        DB[(12 Relational Tables in Strict 3NF)]
     end
 
     UI --> AUTH_CHECK
@@ -111,11 +149,18 @@ graph TB
     PRISMA --> DB
 ```
 
+#### 💡 Simple Explanation of Architecture:
+1. **Client Layer**: The fast responsive React application where terminal operators click buttons to manage ships, trucks, and cranes.
+2. **Backend Gateway**: Express 5 server verifying JSON Web Tokens (JWT) and routing calls to either REST endpoints or Apollo GraphQL.
+3. **Service Layer**: Validates business rules, calculates tariffs, and issues database transactions.
+4. **OS Simulator**: Re-creates operating system primitives: cranes behave as Mutex locks, berths behave as Semaphores, and container moves run as Scheduled Processes.
+5. **Database Layer**: Stores persistent records across 12 relational PostgreSQL tables.
+
 ---
 
-## 📊 Class Diagram (OS Simulation Engine)
+### 2. Class Diagram (OS Simulation Engine)
 
-This diagram shows the core TypeScript classes running inside the PortFlow scheduling kernel:
+This diagram highlights the TypeScript object-oriented design powering the PortFlow scheduling kernel.
 
 ```mermaid
 classDiagram
@@ -217,40 +262,49 @@ classDiagram
     Process --> Mutex : holds/waits
 ```
 
+#### 💡 Simple Explanation of Classes:
+* **`Process`**: Represents a single port operation (e.g., unloading 50 TEU containers from Vessel X).
+* **`Scheduler`**: The CPU scheduling engine that decides which job runs next using standard algorithms.
+* **`SchedulingStrategy`**: Polymorphic interface allowing instant algorithm swapping at runtime (FCFS, SJF, Priority, Round Robin).
+* **`Mutex`**: Exclusive resource lock. Since a crane can only pick up one container at a time, a job must lock the crane and release it when complete.
+* **`Semaphore`**: Counting semaphore tracking physical dock space (e.g. 5 available berths).
+* **`DeadlockDetector`**: Builds a Wait-For Graph (WFG) and uses Depth-First Search (DFS) to detect circular waits.
+* **`PortSystem`**: The Singleton coordinator managing the scheduler, locks, and berths as a unified kernel.
+
 ---
 
-## 🗄️ Entity Relationship (ER) Diagram (12-Table 3NF Design)
+### 3. Entity-Relationship (ER) Diagram (12-Table 3NF Design)
 
-PortFlow is designed in strict **Third Normal Form (3NF)** with 12 relational tables. Zero redundant columns, full foreign key referential integrity, and B-Tree indexes:
+PortFlow is modeled in **Third Normal Form (3NF)** with 12 interconnected relational tables in PostgreSQL:
 
 ```mermaid
 erDiagram
-    USERS ||--o{ OPERATIONS : "initiates (created_by_user_id)"
-    USERS ||--o{ GATE_PASSES : "issues (issued_by_id)"
-    USERS ||--o{ CUSTOMS_INSPECTIONS : "inspects (inspector_id)"
-    USERS ||--o{ ISSUES : "reports (reported_by_id)"
-    USERS ||--o{ SYSTEM_LOGS : "triggers (user_id)"
+    USERS ||--o{ OPERATIONS : "created_by_user_id"
+    USERS ||--o{ GATE_PASSES : "issued_by_id"
+    USERS ||--o{ CUSTOMS_INSPECTIONS : "inspector_id"
+    USERS ||--o{ ISSUES : "reported_by_id"
+    USERS ||--o{ SYSTEM_LOGS : "user_id"
 
-    EQUIPMENT ||--o{ SHIPS : "parks at berth (berth_equipment_id)"
-    EQUIPMENT ||--o{ OPERATIONS : "crane allocated (crane_equipment_id)"
-    EQUIPMENT ||--o{ OPERATIONS : "berth allocated (berth_equipment_id)"
-    EQUIPMENT ||--o{ ISSUES : "has issue (equipment_id)"
+    EQUIPMENT ||--o{ SHIPS : "berth_equipment_id"
+    EQUIPMENT ||--o{ OPERATIONS : "crane_equipment_id"
+    EQUIPMENT ||--o{ OPERATIONS : "berth_equipment_id"
+    EQUIPMENT ||--o{ ISSUES : "equipment_id"
 
-    SHIPS ||--o{ CARGO : "carries (ship_id)"
-    SHIPS ||--o{ OPERATIONS : "serviced in (ship_id)"
-    SHIPS ||--o{ BILLS : "billed to (ship_id)"
+    SHIPS ||--o{ CARGO : "ship_id"
+    SHIPS ||--o{ OPERATIONS : "ship_id"
+    SHIPS ||--o{ BILLS : "ship_id"
 
-    WAREHOUSES ||--o{ CARGO : "stored inside (warehouse_id)"
+    WAREHOUSES ||--o{ CARGO : "warehouse_id"
 
-    CARGO ||--o{ OPERATIONS : "moved in (cargo_id)"
-    CARGO ||--o{ TRUCKS : "loaded onto (assigned_cargo_id)"
-    CARGO ||--o{ GATE_PASSES : "cleared for (cargo_id)"
-    CARGO ||--o{ CUSTOMS_INSPECTIONS : "inspected for (cargo_id)"
-    CARGO ||--o{ BILLS : "storage billed (cargo_id)"
+    CARGO ||--o{ OPERATIONS : "cargo_id"
+    CARGO ||--o{ TRUCKS : "assigned_cargo_id"
+    CARGO ||--o{ GATE_PASSES : "cargo_id"
+    CARGO ||--o{ CUSTOMS_INSPECTIONS : "cargo_id"
+    CARGO ||--o{ BILLS : "cargo_id"
 
-    TRUCKS ||--o{ GATE_PASSES : "admitted via (truck_id)"
+    TRUCKS ||--o{ GATE_PASSES : "truck_id"
 
-    OPERATIONS ||--o{ BILLS : "invoiced for (operation_id)"
+    OPERATIONS ||--o{ BILLS : "operation_id"
 
     USERS {
         int id PK
@@ -259,17 +313,24 @@ erDiagram
         string full_name
         string role
         datetime created_at
+        datetime updated_at
         datetime deleted_at
+        string deleted_by
     }
 
     EQUIPMENT {
         int id PK
         string equipment_id UK
         string name
-        string type "Berth, Crane, Gantry"
-        string status "Available, Occupied, Busy, Maintenance"
+        string type
+        string status
         float capacity_metric
+        string assigned_to
+        string created_by
+        datetime created_at
+        datetime updated_at
         datetime deleted_at
+        string deleted_by
     }
 
     SHIPS {
@@ -278,33 +339,50 @@ erDiagram
         string name
         string vessel_type
         int capacity_teu
-        string status "Docked, Berthed, Arriving, Arrived"
+        string status
+        string berth_id
         int berth_equipment_id FK
+        datetime eta
+        datetime etd
+        string created_by
+        datetime created_at
+        datetime updated_at
         datetime deleted_at
+        string deleted_by
     }
 
     WAREHOUSES {
         int id PK
         string code UK
         string name
-        string zone_type "Dry, Reefer, Dangerous Goods, Bonded"
+        string zone_type
         int capacity_teu
         int current_occupancy_teu
         float temperature_celsius
+        string status
+        datetime created_at
+        datetime updated_at
         datetime deleted_at
+        string deleted_by
     }
 
     CARGO {
         int id PK
         string cargo_number UK
-        string size_type "20ft or 40ft"
+        string size_type
         float weight_tons
         string cargo_type
         string current_location
+        string ship_name
         int ship_id FK
         int warehouse_id FK
-        string status "On Ship, In Yard, Cleared, Discharged"
+        string hazard_class
+        string status
+        string created_by
+        datetime created_at
+        datetime updated_at
         datetime deleted_at
+        string deleted_by
     }
 
     OPERATIONS {
@@ -314,14 +392,22 @@ erDiagram
         string ship_name
         int ship_id FK
         int cargo_id FK
+        string crane_id
         int crane_equipment_id FK
+        string berth_id
         int berth_equipment_id FK
         int created_by_user_id FK
         int priority
-        string status "Queued, Running, Completed"
+        string status
+        datetime start_time
+        datetime end_time
         int waiting_time_ms
         int turnaround_time_ms
+        string created_by
+        datetime created_at
+        datetime updated_at
         datetime deleted_at
+        string deleted_by
     }
 
     TRUCKS {
@@ -330,10 +416,13 @@ erDiagram
         string driver_name
         string driver_phone
         string transport_company
-        string status "In Transit, Loading, Idle, At Gate"
+        string status
         float max_payload_tons
         int assigned_cargo_id FK
+        datetime created_at
+        datetime updated_at
         datetime deleted_at
+        string deleted_by
     }
 
     GATE_PASSES {
@@ -343,10 +432,11 @@ erDiagram
         int cargo_id FK
         int issued_by_id FK
         string gate_lane
-        string pass_type "Inbound_Delivery, Outbound_Dispatch, Empty_Return"
-        string status "Issued, Checked_In, Completed"
+        string pass_type
+        string status
         datetime check_in_time
         datetime check_out_time
+        datetime created_at
         datetime deleted_at
     }
 
@@ -356,10 +446,14 @@ erDiagram
         int cargo_id FK
         int inspector_id FK
         string declaration_number
-        string inspection_type "X-Ray_Scan, Physical_Inspection, Document_Audit"
-        string status "Pending, Under_Review, Cleared, Held"
+        string inspection_type
+        string status
         bigint duty_amount_cents
         string findings
+        datetime inspected_at
+        datetime cleared_at
+        datetime created_at
+        datetime updated_at
         datetime deleted_at
     }
 
@@ -375,9 +469,11 @@ erDiagram
         float storage_fee
         float total_amount
         string currency
-        string payment_status "Paid, Pending, Issued, Draft"
+        string payment_status
         datetime due_date
         datetime paid_at
+        datetime created_at
+        datetime updated_at
         datetime deleted_at
     }
 
@@ -386,18 +482,21 @@ erDiagram
         string ticket_number UK
         string title
         string description
-        string severity "Critical, High, Medium, Low"
-        string status "Open, Investigating, Resolved"
+        string severity
+        string status
         int reported_by_id FK
         int equipment_id FK
         string resolution_notes
+        datetime resolved_at
+        datetime created_at
+        datetime updated_at
         datetime deleted_at
     }
 
     SYSTEM_LOGS {
         int id PK
         datetime timestamp
-        string level "INFO, WARN, ERROR"
+        string level
         string source
         string message
         string action
@@ -405,16 +504,143 @@ erDiagram
         int entity_id
         int user_id FK
         string ip_address
+        datetime created_at
     }
+```
+
+#### 💡 The 12 Tables in Plain English:
+1. **`users`**: Terminal operators, admins, customs officers, and dispatchers.
+2. **`equipment`**: Cranes and physical berths.
+3. **`ships`**: Marine cargo vessels visiting the port.
+4. **`warehouses`**: Dry yards, CFS container depots, and Reefer cold storage.
+5. **`cargo`**: Containers tracked with TEU sizes, weight, and hazard tags.
+6. **`operations`**: Active Process Control Blocks (Ship + Crane + Berth + Priority).
+7. **`trucks`**: Drayage transport fleet hauling containers between gates and yards.
+8. **`gate_passes`**: Security gate permits for trucks entering through specific lanes.
+9. **`customs_inspections`**: Border compliance checks, declarations, and duties.
+10. **`bills`**: Itemized invoices covering docking, crane hours, and warehouse storage.
+11. **`issues`**: Maintenance incident reports for mechanical faults.
+12. **`system_logs`**: Immutable audit logs of all user mutations and scheduler events.
+
+---
+
+### 4. Operation Lifecycle Flowchart
+
+This flowchart demonstrates what happens behind the scenes from the moment an operator clicks "Submit Operation" until the job completes and the bill is generated.
+
+```mermaid
+flowchart TD
+    START([1. Operator clicks Submit Operation]) --> AUTH{Is User Logged In?}
+    AUTH -- No --> REJECT([Return 401: Unauthorized])
+    AUTH -- Yes --> VALIDATE{Valid Ship & Crane selected?}
+    VALIDATE -- No --> BAD_INPUT([Return 400: Missing Required Fields])
+    VALIDATE -- Yes --> SAVE_DB[Save Operation in PostgreSQL\nstatus = Queued]
+    
+    SAVE_DB --> CREATE_PCB[Create OS Process PCB\nAdd to Scheduler Ready Queue]
+    
+    CREATE_PCB --> SCHEDULER[Scheduler selects next Job\nBased on Policy: FCFS / SJF / Priority]
+    
+    SCHEDULER --> CHECK_CRANE{Is Assigned Crane Free?}
+    CHECK_CRANE -- No / Busy --> WAIT_STATE[Process becomes WAITING]
+    WAIT_STATE --> CHECK_DEADLOCK{Deadlock Cycle in Wait-For Graph?}
+    CHECK_DEADLOCK -- Yes --> ALERT[Log Warning: Deadlock Found]
+    CHECK_DEADLOCK -- No --> WAIT_STATE
+    
+    CHECK_CRANE -- Yes / Free --> LOCK_CRANE[Lock Crane Mutex\nProcess becomes RUNNING]
+    
+    LOCK_CRANE --> RUN_WORK[Simulate Container Lift\nDuration: 3-5 seconds]
+    
+    RUN_WORK --> UNLOCK_CRANE[Unlock Crane Mutex\nProcess becomes TERMINATED]
+    
+    UNLOCK_CRANE --> UPDATE_DB[Update PostgreSQL:\nstatus = Completed\nSave Turnaround & Waiting Time]
+    
+    UPDATE_DB --> CREATE_BILL[Auto-create Tariff Bill in DB]
+    
+    CREATE_BILL --> DONE([Job Complete & Screen Updates])
+```
+
+#### 💡 Step-by-Step Walkthrough:
+1. **Submit**: Operator picks a ship, crane, and priority, then submits the task.
+2. **Authentication & Validation**: JWT security check ensures valid user permissions.
+3. **Database Insertion**: The job is persisted into PostgreSQL with status `Queued`.
+4. **OS Queueing**: An in-memory `Process` PCB is created and placed in the Ready Queue.
+5. **Scheduler Decision**: Algorithm (e.g. SJF or Priority) selects the next process to execute.
+6. **Mutex Lock & Deadlock Scan**: If crane is free, it locks exclusively. If busy, process waits while Deadlock Detector checks the Wait-For Graph.
+7. **Execution**: Simulated crane lift runs; upon completion, crane unlocks.
+8. **Finalization & Billing**: Database updates to `Completed`, turnaround times are recorded, and a tariff invoice is generated automatically.
+
+---
+
+### 5. Sequence Diagram (Request & Response Timeline)
+
+This sequence diagram illustrates message flow across the client browser, API gateway, service layer, OS simulator, and database.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Operator (Browser)
+    participant API as Backend Gateway (Express 5)
+    participant Service as Operations Service
+    participant OS as OS Engine (PortSystem)
+    participant DB as PostgreSQL Database
+
+    Note over User,DB: Phase 1: Creating a New Operation
+    User->>API: 1. POST /api/operations (ship, crane, priority)
+    API->>Service: 2. submitOperation(dto)
+    Service->>DB: 3. INSERT INTO operations (status = 'Queued')
+    DB-->>Service: 4. Record saved (id = 101, process_id = 'op-101')
+    Service->>OS: 5. addProcess(Process 'op-101')
+    OS-->>Service: 6. Added to ready queue
+    Service-->>API: 7. Operation created
+    API-->>User: 8. HTTP 201 Created (UI shows 'Queued')
+
+    Note over User,DB: Phase 2: Running the Operation
+    User->>API: 9. POST /api/operations/dispatch
+    API->>Service: 10. dispatchNext()
+    Service->>OS: 11. executeNextProcess()
+    OS->>OS: 12. Scheduler selects highest-priority process
+    OS->>OS: 13. Crane Mutex locked
+    OS->>OS: 14. Work executed (simulated delay)
+    OS->>OS: 15. Crane Mutex unlocked
+    OS-->>Service: 16. Process finished (status: TERMINATED)
+    Service->>DB: 17. UPDATE operations (status = 'Completed', turnaround_time)
+    Service->>DB: 18. INSERT INTO bills (Auto Tariff Invoice)
+    DB-->>Service: 19. Database updated
+    Service-->>API: 20. Dispatch finished
+    API-->>User: 21. HTTP 200 OK (UI updates to 'Completed')
+
+    Note over User,DB: Phase 3: Fetching Reports with GraphQL
+    User->>API: 22. POST /graphql (query: portDashboardOverview)
+    API->>DB: 23. Aggregated query across tables
+    DB-->>API: 24. Return counts and stats
+    API-->>User: 25. Live Dashboard Charts rendered
 ```
 
 ---
 
-## 🧠 Operating System (OS) Concepts in Plain English
+### 🛠️ How to Open & Edit in Draw.io
 
-| OS Concept | Port Real-World Analogy | How PortFlow Implements It |
+All diagrams are also exported in vector format inside:
+📁 [`folder/diagrams.xml`](./folder/diagrams.xml)
+
+1. Open **[https://app.diagrams.net](https://app.diagrams.net)** in your web browser.
+2. Select **File** ➔ **Open From** ➔ **Device**.
+3. Choose `folder/diagrams.xml`.
+4. You will see 5 multi-tab pages:
+   * **Tab 1**: Architecture Diagram
+   * **Tab 2**: Class Diagram
+   * **Tab 3**: Entity-Relationship (ER) Diagram
+   * **Tab 4**: Operation Lifecycle Flowchart
+   * **Tab 5**: Sequence Diagram
+5. Edit any element and export to high-resolution PNG or PDF.
+
+---
+
+## 🧠 Operating System (OS) Concepts Made Simple
+
+| OS Concept | Real-World Port Analogy | Implementation in PortFlow |
 | :--- | :--- | :--- |
-| **Process & PCB** | Ship loading or unloading job | Each task is an isolated `Process` object with an ID (`pid`), burst time, arrival time, and execution state (`READY`, `RUNNING`, `TERMINATED`). |
+| **Process & PCB** | Ship loading/unloading task | Each task is an isolated `Process` object with an ID, burst duration, arrival time, and execution state (`READY`, `RUNNING`, `TERMINATED`). |
 | **CPU Scheduling** | Crane work sequencing | Schedulers pick the next operation from the ready queue using **FCFS, SJF, Priority, or Round Robin**. |
 | **Ready Queue** | Waiting line for equipment | Queue where operations wait until their crane and berth are both free. |
 | **Mutex Lock** | Exclusive Crane access | Only **one** operation can use a crane at a time to prevent collisions. |
@@ -423,7 +649,7 @@ erDiagram
 
 ---
 
-## 💾 Database (DBMS) Concepts in Plain English
+## 💾 Database (DBMS) Concepts Made Simple
 
 | DBMS Concept | Why It Matters | Implementation in PortFlow |
 | :--- | :--- | :--- |
@@ -442,7 +668,7 @@ erDiagram
 2. **Operations & CPU Scheduling**:
    - Create, dispatch, and track ship discharge and loading tasks.
    - Dynamic algorithm switching: toggle between **FCFS, SJF, Priority, and Round Robin** live without restarting the server.
-   - Real-time Gantt execution chart and Gantt queue visualization.
+   - Real-time Gantt execution chart and queue visualization.
 3. **Logistics Hub (Fleet, Warehouses, Checkpoints)**:
    - **Warehouses**: Manage CFS dry yards, cold-chain reefer facilities (-18.5°C), hazardous storage silos, and bonded sheds.
    - **Drayage Trucks**: Track transport fleet, license plates, assigned container payloads, and drivers.
@@ -560,7 +786,8 @@ portflow/
 │   └── package.json
 │
 ├── folder/                     # System design diagrams (Mermaid & Draw.io XML)
-│   └── DIAGRAMS.md             # Complete system architecture documentation
+│   ├── DIAGRAMS.md             # Complete 5-diagram reference manual
+│   └── diagrams.xml            # Multi-page Draw.io vector file
 ├── load-test.k6.js             # Grafana k6 performance & stress load test
 ├── render.yaml                 # Render cloud deployment blueprint
 ├── package.json                # Root orchestration scripts
