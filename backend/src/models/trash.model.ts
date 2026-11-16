@@ -1,4 +1,14 @@
-export type TrashCollection = 'operations' | 'ships' | 'Cargos' | 'Equipments';
+export type TrashCollection =
+    | 'operations'
+    | 'ships'
+    | 'Cargos'
+    | 'Equipments'
+    | 'warehouses'
+    | 'trucks'
+    | 'gate_passes'
+    | 'customs_inspections'
+    | 'bills'
+    | 'issues';
 
 export interface TrashedRecord {
     id: number;

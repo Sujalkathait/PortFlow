@@ -2,7 +2,18 @@ import { ITrashService, ITrashRepository } from '../interfaces';
 import { TrashedRecord, TrashCollection } from '../models';
 import { trashRepository } from '../repositories/trash.repository';
 
-const VALID_COLLECTIONS: TrashCollection[] = ['operations', 'ships', 'Cargos', 'Equipments'];
+const VALID_COLLECTIONS: TrashCollection[] = [
+    'operations',
+    'ships',
+    'Cargos',
+    'Equipments',
+    'warehouses',
+    'trucks',
+    'gate_passes',
+    'customs_inspections',
+    'bills',
+    'issues'
+];
 
 function normalizeCollection(collection: string): TrashCollection {
     const lower = (collection || '').toLowerCase().trim();
@@ -10,6 +21,12 @@ function normalizeCollection(collection: string): TrashCollection {
     if (lower === 'equipments' || lower === 'equipment') return 'Equipments';
     if (lower === 'ships' || lower === 'ship') return 'ships';
     if (lower === 'operations' || lower === 'operation') return 'operations';
+    if (lower === 'warehouses' || lower === 'warehouse') return 'warehouses';
+    if (lower === 'trucks' || lower === 'truck') return 'trucks';
+    if (lower === 'gate_passes' || lower === 'gate_pass' || lower === 'gatepasses' || lower === 'gatepass') return 'gate_passes';
+    if (lower === 'customs_inspections' || lower === 'customs_inspection' || lower === 'customs') return 'customs_inspections';
+    if (lower === 'bills' || lower === 'bill' || lower === 'invoices' || lower === 'invoice') return 'bills';
+    if (lower === 'issues' || lower === 'issue' || lower === 'incidents' || lower === 'incident') return 'issues';
     return collection as TrashCollection;
 }
 
